@@ -1,9 +1,15 @@
 # CHANGELOG
 
 
+## v0.1.2 (2026-02-13)
+
+
 ## v0.1.1 (2026-02-13)
 
 ### Bug Fixes
+
+- **ci**: Add database migration step to CI workflow
+  ([`74fbe61`](https://github.com/HGNC/genew4-orm/commit/74fbe61e94d1abd49adeec38a131b41b65b7851a))
 
 - **ci**: Add postgres service container to ci.yml
   ([`a85bba1`](https://github.com/HGNC/genew4-orm/commit/a85bba1707ba36373c14a6877a1adb68558072c5))
