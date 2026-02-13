@@ -122,7 +122,7 @@ jobs:
 
       - name: Check coverage threshold
         run: |
-          python -c "
+          python - << 'EOF'
           import sys
           import xml.etree.ElementTree as ET
           try:
@@ -133,7 +133,7 @@ jobs:
               if line_rate < 90:
                   print('::warning::Coverage is below 90% threshold')
                   sys.exit(1)
-          except Exception as e:
+          except Exception:
               print('::warning::Could not parse coverage.xml')
               sys.exit(1)
-          "
+          EOF
