@@ -34,10 +34,8 @@ jobs:
           net_loc_unchanged: true
           upload_release_files: true
           upload_to_hash_partitions: true
-          version_variables:
-            - new_version
-          build_environment_env:
-            PYTHON_VERSION: "3.13"
+          version_variables: new_version
+          build_environment_env: "PYTHON_VERSION=3.13"
 
       - name: Update README version
         if: steps.release.outputs.new-version != ''

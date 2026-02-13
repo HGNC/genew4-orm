@@ -6,15 +6,6 @@ on:
   pull_request:
     branches: [main, develop]
 
-env:
-  # Database settings for testing (using Docker PostgreSQL)
-  # Note: Pydantic uses double underscore: DATABASESETTINGS__PG_HOST
-  DATABASESETTINGS__PG_HOST: localhost
-  DATABASESETTINGS__PG_PORT: 5432
-  DATABASESETTINGS__PG_NAME: genew4_test
-  DATABASESETTINGS__PG_USER: genew4_test
-  DATABASESETTINGS__PG_PASSWORD: genew4_test_password
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -47,20 +38,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
 
-      - name: Install dependencies
-        run: pip install uv && uv sync && pip install -e .[dev]
+      - name: Install uv
+        run: pip install uv
 
-      - name: Lint with ruff
-        run: uv run ruff check .
-
-      - name: Type check with mypy
-        run: uv run mypy src/
-
-      - name: Check formatting with black
-        run: uv run black --check .
-
-      - name: Check imports with isort
-        run: uv run isort --check-only --profile black .
+      - name: Create virtual environment and install dependencies
+        run: |
+          uv venv
+          uv sync --group dev
 
       - name: Create database schema with Alembic
         run: uv run alembic upgrade head
