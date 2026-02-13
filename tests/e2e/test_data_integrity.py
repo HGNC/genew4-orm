@@ -117,27 +117,28 @@ class TestJunctionTableIntegrity:
         e2e_session.add(association1)
         e2e_session.commit()
 
-        # Create a new session to try adding duplicate
-        # (to avoid SQLAlchemy session state issues)
+        # Try to add duplicate with updated custom_sort
+        # Use merge() to update existing association instead of inserting duplicate
         association2 = GeneHasGeneGroup(
             gene_id=gene_id,
             gene_group_id=group_id,
             custom_sort="2",
         )
-
-        # Should work (the session may merge)
-        e2e_session.add(association2)
+        merged = e2e_session.merge(association2)
         e2e_session.commit()
+
+        # Verify the custom_sort was updated
+        assert merged.custom_sort == "2"
 
         # Verify we can query the association
         stmt = select(GeneHasGeneGroup).where(
             GeneHasGeneGroup.gene_id == gene_id,
             GeneHasGeneGroup.gene_group_id == group_id,
         )
-        result = e2e_session.execute(stmt).scalars().all()
+        result = e2e_session.execute(stmt).scalars().one()
 
-        # Should have at least one association
-        assert len(result) >= 1
+        # Should have exactly one association with updated custom_sort
+        assert result.custom_sort == "2"
 
     def test_junction_custom_sort_update(self, e2e_session, gene_factory, gene_group_factory) -> None:
         """Test that custom_sort can be updated."""
