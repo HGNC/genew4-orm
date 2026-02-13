@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.2.2 (2026-02-13)
+
+### Bug Fixes
+
+- **tests**: Update query conditions to use explicit comparison for boolean fields
+  ([`fec284f`](https://github.com/HGNC/genew4-orm/commit/fec284fdce74599ab1a4e5612c877a6ab714b106))
+
+
 ## v0.2.1 (2026-02-13)
 
 ### Bug Fixes
@@ -9,6 +17,9 @@
   ([`ce0c260`](https://github.com/HGNC/genew4-orm/commit/ce0c2602a07f6f7e64a10c89a42d7bc4b0fe4595))
 
 ### Refactoring
+
+- **tests**: Add debug print statement for session type in TestReminderCRUD
+  ([`7f205f7`](https://github.com/HGNC/genew4-orm/commit/7f205f7dc4fdad82678370205ad841cc762f79cb))
 
 - **tests**: Remove clean_database fixture for integration tests
   ([`89e3762`](https://github.com/HGNC/genew4-orm/commit/89e3762c0ced14d32193da827a98fc4b6650c278))
