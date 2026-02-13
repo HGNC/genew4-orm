@@ -14,6 +14,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: genew4
+          POSTGRES_PASSWORD: genew4_test_password
+          POSTGRES_DB: genew4
+        options: >-
+          --health-cmd pg_isready
+          --interval 10s
+          --timeout 5s
+          --health-start-period 10s
+          --retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,6 +61,12 @@ jobs:
           DATABASESETTINGS_PG_NAME: genew4
           DATABASESETTINGS_PG_USER: genew4
           DATABASESETTINGS_PG_PASSWORD: genew4_test_password
+          # Override for E2E tests
+          DATABASESETTINGS__PG_HOST: localhost
+          DATABASESETTINGS__PG_PORT: 5432
+          DATABASESETTINGS__PG_NAME: genew4
+          DATABASESETTINGS__PG_USER: genew4
+          DATABASESETTINGS__PG_PASSWORD: genew4_test_password
         run: |
           uv run pytest --cov=genew4_orm --cov-report=xml --cov-report=html --cov-report=term
 
