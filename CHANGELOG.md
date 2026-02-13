@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.2.1 (2026-02-13)
+
+### Bug Fixes
+
+- **tests**: Add cleanup step to truncate PostgreSQL tables after tests
+  ([`ce0c260`](https://github.com/HGNC/genew4-orm/commit/ce0c2602a07f6f7e64a10c89a42d7bc4b0fe4595))
+
+### Refactoring
+
+- **tests**: Remove clean_database fixture for integration tests
+  ([`89e3762`](https://github.com/HGNC/genew4-orm/commit/89e3762c0ced14d32193da827a98fc4b6650c278))
+
+
 ## v0.2.0 (2026-02-13)
 
 ### Features
@@ -21,6 +34,9 @@
 
 - **ci, test**: Update database schema initialization to set PYTHONPATH
   ([`d836367`](https://github.com/HGNC/genew4-orm/commit/d8363671a6bd632d5e52ad8bfeebce2a5d07b3d9))
+
+- **tests**: Update clean_database fixture to autouse for integration tests
+  ([`ed057d6`](https://github.com/HGNC/genew4-orm/commit/ed057d63ae5510c6060b7587fc6f73a505ebfe6e))
 
 
 ## v0.1.3 (2026-02-13)
