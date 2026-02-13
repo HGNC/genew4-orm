@@ -66,6 +66,7 @@ jobs:
           uv run python -c "
           import sys
           sys.path.insert(0, 'src')
+          import genew4_orm.models  # noqa: F401 - Import models to register with SQLModel
           from genew4_orm.session import initialize_engine
           from sqlmodel import SQLModel
           engine = initialize_engine()
