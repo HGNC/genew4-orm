@@ -1,7 +1,24 @@
 # CHANGELOG
 
 
+## v0.2.5 (2026-02-13)
+
+
 ## v0.2.4 (2026-02-13)
+
+### Bug Fixes
+
+- **ci**: Handle missing database credentials gracefully in tests
+  ([`4a57405`](https://github.com/HGNC/genew4-orm/commit/4a574056fe44835b4d7adbb75af3e999f2eecb33))
+
+Tests that require PostgreSQL (e2e, integration/postgresql) now skip gracefully when
+  DATABASESETTINGS_PG_USER and DATABASESETTINGS_PG_PASSWORD are not set, instead of failing with
+  ValidationError.
+
+This fixes CI failures when running all tests together, as the tests that require database
+  credentials will skip cleanly rather than crashing during fixture setup.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.3 (2026-02-13)
