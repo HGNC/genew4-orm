@@ -20,9 +20,14 @@ class TestGeneGroupAliasCRUD:
     def test_create_gene_group_alias_minimal(self, postgres_session):
         """Test creating gene group alias with minimal required fields."""
         ts = int(time.time() * 1000)
+        gene_group = GeneGroup(name=f"Test Group {ts}")
+        postgres_session.add(gene_group)
+        postgres_session.commit()
+        postgres_session.refresh(gene_group)
+
         alias = GeneGroupAlias(
             alias=f"Test Alias {ts}",
-            gene_group_id=1,  # Use existing gene group
+            gene_group_id=gene_group.id,
         )
         postgres_session.add(alias)
         postgres_session.commit()
