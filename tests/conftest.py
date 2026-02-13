@@ -4,6 +4,7 @@ This module provides fixtures for testing ORM with both PostgreSQL
 and SQLite databases, as well as sample data fixtures.
 """
 
+import os
 from collections.abc import Generator
 
 import pytest
@@ -22,10 +23,15 @@ TEST_SQLITE_URL = "sqlite:///:memory:"
 
 def _try_postgres_connection() -> bool:
     """Check if PostgreSQL database is available by attempting a connection."""
-    settings = DatabaseSettings()
+    # First check if required environment variables are set
+    # DatabaseSettings() requires pg_user and pg_password, which will raise
+    # ValidationError if not provided via environment variables
+    if not os.getenv("DATABASESETTINGS_PG_USER") or not os.getenv("DATABASESETTINGS_PG_PASSWORD"):
+        return False
 
     try:
         # Try to connect to verify database is available
+        settings = DatabaseSettings()
         engine = create_engine(settings.get_connection_url(with_password=True))
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))

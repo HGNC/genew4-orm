@@ -4,6 +4,7 @@ This module provides fixtures specifically designed for E2E testing,
 focusing on test isolation and automatic cleanup.
 """
 
+import os
 from collections.abc import Generator
 
 import pytest
@@ -32,6 +33,10 @@ def e2e_session() -> Generator[SQLAlchemySession, None]:
         SQLAlchemySession configured for E2E testing.
         None: No teardown needed (automatic rollback).
     """
+    # Check if database credentials are available
+    if not os.getenv("DATABASESETTINGS_PG_USER") or not os.getenv("DATABASESETTINGS_PG_PASSWORD"):
+        pytest.skip("E2E tests require PostgreSQL database credentials")
+
     # Initialize engine first (required before get_engine)
     initialize_engine()
 
