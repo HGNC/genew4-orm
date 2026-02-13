@@ -122,21 +122,18 @@ jobs:
 
       - name: Check coverage threshold
         run: |
-          # Parse coverage from XML report
-          COVERAGE=$(python -c "
+          python -c "
+          import sys
           import xml.etree.ElementTree as ET
           try:
               tree = ET.parse('coverage.xml')
               coverage = tree.find('.//coverage')
-              line_rate = coverage.get('line-rate', '0').replace('%', '')
-              print(f'{line_rate}')
+              line_rate = float(coverage.get('line-rate', '0').replace('%', ''))
+              print(f'Current coverage: {line_rate:.1f}%')
+              if line_rate < 90:
+                  print('::warning::Coverage is below 90% threshold')
+                  sys.exit(1)
           except Exception as e:
-              print('0.0')
-          ")
-          echo \"Current coverage: ${COVERAGE}\"
-
-          # Fail if coverage is below 90%
-          if [ 1 -eq "$(echo "${COVERAGE} < 90" | bc -l)" ]; then
-            echo \"::warning::Coverage is below 90% threshold\"
-            exit 1
-          fi
+              print('::warning::Could not parse coverage.xml')
+              sys.exit(1)
+          "
