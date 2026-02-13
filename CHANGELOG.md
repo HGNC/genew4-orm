@@ -1,9 +1,23 @@
 # CHANGELOG
 
 
+## v0.2.9 (2026-02-13)
+
+
 ## v0.2.8 (2026-02-13)
 
 ### Bug Fixes
+
+- **ci**: Simplify coverage threshold check using Python
+  ([`5474bf7`](https://github.com/HGNC/genew4-orm/commit/5474bf795b9756050248a40144a8fc4a6cb9a2a6))
+
+Replace bash/bc approach with pure Python comparison to avoid: - Bash syntax issues with multi-line
+  scripts - bc dependency - Environment variable substitution problems
+
+Now handles XML parsing and threshold comparison entirely in Python with proper GitHub Actions
+  warning format output.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 - **ci**: Use SQLAlchemy .is_() for null-safe boolean comparison
   ([`453919e`](https://github.com/HGNC/genew4-orm/commit/453919ecb5e9e8e6a46048d7560bd4573245f219))
