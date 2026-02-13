@@ -1,7 +1,21 @@
 # CHANGELOG
 
 
+## v0.2.12 (2026-02-13)
+
+
 ## v0.2.11 (2026-02-13)
+
+### Bug Fixes
+
+- **ci**: Fix AttributeError in exception formatting (test.yml)
+  ([`49b4ca5`](https://github.com/HGNC/genew4-orm/commit/49b4ca5ef02ab38ab8ccf9caa810d12adb23616c))
+
+The debug print statement was using f-string formatting on exception object {e}, which fails with
+  AttributeError when e is NoneType. Change to use {type(e).__name__} which works for all exception
+  types.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.10 (2026-02-13)
