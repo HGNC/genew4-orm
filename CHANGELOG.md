@@ -1,9 +1,15 @@
 # CHANGELOG
 
 
+## v0.2.3 (2026-02-13)
+
+
 ## v0.2.2 (2026-02-13)
 
 ### Bug Fixes
+
+- **tests**: Create gene group before testing alias creation
+  ([`9167d87`](https://github.com/HGNC/genew4-orm/commit/9167d875bb5f3c57fa24cd6577d36c4428744f3f))
 
 - **tests**: Update query conditions to use explicit comparison for boolean fields
   ([`fec284f`](https://github.com/HGNC/genew4-orm/commit/fec284fdce74599ab1a4e5612c877a6ab714b106))
