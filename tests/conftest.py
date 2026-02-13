@@ -62,44 +62,6 @@ def postgres_engine() -> sqlalchemy.engine.Engine:
 
 
 
-# PostgreSQL session fixture
-@pytest.fixture(scope="function", autouse=True)
-def clean_database(postgres_engine) -> None:
-    """Clean database tables and reset sequences before each integration test.
-
-    This fixture runs automatically before each test to ensure test isolation.
-    It deletes all data from tables and resets sequences.
-
-    Args:
-        postgres_engine: The SQLAlchemy engine for PostgreSQL.
-    """
-    # Only clean if PostgreSQL is available
-    if postgres_engine is not None:
-        # Use raw connection for direct SQL execution
-        with postgres_engine.raw_connection() as connection:
-            cursor = connection.cursor()
-
-            # Get all user table names
-            cursor.execute("""
-                SELECT tablename
-                FROM pg_tables
-                WHERE schemaname = 'public'
-                AND tablename NOT LIKE 'pg_%'
-                AND tablename NOT LIKE 'sql_%'
-                ORDER BY tablename
-            """)
-            tables = [row[0] for row in cursor.fetchall()]
-
-            # Truncate all tables
-            for table in tables:
-                try:
-                    cursor.execute(f'TRUNCATE TABLE public."{table}" CASCADE')
-                except Exception:
-                    pass  # Table might not exist
-
-            cursor.close()
-            connection.commit()
-
 
 # PostgreSQL session fixture
 @pytest.fixture(scope="function")
