@@ -1,7 +1,15 @@
 # CHANGELOG
 
 
+## v0.1.3 (2026-02-13)
+
+
 ## v0.1.2 (2026-02-13)
+
+### Bug Fixes
+
+- **dependencies**: Add alembic as a dependency for database migrations
+  ([`3295b5a`](https://github.com/HGNC/genew4-orm/commit/3295b5a1ef8f064a01ee7090273063038de971fe))
 
 
 ## v0.1.1 (2026-02-13)
