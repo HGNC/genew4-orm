@@ -83,20 +83,17 @@ def postgres_session(postgres_engine) -> Generator[Session, None, None]:
     session.close()
 
     # Cleanup: truncate all tables after test
-    with postgres_engine.raw_connection() as connection:
-        cursor = connection.cursor()
-        cursor.execute("""
+    with postgres_engine.begin() as conn:
+        result = conn.execute(text("""
             SELECT tablename
             FROM pg_tables
             WHERE schemaname = 'public'
             AND tablename NOT LIKE 'pg_%'
             AND tablename NOT LIKE 'sql_%'
-        """)
-        tables = [row[0] for row in cursor.fetchall()]
+        """))
+        tables = [row[0] for row in result.fetchall()]
         for table in tables:
-            cursor.execute(f'TRUNCATE TABLE public."{table}" CASCADE')
-        cursor.close()
-        connection.commit()
+            conn.execute(text(f'TRUNCATE TABLE public."{table}" CASCADE'))
 
 
 # SQLite engine fixture for unit tests
