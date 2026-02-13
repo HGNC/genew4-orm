@@ -54,6 +54,17 @@ jobs:
           # This ensures accurate coverage reporting across CI runs
           rm -f .coverage* htmlcov/ coverage.xml
 
+      - name: Initialize database schema
+        env:
+          DATABASESETTINGS_PG_HOST: localhost
+          DATABASESETTINGS_PG_PORT: 5432
+          DATABASESETTINGS_PG_NAME: genew4
+          DATABASESETTINGS_PG_USER: genew4
+          DATABASESETTINGS_PG_PASSWORD: genew4_test_password
+        run: |
+          export PYTHONPATH=src
+          uv run python -c "from genew4_orm.session import initialize_engine; from sqlmodel import SQLModel; engine = initialize_engine(); SQLModel.metadata.create_all(engine)"
+
       - name: Run tests with coverage
         env:
           DATABASESETTINGS_PG_HOST: localhost

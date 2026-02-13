@@ -56,7 +56,9 @@ jobs:
           DATABASESETTINGS_PG_NAME: genew4
           DATABASESETTINGS_PG_USER: genew4
           DATABASESETTINGS_PG_PASSWORD: genew4_test_password
-        run: uv run python -c "from genew4_orm.session import initialize_engine; from sqlmodel import SQLModel; engine = initialize_engine(); SQLModel.metadata.create_all(engine)"
+        run: |
+          export PYTHONPATH=src
+          uv run python -c "from genew4_orm.session import initialize_engine; from sqlmodel import SQLModel; engine = initialize_engine(); SQLModel.metadata.create_all(engine)"
 
       - name: Run integration tests
         env:
