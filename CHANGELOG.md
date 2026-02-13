@@ -1,7 +1,15 @@
 # CHANGELOG
 
 
+## v0.2.4 (2026-02-13)
+
+
 ## v0.2.3 (2026-02-13)
+
+### Bug Fixes
+
+- **tests**: Update junction table association handling to use merge for duplicates
+  ([`7cca375`](https://github.com/HGNC/genew4-orm/commit/7cca3751b8ef7bcf3afcdb16be2ed8d0cb29800a))
 
 
 ## v0.2.2 (2026-02-13)
