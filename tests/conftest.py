@@ -60,8 +60,10 @@ def postgres_engine() -> sqlalchemy.engine.Engine:
     yield engine
 
 
-# Database cleanup fixture for integration tests
-@pytest.fixture(scope="function")
+
+
+# PostgreSQL session fixture
+@pytest.fixture(scope="function", autouse=True)
 def clean_database(postgres_engine) -> None:
     """Clean database tables and reset sequences before each integration test.
 
