@@ -1,7 +1,34 @@
 # CHANGELOG
 
 
+## v0.2.0 (2026-02-13)
+
+### Features
+
+- **ci**: Add manual creation of cytoband table in database initialization
+  ([`5f81c3d`](https://github.com/HGNC/genew4-orm/commit/5f81c3d197ce223fed57786150f40c21c4a46fee))
+
+### Refactoring
+
+- **ci**: Enhance database schema initialization with detailed output and PYTHONPATH adjustment
+  ([`ac85019`](https://github.com/HGNC/genew4-orm/commit/ac85019050fb50092ddc0aad66d6cd3bbd37e207))
+
+- **ci**: Rename database migration step and initialize schema directly
+  ([`9634eb7`](https://github.com/HGNC/genew4-orm/commit/9634eb7e13cdc5330a6d1e947758dfba70a718d3))
+
+- **ci, test**: Import models to register with SQLModel during database initialization
+  ([`dde5f53`](https://github.com/HGNC/genew4-orm/commit/dde5f53aae902a6086bae6eea0a9f4ea6af59e4d))
+
+- **ci, test**: Update database schema initialization to set PYTHONPATH
+  ([`d836367`](https://github.com/HGNC/genew4-orm/commit/d8363671a6bd632d5e52ad8bfeebce2a5d07b3d9))
+
+
 ## v0.1.3 (2026-02-13)
+
+### Refactoring
+
+- **audit_log**: Remove obsolete migration and update revision references
+  ([`f1f1839`](https://github.com/HGNC/genew4-orm/commit/f1f1839e253ee0ca8037e4527153c0db7bdc8374))
 
 
 ## v0.1.2 (2026-02-13)
