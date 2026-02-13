@@ -1,7 +1,21 @@
 # CHANGELOG
 
 
+## v0.2.6 (2026-02-13)
+
+
 ## v0.2.5 (2026-02-13)
+
+### Bug Fixes
+
+- **ci**: Add database env vars to coverage report step in ci.yml
+  ([`278acf9`](https://github.com/HGNC/genew4-orm/commit/278acf967c40ad6fd9545f928fbd0f22ae97f4f0))
+
+The "Generate coverage report" step now includes DATABASESETTINGS_* environment variables, ensuring
+  e2e and integration/postgresql tests run correctly instead of skipping due to missing database
+  credentials.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.4 (2026-02-13)
