@@ -126,15 +126,25 @@ jobs:
           python3 - << 'EOF'
           import sys
           import xml.etree.ElementTree as ET
+          import os
+
+          cov_file = 'coverage.xml'
+          if not os.path.exists(cov_file):
+              print(f'::warning::Coverage file {cov_file} not found')
+              sys.exit(1)
+
           try:
-              tree = ET.parse('coverage.xml')
+              tree = ET.parse(cov_file)
               coverage = tree.find('.//coverage')
               line_rate = float(coverage.get('line-rate', '0').replace('%', ''))
               print(f'Current coverage: {line_rate:.1f}%')
               if line_rate < 90:
                   print('::warning::Coverage is below 90% threshold')
                   sys.exit(1)
-          except Exception:
-              print('::warning::Could not parse coverage.xml')
+          except ET.ParseError as e:
+              print(f'::warning::Could not parse coverage.xml: {e}')
+              sys.exit(1)
+          except Exception as e:
+              print(f'::warning::Exception reading coverage: {e}')
               sys.exit(1)
           EOF
