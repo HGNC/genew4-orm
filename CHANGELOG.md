@@ -1,7 +1,29 @@
 # CHANGELOG
 
 
+## v0.2.7 (2026-02-13)
+
+
 ## v0.2.6 (2026-02-13)
+
+### Bug Fixes
+
+- **ci**: Fix bash syntax in coverage threshold check (test.yml)
+  ([`2001704`](https://github.com/HGNC/genew4-orm/commit/20017044aed671effdb6885e8cd009fc826b26b5))
+
+The if statement was using (( )) construct with command substitution which caused bash syntax
+  errors. Fixed to use [ ] for proper string comparison with bc -l result.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+### Code Style
+
+- **ci**: Format conftest.py with ruff
+  ([`cff0127`](https://github.com/HGNC/genew4-orm/commit/cff01276014607cbd5e9e2fab239211aabf8228a))
+
+Fix ruff formatting issue with multi-line string argument to text().
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.5 (2026-02-13)
