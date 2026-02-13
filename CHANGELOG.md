@@ -1,7 +1,30 @@
 # CHANGELOG
 
 
+## v0.2.8 (2026-02-13)
+
+### Bug Fixes
+
+- **ci**: Use SQLAlchemy .is_() for null-safe boolean comparison
+  ([`453919e`](https://github.com/HGNC/genew4-orm/commit/453919ecb5e9e8e6a46048d7560bd4573245f219))
+
+Use .is_(False) instead of == False for comparing boolean fields in SQLAlchemy. This generates "IS
+  FALSE" in SQL which correctly matches the boolean value while satisfying ruff E712 rule.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+
 ## v0.2.7 (2026-02-13)
+
+### Code Style
+
+- **ci**: Fix ruff E712 comparisons to False in test files
+  ([`1a7a190`](https://github.com/HGNC/genew4-orm/commit/1a7a19095ea409828e0234e7d041e7cae1221cae))
+
+- test_external_resource.py: use not ExternalResource.approved - test_reminder.py: use not
+  Reminder.sent
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.6 (2026-02-13)
