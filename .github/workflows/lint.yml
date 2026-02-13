@@ -1,0 +1,73 @@
+name: Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install ruff
+        run: uv pip install ruff
+
+      - uses: chartlr/ruff-action@v1
+        with:
+          args: check .
+
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install mypy
+        run: uv pip install mypy-protobuf==3.17.0
+
+      - uses: chartlr/mypy-action@v1
+        with:
+          require_serial: true
+
+  formatters:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install formatters
+        run: uv pip install ruff black isort
+
+      - name: Check formatting with ruff
+        run: uv run ruff format --check .
+
+      - name: Check formatting with black
+        run: uv run black --check .
+
+      - name: Check import sorting with isort
+        run: uv run isort --check-only --profile black .

@@ -3,13 +3,9 @@
 This model contains correspondence record information.
 """
 
-from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Text
-from sqlmodel import Field, Relationship, SQLModel
-
-if TYPE_CHECKING:
-    from genew4_orm.models.gene_group import GeneGroup
+from sqlmodel import Field, SQLModel
 
 
 class Correspondence(SQLModel, table=True):

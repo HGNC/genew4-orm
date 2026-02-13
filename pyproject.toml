@@ -1,6 +1,36 @@
 [project]
 name = "genew4-orm"
 version = "0.1.0"
+description = "Python ORM for the genew4 PostgreSQL database with type-safe models, audit logging, and session management."
+readme = "README.md"
+requires-python = ">=3.13"
+license = {text = "MIT"}
+authors = [
+    {name = "Gene Nomenclature Team", email = "dev@genomenclature.org"}
+]
+keywords = [
+    "sqlalchemy",
+    "sqlmodel",
+    "orm",
+    "postgresql",
+    "genew4",
+    "hgnc",
+    "gene",
+    "database",
+    "pydantic",
+    "type-safety",
+    "audit",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: SQL",
+    "Topic :: Database",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
     "psycopg>=3.3.2",
     "pydantic>=2.12.5",
@@ -9,12 +39,26 @@ dependencies = [
     "sqlmodel>=0.0.33",
 ]
 
+[project.urls]
+Homepage = "https://github.com/genew4/genew4-orm"
+Documentation = "https://genew4-orm.hgnc.github.io"
+Repository = "https://github.com/genew4/genew4-orm.git"
+"Bug Tracker" = "https://github.com/genew4/genew4-orm/issues"
+
 [tool.pytest]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = ["-v", "--cov=genew4_orm", "--cov-report=html", "--cov-report=term", "--cov-report=xml"]
+pythonpath = ["src"]
+addopts = [
+    "-v",
+    "--cov=genew4_orm",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+    "--strict-markers",
+    "--strict-config",
+]
 
 [tool.coverage.run]
 source = ["src/genew4_orm"]
@@ -22,6 +66,8 @@ omit = [
     "tests/*",
     "*/test_*.py",
 ]
+branch = true
+parallel = true
 
 [tool.coverage.report]
 exclude_lines = [
@@ -34,4 +80,50 @@ dev = [
     "pytest-asyncio>=1.3.0",
     "pytest-cov>=7.0.0",
     "pytest-xdist>=3.8.0",
+    "ruff>=0.9.0",
+    "mypy>=1.14.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
 ]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+indent-width = 4
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "*.pyc",
+    ".eggs",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "YTT"]
+ignore = []
+
+[tool.black]
+line-length = 100
+target-version = ["py313"]
+skip-string-normalization = true
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 100
+known_first_party = ["sqlmodel", "pydantic", "sqlalchemy"]
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = false
+strict = true
+exclude = [
+    "venv/*",
+    ".venv/*",
+    "build/*",
+]
+[[tool.mypy.overrides]]
+module = "sqlmodel"
+ignore_missing_imports = true

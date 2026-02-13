@@ -6,8 +6,7 @@ from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field, SQLModel
 
 if TYPE_CHECKING:
-    from genew4_orm.models.correspondence import Correspondence
-    from genew4_orm.models.gene_group import GeneGroup
+    pass
 
 
 class FamHasCorr(SQLModel, table=True):

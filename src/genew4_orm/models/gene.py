@@ -6,7 +6,6 @@ TypeScript ORM implementation in hgnc-tools-api.
 
 from datetime import date
 
-from pydantic import BaseModel
 from sqlalchemy import Boolean, Column, Date, Integer, String, Text
 from sqlmodel import Field, Relationship, SQLModel
 

@@ -144,7 +144,7 @@ class TestPaginatedQuery:
     def test_paginated_query_returns_tuple(self) -> None:
         """Test paginated_query returns tuple of results and metadata."""
         mock_session = MagicMock()
-        mock_session.execute.return_value.all.return_value = []
+        mock_session.scalars.return_value = iter([])
 
         statement = build_gene_query()
         results, total_pages, total_count = paginated_query(
@@ -160,7 +160,7 @@ class TestPaginatedQuery:
         mock_session = MagicMock()
         # Simulate 25 results
         mock_results = [MagicMock() for _ in range(25)]
-        mock_session.execute.return_value.all.return_value = mock_results
+        mock_session.scalars.return_value = iter(mock_results)
 
         statement = build_gene_query()
         results, total_pages, total_count = paginated_query(
@@ -174,7 +174,7 @@ class TestPaginatedQuery:
     def test_paginated_query_empty_results(self) -> None:
         """Test paginated_query handles empty results."""
         mock_session = MagicMock()
-        mock_session.execute.return_value.all.return_value = []
+        mock_session.scalars.return_value = iter([])
 
         statement = build_gene_query()
         results, total_pages, total_count = paginated_query(
@@ -192,34 +192,34 @@ class TestGetGenesByIds:
     def test_get_genes_by_ids_without_eager_load(self) -> None:
         """Test get_genes_by_ids without eager loading."""
         mock_session = MagicMock()
-        mock_session.execute.return_value.scalars.return_value.all.return_value = []
+        mock_session.scalars.return_value = iter([])
 
         gene_ids = [12345, 67890]
         result = get_genes_by_ids(mock_session, gene_ids, eager_load=False)
 
         # Should execute a query
-        mock_session.execute.assert_called_once()
+        mock_session.scalars.assert_called_once()
 
     def test_get_genes_by_ids_with_eager_load(self) -> None:
         """Test get_genes_by_ids with eager loading."""
         mock_session = MagicMock()
-        mock_session.execute.return_value.scalars.return_value.all.return_value = []
+        mock_session.scalars.return_value = iter([])
 
         gene_ids = [12345, 67890]
         result = get_genes_by_ids(mock_session, gene_ids, eager_load=True)
 
         # Should execute a query with options
-        mock_session.execute.assert_called_once()
+        mock_session.scalars.assert_called_once()
 
     def test_get_genes_by_ids_empty_list(self) -> None:
         """Test get_genes_by_ids with empty ID list."""
         mock_session = MagicMock()
-        mock_session.execute.return_value.scalars.return_value.all.return_value = []
+        mock_session.scalars.return_value = iter([])
 
         result = get_genes_by_ids(mock_session, [], eager_load=False)
 
         # Should still execute query
-        mock_session.execute.assert_called_once()
+        mock_session.scalars.assert_called_once()
 
 
 class TestGetGeneGroupsByIds:
@@ -228,13 +228,13 @@ class TestGetGeneGroupsByIds:
     def test_get_gene_groups_by_ids_without_eager_load(self) -> None:
         """Test get_gene_groups_by_ids without eager loading."""
         mock_session = MagicMock()
-        mock_session.execute.return_value.scalars.return_value.all.return_value = []
+        mock_session.scalars.return_value = iter([])
 
         group_ids = [1, 2, 3]
         result = get_gene_groups_by_ids(mock_session, group_ids, eager_load=False)
 
         # Should execute a query
-        mock_session.execute.assert_called_once()
+        mock_session.scalars.assert_called_once()
 
     def test_get_gene_groups_by_ids_with_eager_load(self) -> None:
         """Test get_gene_groups_by_ids with eager loading uses options."""
@@ -255,12 +255,12 @@ class TestGetGeneGroupsByIds:
     def test_get_gene_groups_by_ids_empty_list(self) -> None:
         """Test get_gene_groups_by_ids with empty ID list."""
         mock_session = MagicMock()
-        mock_session.execute.return_value.scalars.return_value.all.return_value = []
+        mock_session.scalars.return_value = iter([])
 
         result = get_gene_groups_by_ids(mock_session, [], eager_load=False)
 
         # Should still execute query
-        mock_session.execute.assert_called_once()
+        mock_session.scalars.assert_called_once()
 
 
 class TestStreamGenes:
@@ -269,7 +269,7 @@ class TestStreamGenes:
     def test_stream_genes_is_iterator(self) -> None:
         """Test that stream_genes returns an iterator."""
         mock_session = MagicMock()
-        mock_session.execute.return_value.all.return_value = []
+        mock_session.scalars.return_value = iter([])
 
         result = stream_genes(mock_session, chunk_size=100)
 
@@ -279,7 +279,7 @@ class TestStreamGenes:
     def test_stream_genes_with_status_filter(self) -> None:
         """Test stream_genes with status filter."""
         mock_session = MagicMock()
-        mock_session.execute.return_value.all.return_value = []
+        mock_session.scalars.return_value = iter([])
 
         result = stream_genes(mock_session, chunk_size=100, status="test_status")
 
@@ -289,7 +289,7 @@ class TestStreamGenes:
     def test_stream_genes_custom_chunk_size(self) -> None:
         """Test stream_genes with custom chunk size."""
         mock_session = MagicMock()
-        mock_session.execute.return_value.all.return_value = []
+        mock_session.scalars.return_value = iter([])
 
         result = stream_genes(mock_session, chunk_size=500)
 

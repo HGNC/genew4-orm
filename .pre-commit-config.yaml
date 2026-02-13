@@ -1,0 +1,52 @@
+default_language_version: 3.13
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.3
+    hooks:
+      - id: ruff
+        name: ruff
+        entry: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python]
+        types: [python]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.0.1
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        args: [--config-file=pyproject.toml]
+        additional_dependencies:
+          - mypy-protobuf==3.17.0
+        types_or: [python]
+        types: [python]
+        require_serial: true
+
+  - repo: https://github.com/pre-commit/mirrors-black
+    rev: 24.3.0
+    hooks:
+      - id: black
+        name: black
+        entry: black
+        types_or: [python]
+        types: [python]
+
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: 0.4.0
+    hooks:
+      - id: isort
+        name: isort (python)
+        entry: isort
+        args: [--settings-path=pyproject.toml]
+        types_or: [python]
+        types: [python]
+
+ci:
+  autofix_prs: false
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes by pre-commit hooks
+
+    skip: [mypy, ruff]
+    submodules: false

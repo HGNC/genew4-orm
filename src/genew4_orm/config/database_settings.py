@@ -1,7 +1,8 @@
 """Database configuration settings using Pydantic settings."""
 
 from typing import Any
-from pydantic import Field, SecretStr, field_validator
+
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

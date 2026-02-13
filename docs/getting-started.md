@@ -134,3 +134,4 @@ with get_readwrite_session(user="your_name") as session:
 
 - [Models](models.md) - Learn about available database models
 - [Querying](querying.md) - Advanced querying techniques
+- [Development Workflow](development-workflow.md) - Contributing and CI/CD process

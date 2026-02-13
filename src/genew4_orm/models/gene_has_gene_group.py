@@ -6,7 +6,7 @@ between Gene and GeneGroup, with custom sort order.
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, String
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -27,7 +27,11 @@ class GeneHasGeneGroup(SQLModel, table=True):
     # Foreign keys serve as composite primary key
     gene_id: int | None = Field(
         default=None,
-        sa_column=Column("hgnc_id", ForeignKey("hgnc.hgnc_id", ondelete="CASCADE"), primary_key=True),
+        sa_column=Column(
+            "hgnc_id",
+            ForeignKey("hgnc.hgnc_id", ondelete="CASCADE"),
+            primary_key=True,
+        ),
         description="Foreign key to hgnc table (part of composite primary key)",
     )
     gene_group_id: int | None = Field(

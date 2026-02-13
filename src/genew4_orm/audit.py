@@ -7,7 +7,7 @@ and DELETE operations using SQLAlchemy event listeners.
 import json
 from typing import Any
 
-from sqlalchemy import event, desc
+from sqlalchemy import desc, event
 from sqlalchemy.orm import Session
 
 from genew4_orm.models.audit_log import AuditLog

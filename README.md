@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+![![PyPI - Version](https://img.shields.io/pypi/v/genew4-orm)](https://pypi.org/project/genew4-orm)
 
 Python ORM for the genew4 PostgreSQL database.
 
@@ -117,6 +118,16 @@ cp .env.example .env
 # Edit .env with your database credentials
 ```
 
+### Continuous Integration
+
+This project uses GitHub Actions for CI/CD:
+
+- **Linting**: ruff, mypy, black, isort run on every push
+- **Testing**: All tests run automatically (unit, integration, e2e)
+- **Database**: PostgreSQL container spun up for integration tests
+- **Releases**: Semantic versioning via conventional commits
+- **Documentation**: Auto-deployed to GitHub Pages
+
 ### Running Tests
 
 ```bash
@@ -142,6 +153,40 @@ pytest -v
 pytest -k "test_user"
 ```
 
+## Contributing Workflow
+
+```bash
+# 1. Create a feature branch
+git checkout -b feature/my-changes
+
+# 2. Make your changes
+# Edit code, fix bugs, add features
+
+# 3. Run linting
+make lint
+# Runs: ruff, mypy, black, isort
+
+# 4. Run tests
+make test
+# Requires PostgreSQL for integration tests
+
+# 5. Commit with conventional message
+git add .
+git commit -m "feat: description of changes"
+# Types: feat, fix, docs, chore, perf, refactor, test
+
+# 6. Push to GitHub
+git push origin feature/my-changes
+
+# 7. Create Pull Request
+# Go to GitHub and create PR
+
+# 8. On merge to main:
+# - Semantic version created automatically
+# - GitHub release created
+# - Documentation deployed
+```
+
 ### Viewing Coverage
 
 ```bash
@@ -164,4 +209,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Documentation
 
-Full API documentation coming soon.
+- [Getting Started](https://genew4-orm.hgnc.github.io/getting-started/) - Installation and configuration
+- [Configuration](https://genew4-orm.hgnc.github.io/configuration/) - Environment variables and settings
+- [Models](https://genew4-orm.hgnc.github.io/models/) - Database model reference
+- [Querying](https://genew4-orm.hgnc.github.io/querying/) - Query helpers and eager loading
+- [API Reference](https://genew4-orm.hgnc.github.io/api-reference/) - Auto-generated API docs
+- [CRUD Operations](https://genew4-orm.hgnc.github.io/crud-operations/) - Create, read, update, delete guide
+- [Audit Logging](https://genew4-orm.hgnc.github.io/audit-logging/) - Automatic audit trail
+- [Testing](https://genew4-orm.hgnc.github.io/testing/) - Test suite guide

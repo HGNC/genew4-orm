@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  semantic-release:
+    runs-on: ubuntu-latest
+    outputs:
+      new-version: ${{ steps.release.outputs.new-version }}
+      new-tag: ${{ steps.release.outputs.new-tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Python Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v9.9.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_namespace: python-semantic-release
+          commit_author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          commit_message: "chore(release): {version} [skip ci]"
+          prerelease_tag_name: v{version}
+          major_on_zero: true
+          net_loc_unchanged: true
+          upload_release_files: true
+          upload_to_hash_partitions: true
+          version_variables: [
+            new_version
+          ]
+          build_environment_env:
+            PYTHON_VERSION: ${{ matrix.python-version }}
+
+      - name: Update README version
+        if: steps.release.outputs.new-version != ''
+        run: |
+          sed -i 's/^\\* \\*Version: \\*[0-9.]*/\\*Version: ${{ steps.release.outputs.new-version }}/' README.md
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@users.noreplies.github.com"
+          git add README.md
+          git commit -m "chore: update version in README [skip ci]"
+          git push

@@ -6,8 +6,7 @@ from sqlalchemy import Column, ForeignKey, Integer
 from sqlmodel import Field, SQLModel
 
 if TYPE_CHECKING:
-    from genew4_orm.models.gene_group import GeneGroup
-    from genew4_orm.models.specialist import Specialist
+    pass
 
 
 class FamHasSpecialist(SQLModel, table=True):

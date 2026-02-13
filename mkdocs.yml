@@ -19,6 +19,7 @@ nav:
       - CRUD Operations: crud-operations.md
       - Audit Logging: audit-logging.md
   - Development:
+      - Development Workflow: development-workflow.md
       - Testing: testing.md
 
 # Theme configuration

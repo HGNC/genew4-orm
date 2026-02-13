@@ -179,7 +179,6 @@ def build_gene_query(
 def build_gene_group_query(
     *,
     group_status: str | None = None,
-    group_type: str | None = None,
     search: str | None = None,
     limit: int = 100,
     offset: int = 0,
@@ -187,8 +186,7 @@ def build_gene_group_query(
     """Build a GeneGroup query with optional filters and pagination.
 
     Args:
-        group_status: Optional gene group status filter.
-        group_type: Optional gene group type filter.
+        group_status: Optional gene group name filter.
         search: Optional search string for name/abbreviation.
         limit: Maximum number of results to return.
         offset: Number of results to skip.
@@ -209,14 +207,11 @@ def build_gene_group_query(
     statement = select(GeneGroup)
 
     if group_status is not None:
-        statement = statement.where(GeneGroup.name == group_status)
-
-    if group_type is not None:
-        statement = statement.where(GeneGroup.type == group_type)
+        statement = statement.where(GeneGroup.name == group_status)  # type: ignore[arg-type]
 
     if search is not None:
         search_pattern = f"%{search}%"
-        # Use or_() for combining conditions with type: ignore
+        # Use or_() for combining conditions
         from sqlalchemy import or_
         # name is not nullable, abbreviation is nullable
         statement = statement.where(
@@ -260,14 +255,14 @@ def paginated_query(
         ...     print(f"Showing {len(genes)} of {total_count} genes (page 1 of {total_pages})")
     """
     # Get total count
-    total_count = len(list(session.execute(statement).all()))  # type: ignore[attr-defined]
+    total_count = len(list(session.scalars(statement)))
 
     # Calculate pagination
     total_pages = (total_count + per_page - 1) // per_page
     offset = (page - 1) * per_page
 
     # Execute paginated query
-    results = session.execute(statement.offset(offset).limit(per_page)).all()  # type: ignore[attr-defined]
+    results = list(session.scalars(statement.offset(offset).limit(per_page)))
 
     return results, total_pages, total_count
 
@@ -302,7 +297,7 @@ def get_genes_by_ids(
     if eager_load:
         statement = statement.options(get_gene_with_groups())
 
-    return list(session.execute(statement))  # type: ignore[attr-defined]
+    return list(session.scalars(statement))
 
 
 def get_gene_groups_by_ids(
@@ -332,7 +327,7 @@ def get_gene_groups_by_ids(
     if eager_load:
         statement = statement.options(get_gene_group_with_all_relations())
 
-    return list(session.execute(statement))  # type: ignore[attr-defined]
+    return list(session.scalars(statement))
 
 
 # Stream query functions
@@ -369,9 +364,9 @@ def stream_genes(
 
         if status is not None:
             # Filter by name prefix as proxy for status
-            statement = statement.where(GeneGroup.name.like(f"{status}%"))
+            statement = statement.where(GeneGroup.name.like(f"{status}%"))  # type: ignore[attr-defined]
 
-        chunk = list(session.execute(statement))  # type: ignore[attr-defined]
+        chunk = list(session.scalars(statement))
 
         if not chunk:
             break

@@ -5,8 +5,6 @@ This module contains all SQLModel classes representing database tables.
 
 from genew4_orm.models.audit_log import AuditLog
 from genew4_orm.models.correspondence import Correspondence
-# Cytoband excluded - use raw SQL for this table (no PK)
-# from genew4_orm.models.cytoband import Cytoband
 from genew4_orm.models.editor import Editor
 from genew4_orm.models.external_resource import ExternalResource
 from genew4_orm.models.fam_has_corr import FamHasCorr
@@ -21,6 +19,9 @@ from genew4_orm.models.hierarchy_closure import HierarchyClosure
 from genew4_orm.models.reminder import Reminder
 from genew4_orm.models.specialist import Specialist
 from genew4_orm.models.user import User
+
+# Cytoband excluded - use raw SQL for this table (no PK)
+# from genew4_orm.models.cytoband import Cytoband
 
 __all__ = [
     "Gene",

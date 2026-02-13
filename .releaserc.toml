@@ -1,0 +1,52 @@
+# .releaserc.toml configuration for python-semantic-release
+# See https://python-semantic-release.readthedocs.io/en/latest/configuration.html
+
+[tool.semantic_release]
+# Commit parser settings
+commit_parser = "angular"
+commit_parser_options.angular_parser = "conventional_commits"
+
+# Commit message parsing
+major_on_zero = true
+net_loc_unchanged = true
+
+# Branch configuration
+branch = "main"
+main_branch = "main"
+development_branch = "develop"
+
+# Tag configuration
+tag_format = "v{version}"
+
+# Changelog configuration
+changelog_file = "CHANGELOG.md"
+changelog_section_capitalization = "title"
+changelog_sections = [
+    "build",
+    "ci",
+    "chore",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "refactor",
+    "style",
+    "test"
+]
+changelog_excluded_commit_patterns = [
+    "^chore\\(\\(.*)\\s?",
+    "^docs\\(\\(.*)\\s?",
+    "^style\\(\\(.*)\\s?",
+    "^refactor\\(\\(.*)\\s?",
+    "^perf\\(\\(.*)\\s?",
+    "^test\\(\\(.*)\\s?"
+]
+
+# Upload to release
+upload_to_pypi = false
+upload_to_release = true
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["v\\d+\\.\\d+\\.\\d+"]
+minor_tags = ["v\\d+\\.\\d+\\.\\d+"]
+patch_tags = ["v\\d+\\.\\d+\\.\\d+"]

@@ -82,7 +82,7 @@ def initialize_engine(settings: DatabaseSettings | None = None) -> Engine:
         return _global_engine
 
     if settings is None:
-        settings = DatabaseSettings()
+        settings = DatabaseSettings()  # type: ignore[call-arg]
 
     _global_settings = settings
     _global_engine = _create_engine(settings)

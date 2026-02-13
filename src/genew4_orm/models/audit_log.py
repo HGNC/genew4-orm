@@ -4,12 +4,12 @@ This model stores audit trail information for all CREATE, UPDATE,
 and DELETE operations on database entities.
 """
 
+import json
 from datetime import datetime
 from typing import Any
 
 from sqlalchemy import Column, DateTime, Integer, String, Text
 from sqlmodel import Field, SQLModel
-import json
 
 
 def _serialize_field_changes(value: dict[str, Any] | None) -> str | None:
@@ -23,7 +23,7 @@ def _deserialize_field_changes(value: str | None) -> dict[str, Any]:
     """Deserialize field changes JSON string from database storage."""
     if value is None:
         return {}
-    return json.loads(value)
+    return json.loads(value)  # type: ignore[no-any-return]
 
 
 class AuditLog(SQLModel, table=True):

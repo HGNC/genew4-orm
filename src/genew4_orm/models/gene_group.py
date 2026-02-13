@@ -9,14 +9,10 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Column, String, Text
 from sqlmodel import Field, Relationship, SQLModel
 
-
 if TYPE_CHECKING:
-    from genew4_orm.models.correspondence import Correspondence
-    from genew4_orm.models.external_resource import ExternalResource
     from genew4_orm.models.gene_group_alias import GeneGroupAlias
     from genew4_orm.models.gene_has_gene_group import GeneHasGeneGroup
     from genew4_orm.models.hierarchy_closure import HierarchyClosure
-    from genew4_orm.models.specialist import Specialist
 
 
 class GeneGroup(SQLModel, table=True):

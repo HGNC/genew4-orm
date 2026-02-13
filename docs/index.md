@@ -12,6 +12,7 @@ genew4-orm is a Python Object-Relational Mapping (ORM) library for the Gene Nome
 - **Read-Only Sessions**: Built-in protection against accidental modifications
 - **Query Helpers**: Eager loading utilities to prevent N+1 queries
 - **Database Migrations**: Alembic integration for schema management
+- **CI/CD Pipeline**: Automated testing, releases, and documentation deployment via GitHub Actions
 
 ## Installation
 

@@ -5,14 +5,8 @@ GeneGroup (family_new) and ExternalResource.
 Note: This table uses (family_id, ext_id) as composite primary key.
 """
 
-from typing import TYPE_CHECKING
-
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlmodel import Field, Relationship, SQLModel
-
-if TYPE_CHECKING:
-    from genew4_orm.models.external_resource import ExternalResource
-    from genew4_orm.models.gene_group import GeneGroup
+from sqlmodel import Field, SQLModel
 
 
 class FamHasExtResource(SQLModel, table=True):
