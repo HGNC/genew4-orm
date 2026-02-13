@@ -227,7 +227,7 @@ class TestReminderCRUD:
         postgres_session.commit()
 
         # Query unsent reminders
-        stmt = select(Reminder).where(Reminder.sent == False)
+        stmt = select(Reminder).where(Reminder.sent.is_(False))
         unsent_reminders = postgres_session.execute(stmt).scalars().all()
 
         unsent_subjects = [r.subject for r in unsent_reminders]
