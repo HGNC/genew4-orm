@@ -64,9 +64,28 @@ jobs:
           import genew4_orm.models  # noqa: F401 - Import models to register with SQLModel
           from genew4_orm.session import initialize_engine
           from sqlmodel import SQLModel
+          from sqlalchemy import text
           engine = initialize_engine()
+
+          # Create all SQLModel tables
           SQLModel.metadata.create_all(engine)
+
+          # Manually create cytoband table (no PK, not a SQLModel)
+          with engine.connect() as conn:
+              conn.execute(text('''
+                  CREATE TABLE IF NOT EXISTS cytoband (
+                      cb_source VARCHAR(50),
+                      cb_chr VARCHAR(50),
+                      cb_start INTEGER,
+                      cb_end INTEGER,
+                      cb_band VARCHAR(50),
+                      cb_stain VARCHAR(50)
+                  )
+              '''))
+              conn.commit()
+
           print('Created tables:', sorted(t.name for t in SQLModel.metadata.tables.values()))
+          print('Created cytoband table manually')
           "
 
       - name: Run integration tests
