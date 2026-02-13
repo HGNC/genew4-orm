@@ -32,6 +32,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
+    "alembic>=1.15.0",
     "psycopg>=3.3.2",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
