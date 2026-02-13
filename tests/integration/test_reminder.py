@@ -15,12 +15,12 @@ from genew4_orm.models.reminder import Reminder
 from genew4_orm.models.user import User
 
 
-@pytest.mark.usefixtures("postgres_session")
 class TestReminderCRUD:
     """Test Reminder CRUD operations with PostgreSQL."""
 
     def test_create_reminder_minimal(self, postgres_session):
         """Test creating reminder with minimal required fields."""
+        print(f"DEBUG: session type = {type(postgres_session)}")
         user = User(display_name="testuser")
         postgres_session.add(user)
         postgres_session.commit()
