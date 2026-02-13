@@ -63,7 +63,15 @@ jobs:
           DATABASESETTINGS_PG_PASSWORD: genew4_test_password
         run: |
           export PYTHONPATH=src
-          uv run python -c "from genew4_orm.session import initialize_engine; from sqlmodel import SQLModel; engine = initialize_engine(); SQLModel.metadata.create_all(engine)"
+          uv run python -c "
+          import sys
+          sys.path.insert(0, 'src')
+          from genew4_orm.session import initialize_engine
+          from sqlmodel import SQLModel
+          engine = initialize_engine()
+          SQLModel.metadata.create_all(engine)
+          print('Created tables:', sorted(t.name for t in SQLModel.metadata.tables.values()))
+          "
 
       - name: Run tests with coverage
         env:
