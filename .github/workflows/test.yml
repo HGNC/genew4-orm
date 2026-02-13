@@ -145,6 +145,6 @@ jobs:
               print(f'::warning::Could not parse coverage.xml: {e}')
               sys.exit(1)
           except Exception as e:
-              print(f'::warning::Exception reading coverage: {e}')
+              print(f'::warning::Exception reading coverage: {type(e).__name__}')
               sys.exit(1)
           EOF
