@@ -3,7 +3,6 @@
 This model contains GRCh38 coordinate mapping data with composite primary key.
 """
 
-
 from sqlalchemy import Column, Integer, String
 from sqlmodel import Field, SQLModel
 
@@ -79,6 +78,5 @@ class Grch38Mapping(SQLModel, table=True):
     def __repr__(self) -> str:
         """Return string representation of Grch38Mapping."""
         return (
-            f"<Grch38Mapping(source={self.source}, chromosome='{self.chromosome}', "
-            f"start={self.start}, end={self.end})>"
+            f"<Grch38Mapping(source={self.source}, chromosome='{self.chromosome}', start={self.start}, end={self.end})>"
         )

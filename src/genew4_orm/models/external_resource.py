@@ -3,7 +3,6 @@
 This model contains external database/resource information.
 """
 
-
 from sqlmodel import Field, SQLModel
 
 

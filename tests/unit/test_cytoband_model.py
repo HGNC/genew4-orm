@@ -1,11 +1,7 @@
 """Unit tests for Cytoband model."""
 
-from datetime import date
-
-import pytest
-
-from genew4_orm.models.cytoband import Cytoband
 from genew4_orm.enums import CytobandSourceType
+from genew4_orm.models.cytoband import Cytoband
 
 
 class TestCytoband:

@@ -7,8 +7,9 @@ N+1 query issues with relationship loading.
 import time
 
 import pytest
-from sqlalchemy import event, func, select
-from sqlalchemy.orm import Session as SQLAlchemySession, joinedload, selectinload
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session as SQLAlchemySession
+from sqlalchemy.orm import joinedload, selectinload
 
 from genew4_orm.models import Gene, GeneGroup, GeneHasGeneGroup
 from genew4_orm.utils.query_helpers import (
@@ -22,9 +23,7 @@ class TestQueryHelperPerformance:
     """Test performance of query helper functions."""
 
     @pytest.mark.skip("Performance tests require debugging of helper function signatures")
-    def test_get_gene_with_groups_performance(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_get_gene_with_groups_performance(self, postgres_session: SQLAlchemySession) -> None:
         """Benchmark get_gene_with_groups helper."""
         # Setup test data
         postgres_session.info["user"] = "test_user"
@@ -48,13 +47,9 @@ class TestQueryHelperPerformance:
         assert result is not None
         assert result.hgnc_id == gene_id
         # Should be fast with eager loading
-        assert (
-            elapsed < 0.5
-        ), f"get_gene_with_groups took {elapsed:.3f}s, expected < 0.5s"
+        assert elapsed < 0.5, f"get_gene_with_groups took {elapsed:.3f}s, expected < 0.5s"
 
-    def test_build_gene_query_performance(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_build_gene_query_performance(self, postgres_session: SQLAlchemySession) -> None:
         """Benchmark build_gene_query helper."""
         # Setup test data
         postgres_session.info["user"] = "test_user"
@@ -63,18 +58,14 @@ class TestQueryHelperPerformance:
         # Time query building
         start = time.perf_counter()
         stmt = build_gene_query(status="Approved")
-        result = postgres_session.execute(stmt).scalars().all()
+        postgres_session.execute(stmt).scalars().all()
         elapsed = time.perf_counter() - start
 
         # Query building and execution should be fast
-        assert (
-            elapsed < 1.0
-        ), f"build_gene_query took {elapsed:.3f}s, expected < 1.0s"
+        assert elapsed < 1.0, f"build_gene_query took {elapsed:.3f}s, expected < 1.0s"
 
     @pytest.mark.skip("Needs investigation of query helper functions")
-    def test_gene_query_by_symbol_performance(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_gene_query_by_symbol_performance(self, postgres_session: SQLAlchemySession) -> None:
         """Benchmark query by symbol."""
         postgres_session.info["user"] = "test_user"
         postgres_session.info["read_only"] = False
@@ -104,9 +95,7 @@ class TestQueryHelperPerformance:
         assert len(result) >= 30, f"Expected at least 30 genes, found {len(result)}"
         assert elapsed < 1.0, f"Query took {elapsed:.3f}s, expected < 1.0s"
 
-    def test_simple_gene_query_performance(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_simple_gene_query_performance(self, postgres_session: SQLAlchemySession) -> None:
         """Benchmark simple gene query performance."""
         postgres_session.info["user"] = "test_user"
         postgres_session.info["read_only"] = False
@@ -114,23 +103,19 @@ class TestQueryHelperPerformance:
         # Simple query without joins
         start = time.perf_counter()
         stmt = select(Gene).where(Gene.approved_symbol.like("TEST_%"))
-        result = postgres_session.execute(stmt).scalars().all()
+        postgres_session.execute(stmt).scalars().all()
 
         elapsed = time.perf_counter() - start
 
         # Should be reasonably fast
-        assert (
-            elapsed < 1.0
-        ), f"Simple query took {elapsed:.3f}s, expected < 1.0s"
+        assert elapsed < 1.0, f"Simple query took {elapsed:.3f}s, expected < 1.0s"
 
 
 @pytest.mark.skip("Needs investigation of query helper function internals")
 class TestN1QueryDetection:
     """Test for N+1 query problems."""
 
-    def test_gene_without_eager_loading_has_n_plus_1(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_gene_without_eager_loading_has_n_plus_1(self, postgres_session: SQLAlchemySession) -> None:
         """Gene without eager loading causes N+1 queries."""
         postgres_session.info["user"] = "test_user"
         postgres_session.info["read_only"] = False
@@ -154,9 +139,7 @@ class TestN1QueryDetection:
 class TestBatchOperationPerformance:
     """Test performance of batch operations."""
 
-    def test_batch_insert_performance(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_batch_insert_performance(self, postgres_session: SQLAlchemySession) -> None:
         """Benchmark batch insert operations."""
         postgres_session.info["user"] = "test_user"
         postgres_session.info["read_only"] = False
@@ -177,20 +160,17 @@ class TestBatchOperationPerformance:
         # 50 inserts should be reasonably fast
         elapsed = time.perf_counter() - start
 
-        assert (
-            elapsed < 5.0
-        ), f"Batch insert of 50 took {elapsed:.3f}s, expected < 5.0s"
+        assert elapsed < 5.0, f"Batch insert of 50 took {elapsed:.3f}s, expected < 5.0s"
 
 
 @pytest.mark.usefixtures("postgres_session")
 class TestComplexQueryPerformance:
     """Test performance of complex queries."""
 
-    def test_join_query_performance(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_join_query_performance(self, postgres_session: SQLAlchemySession) -> None:
         """Benchmark join query performance."""
         import time as time_module
+
         unique_suffix = f"_{int(time_module.time())}"
 
         postgres_session.info["user"] = "test_user"
@@ -239,20 +219,15 @@ class TestComplexQueryPerformance:
         assert len(result) == 10, f"Expected 10 genes, found {len(result)}"
         assert elapsed < 0.5, f"Join query with eager loading took {elapsed:.3f}s, expected < 0.5s"
 
-    def test_aggregation_query_performance(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_aggregation_query_performance(self, postgres_session: SQLAlchemySession) -> None:
         """Benchmark aggregation query performance."""
         postgres_session.info["user"] = "test_user"
         postgres_session.info["read_only"] = False
 
         # Aggregation query
         start = time.perf_counter()
-        stmt = (
-            select(Gene.approved_symbol, func.count(Gene.hgnc_id))
-            .group_by(Gene.approved_symbol)
-        )
-        result = postgres_session.execute(stmt).scalars().all()
+        stmt = select(Gene.approved_symbol, func.count(Gene.hgnc_id)).group_by(Gene.approved_symbol)
+        postgres_session.execute(stmt).scalars().all()
 
         elapsed = time.perf_counter() - start
 
@@ -264,9 +239,7 @@ class TestComplexQueryPerformance:
 class TestIndexUsage:
     """Test index usage and performance."""
 
-    def test_primary_key_lookup_is_fast(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_primary_key_lookup_is_fast(self, postgres_session: SQLAlchemySession) -> None:
         """Benchmark primary key lookups are fast."""
         postgres_session.info["user"] = "test_user"
         postgres_session.info["read_only"] = False
@@ -290,13 +263,9 @@ class TestIndexUsage:
         elapsed = time.perf_counter() - start
 
         # 100 primary key lookups should be very fast
-        assert (
-            elapsed < 2.0
-        ), f"100 PK lookups took {elapsed:.3f}s, expected < 2.0s"
+        assert elapsed < 2.0, f"100 PK lookups took {elapsed:.3f}s, expected < 2.0s"
 
-    def test_unique_index_lookup_is_fast(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_unique_index_lookup_is_fast(self, postgres_session: SQLAlchemySession) -> None:
         """Benchmark unique index lookups are fast."""
         postgres_session.info["user"] = "test_user"
         postgres_session.info["read_only"] = False
@@ -320,18 +289,14 @@ class TestIndexUsage:
         elapsed = time.perf_counter() - start
 
         # 50 unique index lookups should be fast
-        assert (
-            elapsed < 2.0
-        ), f"50 unique index lookups took {elapsed:.3f}s, expected < 2.0s"
+        assert elapsed < 2.0, f"50 unique index lookups took {elapsed:.3f}s, expected < 2.0s"
 
 
 @pytest.mark.usefixtures("postgres_session")
 class TestRelationshipLoadingStrategies:
     """Test relationship loading strategies."""
 
-    def test_selectinload_vs_joinedload(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_selectinload_vs_joinedload(self, postgres_session: SQLAlchemySession) -> None:
         """Compare selectinload vs joinedload performance."""
         postgres_session.info["user"] = "test_user"
         postgres_session.info["read_only"] = False
@@ -347,7 +312,7 @@ class TestRelationshipLoadingStrategies:
         gene_id = gene.hgnc_id
 
         # Create groups
-        group = GeneGroup(name=f"Test Group for loading")
+        group = GeneGroup(name="Test Group for loading")
         postgres_session.add(group)
         postgres_session.flush()
         group_id = group.id
@@ -361,44 +326,30 @@ class TestRelationshipLoadingStrategies:
 
         # Time with selectinload
         start = time.perf_counter()
-        stmt = (
-            select(Gene)
-            .options(selectinload(Gene.gene_has_gene_groups))
-            .where(Gene.hgnc_id == gene_id)
-        )
-        result = postgres_session.execute(stmt).scalars().first()
+        stmt = select(Gene).options(selectinload(Gene.gene_has_gene_groups)).where(Gene.hgnc_id == gene_id)
+        postgres_session.execute(stmt).scalars().first()
 
         elapsed = time.perf_counter() - start
 
         # selectinload should only make 1 query
-        assert (
-            elapsed < 0.5
-        ), f"selectinload took {elapsed:.3f}s, expected < 0.5s"
+        assert elapsed < 0.5, f"selectinload took {elapsed:.3f}s, expected < 0.5s"
 
         # Time with joinedload (should make more queries)
         start = time.perf_counter()
-        stmt = (
-            select(Gene)
-            .options(joinedload(Gene.gene_has_gene_groups))
-            .where(Gene.hgnc_id == gene_id)
-        )
-        result = postgres_session.execute(stmt).scalars().first()
+        stmt = select(Gene).options(joinedload(Gene.gene_has_gene_groups)).where(Gene.hgnc_id == gene_id)
+        postgres_session.execute(stmt).scalars().first()
 
         elapsed_join = time.perf_counter() - start
 
         # joinedload typically makes more queries but should be faster overall
-        assert (
-            elapsed_join < 0.5
-        ), f"joinedload took {elapsed_join:.3f}s, expected < 0.5s"
+        assert elapsed_join < 0.5, f"joinedload took {elapsed_join:.3f}s, expected < 0.5s"
 
 
 @pytest.mark.usefixtures("postgres_session")
 class TestQueryOptimization:
     """Test query optimization techniques."""
 
-    def test_exists_subquery_is_efficient(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_exists_subquery_is_efficient(self, postgres_session: SQLAlchemySession) -> None:
         """Test that EXISTS subquery is efficient."""
         postgres_session.info["user"] = "test_user"
         postgres_session.info["read_only"] = False
@@ -411,18 +362,15 @@ class TestQueryOptimization:
         )
         postgres_session.add(gene)
         postgres_session.commit()
-        gene_id = gene.hgnc_id
 
         # Time simple query with status filter
         start = time.perf_counter()
         stmt = build_gene_query(
             status="Approved",
         )
-        result = postgres_session.execute(stmt).scalars().first()
+        postgres_session.execute(stmt).scalars().first()
 
         elapsed = time.perf_counter() - start
 
         # EXISTS subquery should be fast
-        assert (
-            elapsed < 1.0
-        ), f"EXISTS query took {elapsed:.3f}s, expected < 1.0s"
+        assert elapsed < 1.0, f"EXISTS query took {elapsed:.3f}s, expected < 1.0s"

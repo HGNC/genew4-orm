@@ -65,12 +65,8 @@ class GeneLocusType(StrEnum):
     ENDOGENOUS_RETROVIRUS = "endogenous retrovirus"
     FRAGILE_SITE = "fragile site"
     GWPP = "gene with protein product"
-    GWPP_DEMONSTRATES_SOMATIC_REARRANGEMENT = (
-        "gene with protein product, demonstrates somatic rearrangement"
-    )
-    GWPP_FUNCTION_KNOWN_OR_INFERRED = (
-        "gene with protein product, function known or inferred"
-    )
+    GWPP_DEMONSTRATES_SOMATIC_REARRANGEMENT = "gene with protein product, demonstrates somatic rearrangement"
+    GWPP_FUNCTION_KNOWN_OR_INFERRED = "gene with protein product, function known or inferred"
     GWPP_FUNCTION_UNKNOWN = "gene with protein product, function unknown"
     GWPP_INFERRED = "gene with protein product, inferred"
     IMMUNOGLOBULIN_GENE = "immunoglobulin gene"

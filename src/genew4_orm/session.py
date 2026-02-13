@@ -55,9 +55,7 @@ def _create_engine(settings: DatabaseSettings) -> Engine:
         pass  # Could add logging here
 
     @event.listens_for(engine, "checkout")
-    def receive_checkout(
-        dbapi_conn: Any, connection_record: Any, connection_proxy: Any
-    ) -> None:
+    def receive_checkout(dbapi_conn: Any, connection_record: Any, connection_proxy: Any) -> None:
         """Log connection checkout from pool."""
         pass  # Could add logging here
 
@@ -100,9 +98,7 @@ def get_engine() -> Engine:
         RuntimeError: If engine has not been initialized.
     """
     if _global_engine is None:
-        raise RuntimeError(
-            "Database engine not initialized. Call initialize_engine() first."
-        )
+        raise RuntimeError("Database engine not initialized. Call initialize_engine() first.")
     return _global_engine
 
 
@@ -116,9 +112,7 @@ def get_settings() -> DatabaseSettings:
         RuntimeError: If settings have not been initialized.
     """
     if _global_settings is None:
-        raise RuntimeError(
-            "Database settings not initialized. Call initialize_engine() first."
-        )
+        raise RuntimeError("Database settings not initialized. Call initialize_engine() first.")
     return _global_settings
 
 
@@ -136,9 +130,7 @@ def _get_session_factory() -> SessionMaker:
     global _session_factory
 
     if _session_factory is None:
-        _session_factory = sessionmaker(
-            bind=get_engine(), autocommit=False, autoflush=False
-        )
+        _session_factory = sessionmaker(bind=get_engine(), autocommit=False, autoflush=False)
 
     return _session_factory
 
@@ -152,9 +144,7 @@ def _get_readonly_session_factory() -> SessionMaker:
     global _readonly_session_factory
 
     if _readonly_session_factory is None:
-        _readonly_session_factory = sessionmaker(
-            bind=get_engine(), autocommit=False, autoflush=False
-        )
+        _readonly_session_factory = sessionmaker(bind=get_engine(), autocommit=False, autoflush=False)
 
     return _readonly_session_factory
 
@@ -229,8 +219,7 @@ def get_readonly_session() -> Generator[Session, None, None]:
     @event.listens_for(session, "before_commit")
     def prevent_writes(session: Session) -> None:
         raise ReadOnlySessionError(
-            "Cannot commit changes in a read-only session. "
-            "Use get_readwrite_session() for modifications."
+            "Cannot commit changes in a read-only session. Use get_readwrite_session() for modifications."
         )
 
     try:

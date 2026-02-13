@@ -7,10 +7,10 @@ including testing relationships with GeneGroup.
 import time
 
 import pytest
-from sqlalchemy import select, text
+from sqlalchemy import select
 
-from genew4_orm.models.gene_group_alias import GeneGroupAlias
 from genew4_orm.models.gene_group import GeneGroup
+from genew4_orm.models.gene_group_alias import GeneGroupAlias
 
 
 @pytest.mark.usefixtures("postgres_session")
@@ -135,9 +135,7 @@ class TestGeneGroupAliasCRUD:
         postgres_session.commit()
 
         # Query by pattern
-        stmt = select(GeneGroupAlias).where(
-            GeneGroupAlias.alias.like(f"%Query Test%{ts}")
-        )
+        stmt = select(GeneGroupAlias).where(GeneGroupAlias.alias.like(f"%Query Test%{ts}"))
         result = postgres_session.execute(stmt).scalar_one_or_none()
 
         assert result is not None
@@ -191,9 +189,7 @@ class TestGeneGroupAliasRelationship:
         postgres_session.commit()
 
         # Query all aliases for this group
-        stmt = select(GeneGroupAlias).where(
-            GeneGroupAlias.gene_group_id == gene_group.id
-        )
+        stmt = select(GeneGroupAlias).where(GeneGroupAlias.gene_group_id == gene_group.id)
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include our 3 aliases
@@ -219,9 +215,9 @@ class TestGeneGroupAliasRelationship:
         postgres_session.commit()
 
         # Query aliases for the group
-        stmt = select(GeneGroupAlias).where(
-            GeneGroupAlias.gene_group_id == gene_group.id
-        ).order_by(GeneGroupAlias.alias)
+        stmt = (
+            select(GeneGroupAlias).where(GeneGroupAlias.gene_group_id == gene_group.id).order_by(GeneGroupAlias.alias)
+        )
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include our aliases
@@ -344,9 +340,7 @@ class TestGeneGroupAliasEdgeCases:
         postgres_session.commit()
 
         # Verify all three are stored distinctly
-        stmt = select(GeneGroupAlias).where(
-            GeneGroupAlias.alias.like(f"%{ts}")
-        )
+        stmt = select(GeneGroupAlias).where(GeneGroupAlias.alias.like(f"%{ts}"))
         results = postgres_session.execute(stmt).scalars().all()
 
         ts_results = {r.alias for r in results if f" {ts}" in r.alias}
@@ -375,9 +369,7 @@ class TestGeneGroupAliasEdgeCases:
         postgres_session.commit()
 
         # Query all aliases for this group
-        stmt = select(GeneGroupAlias).where(
-            GeneGroupAlias.gene_group_id == gene_group.id
-        )
+        stmt = select(GeneGroupAlias).where(GeneGroupAlias.gene_group_id == gene_group.id)
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include our 20 aliases

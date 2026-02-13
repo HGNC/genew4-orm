@@ -3,8 +3,6 @@
 These tests focus on covering the relationship definitions and __repr__ method.
 """
 
-import pytest
-
 from genew4_orm.models import GeneGroup
 
 

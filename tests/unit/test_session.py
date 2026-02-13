@@ -1,19 +1,19 @@
 """Unit tests for session management module."""
 
-from unittest.mock import MagicMock, patch
-import pytest
-from sqlalchemy import Engine
+from unittest.mock import patch
 
+import pytest
+
+from genew4_orm.config import DatabaseSettings
 from genew4_orm.session import (
     ReadOnlySessionError,
-    get_engine,
-    get_settings,
-    get_readwrite_session,
-    get_readonly_session,
     close_all_sessions,
+    get_engine,
+    get_readonly_session,
+    get_readwrite_session,
+    get_settings,
     refresh_engine,
 )
-from genew4_orm.config import DatabaseSettings
 
 
 class TestReadOnlySessionError:
@@ -38,9 +38,10 @@ class TestGetEngine:
         """Test get_engine raises RuntimeError if not initialized."""
         # Reset global state by importing fresh module
         import importlib
+
         import genew4_orm.session
+
         importlib.reload(genew4_orm.session)
-        from genew4_orm.session import get_engine
 
         with pytest.raises(RuntimeError) as exc_info:
             get_engine()
@@ -55,9 +56,10 @@ class TestGetSettings:
         """Test get_settings raises RuntimeError if not initialized."""
         # Reset global state
         import importlib
+
         import genew4_orm.session
+
         importlib.reload(genew4_orm.session)
-        from genew4_orm.session import get_settings
 
         with pytest.raises(RuntimeError) as exc_info:
             get_settings()
@@ -67,7 +69,6 @@ class TestGetSettings:
     @patch("genew4_orm.session._global_settings", None)
     def test_get_settings_with_none_settings_raises(self) -> None:
         """Test get_settings raises when settings is None."""
-        from genew4_orm.session import get_settings
 
         with pytest.raises(RuntimeError) as exc_info:
             get_settings()
@@ -94,9 +95,10 @@ class TestRefreshEngine:
         """Test refresh_engine raises RuntimeError if no settings available."""
         # Reset global state
         import importlib
+
         import genew4_orm.session
+
         importlib.reload(genew4_orm.session)
-        from genew4_orm.session import refresh_engine
 
         with pytest.raises(RuntimeError) as exc_info:
             refresh_engine()
@@ -107,7 +109,6 @@ class TestRefreshEngine:
     @patch("genew4_orm.session._global_engine", None)
     def test_refresh_engine_checks_settings_first(self) -> None:
         """Test refresh_engine checks settings before proceeding."""
-        from genew4_orm.session import refresh_engine
 
         with pytest.raises(RuntimeError, match="Cannot refresh"):
             refresh_engine()
@@ -119,21 +120,24 @@ class TestReadWriteSession:
     def test_readwrite_session_default_user(self) -> None:
         """Test get_readwrite_session uses 'unknown' as default user."""
         # We need to initialize engine first
-        from genew4_orm.session import initialize_engine
-        from genew4_orm.config import DatabaseSettings
         import os
         from unittest.mock import patch
 
+        from genew4_orm.session import initialize_engine
+
         # Mock the environment variables needed for DatabaseSettings
-        with patch.dict(os.environ, {
-            "DATABASESETTINGS_PG_USER": "test",
-            "DATABASESETTINGS_PG_PASSWORD": "test",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "DATABASESETTINGS_PG_USER": "test",
+                "DATABASESETTINGS_PG_PASSWORD": "test",
+            },
+        ):
             try:
                 settings = DatabaseSettings()
                 # Note: This may fail if PostgreSQL is not available
                 # So we'll catch the error and continue
-                engine = initialize_engine(settings)
+                initialize_engine(settings)
 
                 # Test the session context manager
                 with get_readwrite_session() as session:
@@ -152,6 +156,7 @@ class TestReadWriteSession:
         # Verify the code path for custom user
         # We can test this without database by inspecting function behavior
         import inspect
+
         from genew4_orm.session import get_readwrite_session
 
         source = inspect.getsource(get_readwrite_session)
@@ -161,6 +166,7 @@ class TestReadWriteSession:
     def test_readwrite_session_exception_handling(self) -> None:
         """Test get_readwrite_session handles exceptions properly."""
         import inspect
+
         from genew4_orm.session import get_readwrite_session
 
         source = inspect.getsource(get_readwrite_session)
@@ -176,7 +182,6 @@ class TestReadonlySession:
     def test_readonly_session_marks_read_only(self) -> None:
         """Test get_readonly_session marks session as read-only."""
         import inspect
-        from genew4_orm.session import get_readonly_session
 
         source = inspect.getsource(get_readonly_session)
         # Verify read_only flag is set
@@ -185,8 +190,7 @@ class TestReadonlySession:
     def test_readonly_session_error_message(self) -> None:
         """Test that ReadOnlySessionError has appropriate message."""
         error = ReadOnlySessionError(
-            "Cannot commit changes in a read-only session. "
-            "Use get_readwrite_session() for modifications."
+            "Cannot commit changes in a read-only session. Use get_readwrite_session() for modifications."
         )
         assert "read-only session" in str(error)
         assert "get_readwrite_session" in str(error)
@@ -198,7 +202,8 @@ class TestSessionFactories:
     def test_session_factory_initialization(self) -> None:
         """Test that session factories can be initialized."""
         import inspect
-        from genew4_orm.session import _get_session_factory, _get_readonly_session_factory
+
+        from genew4_orm.session import _get_readonly_session_factory, _get_session_factory
 
         # Both should use sessionmaker with similar parameters
         session_source = inspect.getsource(_get_session_factory)
@@ -232,14 +237,16 @@ class TestEngineKwargs:
 
     def test_get_engine_kwargs_structure(self) -> None:
         """Test get_engine_kwargs returns expected structure."""
-        from genew4_orm.config import DatabaseSettings
         import os
         from unittest.mock import patch
 
-        with patch.dict(os.environ, {
-            "DATABASESETTINGS_PG_USER": "test",
-            "DATABASESETTINGS_PG_PASSWORD": "test",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "DATABASESETTINGS_PG_USER": "test",
+                "DATABASESETTINGS_PG_PASSWORD": "test",
+            },
+        ):
             settings = DatabaseSettings()
             kwargs = settings.get_engine_kwargs()
 
@@ -252,14 +259,16 @@ class TestEngineKwargs:
 
     def test_get_async_engine_kwargs_structure(self) -> None:
         """Test get_async_engine_kwargs returns expected structure."""
-        from genew4_orm.config import DatabaseSettings
         import os
         from unittest.mock import patch
 
-        with patch.dict(os.environ, {
-            "DATABASESETTINGS_PG_USER": "test",
-            "DATABASESETTINGS_PG_PASSWORD": "test",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "DATABASESETTINGS_PG_USER": "test",
+                "DATABASESETTINGS_PG_PASSWORD": "test",
+            },
+        ):
             settings = DatabaseSettings()
             kwargs = settings.get_async_engine_kwargs()
 
@@ -276,14 +285,16 @@ class TestConnectionUrl:
 
     def test_get_connection_url_without_password(self) -> None:
         """Test connection URL excludes password by default."""
-        from genew4_orm.config import DatabaseSettings
         import os
         from unittest.mock import patch
 
-        with patch.dict(os.environ, {
-            "DATABASESETTINGS_PG_USER": "testuser",
-            "DATABASESETTINGS_PG_PASSWORD": "secret123",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "DATABASESETTINGS_PG_USER": "testuser",
+                "DATABASESETTINGS_PG_PASSWORD": "secret123",
+            },
+        ):
             settings = DatabaseSettings()
             url = settings.get_connection_url()
 
@@ -294,14 +305,16 @@ class TestConnectionUrl:
 
     def test_get_connection_url_with_password(self) -> None:
         """Test connection URL includes password when requested."""
-        from genew4_orm.config import DatabaseSettings
         import os
         from unittest.mock import patch
 
-        with patch.dict(os.environ, {
-            "DATABASESETTINGS_PG_USER": "testuser",
-            "DATABASESETTINGS_PG_PASSWORD": "secret123",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "DATABASESETTINGS_PG_USER": "testuser",
+                "DATABASESETTINGS_PG_PASSWORD": "secret123",
+            },
+        ):
             settings = DatabaseSettings()
             url = settings.get_connection_url(with_password=True)
 

@@ -4,13 +4,10 @@ This module tests User CRUD operations with real database connections,
 including testing full_name property and relationship to reminders.
 """
 
-from datetime import date
-
 import pytest
 from sqlalchemy import select, text
 
 from genew4_orm.models.user import User
-from genew4_orm.models.reminder import Reminder
 
 
 @pytest.mark.usefixtures("postgres_session")
@@ -71,7 +68,6 @@ class TestUserCRUD:
         )
         postgres_session.add(user)
         postgres_session.commit()
-        user_id = user.id
 
         # Update fields
         user.first_name = "Jane"
@@ -122,9 +118,7 @@ class TestUserCRUD:
         # Query with wildcard
         from sqlalchemy import or_
 
-        stmt = select(User).where(
-            or_(User.display_name.like("user%"))
-        ).order_by(User.display_name)
+        stmt = select(User).where(or_(User.display_name.like("user%"))).order_by(User.display_name)
         results = postgres_session.execute(stmt).scalars().all()
 
         assert len(results) >= 3
@@ -258,8 +252,7 @@ class TestUserDefaultValues:
 
         # Query raw columns - all should be NULL (None in fetchall result)
         result = postgres_session.execute(
-            text('SELECT "first_name", "last_name", "email" FROM "user" WHERE id = :id')
-        , {"id": user.id}
+            text('SELECT "first_name", "last_name", "email" FROM "user" WHERE id = :id'), {"id": user.id}
         ).one()
 
         assert result[0] is None

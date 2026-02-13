@@ -3,7 +3,6 @@
 This model contains correspondence record information.
 """
 
-
 from sqlalchemy import Column, Text
 from sqlmodel import Field, SQLModel
 

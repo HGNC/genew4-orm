@@ -6,15 +6,15 @@ and SQLite databases, as well as sample data fixtures.
 
 from collections.abc import Generator
 
-import sqlalchemy
 import pytest
+import sqlalchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlmodel import SQLModel
 
 from genew4_orm.config.database_settings import DatabaseSettings
 from genew4_orm.models import Gene, GeneGroup, GeneHasGeneGroup
-from genew4_orm.session import get_engine, initialize_engine
+from genew4_orm.session import get_engine
 
 # Test database URLs
 TEST_SQLITE_URL = "sqlite:///:memory:"
@@ -169,6 +169,7 @@ def sqlite_session(sqlite_unit_engine) -> Generator[Session, None, None]:
 
 # Sample data fixtures
 
+
 @pytest.fixture
 def sample_gene() -> Gene:
     """Create a sample Gene object for testing.
@@ -205,9 +206,7 @@ def sample_gene_group() -> GeneGroup:
 
 
 @pytest.fixture
-def sample_gene_with_group(
-    sample_gene, sample_gene_group
-) -> tuple[Gene, GeneGroup, GeneHasGeneGroup]:
+def sample_gene_with_group(sample_gene, sample_gene_group) -> tuple[Gene, GeneGroup, GeneHasGeneGroup]:
     """Create a sample Gene associated with a GeneGroup.
 
     Args:
@@ -239,7 +238,6 @@ def test_session(sqlite_unit_engine):
     """
     if _try_postgres_connection():
         # PostgreSQL available - use postgres_session fixture
-        from genew4_orm.session import get_readwrite_session
         session_local = sessionmaker(bind=get_engine(), autocommit=False, autoflush=False)
         session = session_local()
 

@@ -9,8 +9,8 @@ import time
 import pytest
 from sqlalchemy import select, text
 
-from genew4_orm.models.hierarchy_closure import HierarchyClosure
 from genew4_orm.models.gene_group import GeneGroup
+from genew4_orm.models.hierarchy_closure import HierarchyClosure
 
 
 @pytest.mark.usefixtures("postgres_session")
@@ -78,9 +78,7 @@ class TestHierarchyClosureCRUD:
         postgres_session.commit()
 
         # Query by ancestor
-        stmt = select(HierarchyClosure).where(
-            HierarchyClosure.ancestor_id == ancestor.id
-        )
+        stmt = select(HierarchyClosure).where(HierarchyClosure.ancestor_id == ancestor.id)
         result = postgres_session.execute(stmt).scalar_one_or_none()
 
         assert result is not None
@@ -105,9 +103,7 @@ class TestHierarchyClosureCRUD:
         postgres_session.commit()
 
         # Query by descendant
-        stmt = select(HierarchyClosure).where(
-            HierarchyClosure.descendant_id == descendant.id
-        )
+        stmt = select(HierarchyClosure).where(HierarchyClosure.descendant_id == descendant.id)
         result = postgres_session.execute(stmt).scalar_one_or_none()
 
         assert result is not None
@@ -308,9 +304,7 @@ class TestHierarchyClosureRelationships:
         postgres_session.commit()
 
         # Query all descendants for this ancestor
-        stmt = select(HierarchyClosure).where(
-            HierarchyClosure.ancestor_id == ancestor.id
-        )
+        stmt = select(HierarchyClosure).where(HierarchyClosure.ancestor_id == ancestor.id)
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include our 3 closures
@@ -345,9 +339,7 @@ class TestHierarchyClosureRelationships:
         postgres_session.commit()
 
         # Query all ancestors for this descendant
-        stmt = select(HierarchyClosure).where(
-            HierarchyClosure.descendant_id == child.id
-        )
+        stmt = select(HierarchyClosure).where(HierarchyClosure.descendant_id == child.id)
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include our 2 closures
@@ -392,10 +384,7 @@ class TestHierarchyClosureEdgeCases:
         """Test creating many hierarchy closures."""
         ts = int(time.time() * 1000)
         ancestor = GeneGroup(name=f"Many Ancestor {ts}")
-        descendants = [
-            GeneGroup(name=f"Many Descendant {i} {ts}")
-            for i in range(10)
-        ]
+        descendants = [GeneGroup(name=f"Many Descendant {i} {ts}") for i in range(10)]
         postgres_session.add_all([ancestor] + descendants)
         postgres_session.commit()
         postgres_session.refresh(ancestor)
@@ -415,9 +404,7 @@ class TestHierarchyClosureEdgeCases:
         postgres_session.commit()
 
         # Verify all were created
-        stmt = select(HierarchyClosure).where(
-            HierarchyClosure.ancestor_id == ancestor.id
-        )
+        stmt = select(HierarchyClosure).where(HierarchyClosure.ancestor_id == ancestor.id)
         results = postgres_session.execute(stmt).scalars().all()
         found_ids = {r.descendant_id for r in results if r.descendant_id in descendant_ids}
         assert len(found_ids) == 10
@@ -457,9 +444,7 @@ class TestHierarchyClosureEdgeCases:
         postgres_session.commit()
 
         # Query closures with distance between 2 and 7
-        stmt = select(HierarchyClosure).where(
-            HierarchyClosure.distance.between(2, 7)
-        )
+        stmt = select(HierarchyClosure).where(HierarchyClosure.distance.between(2, 7))
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include distance=5 but not distance=1 or distance=10

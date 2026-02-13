@@ -38,7 +38,4 @@ class Cytoband:
 
     def __repr__(self) -> str:
         """Return string representation of Cytoband."""
-        return (
-            f"<Cytoband(source={self.source}, chromosome='{self.chromosome}', "
-            f"band='{self.band}')>"
-        )
+        return f"<Cytoband(source={self.source}, chromosome='{self.chromosome}', band='{self.band}')>"

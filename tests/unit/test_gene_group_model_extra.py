@@ -1,7 +1,5 @@
 """Additional unit tests for GeneGroup model to improve coverage."""
 
-import pytest
-
 from genew4_orm.models import GeneGroup
 
 

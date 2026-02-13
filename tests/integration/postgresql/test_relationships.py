@@ -32,10 +32,7 @@ class TestGeneGeneGroupRelationships:
         group_id = gene_group.id
 
         postgres_session.execute(
-            text(
-                "INSERT INTO gene_has_family (hgnc_id, family_id) "
-                "VALUES (:gene_id, :group_id)"
-            ),
+            text("INSERT INTO gene_has_family (hgnc_id, family_id) VALUES (:gene_id, :group_id)"),
             {"gene_id": gene_id, "group_id": group_id},
         )
         postgres_session.commit()
@@ -68,10 +65,7 @@ class TestGeneGeneGroupRelationships:
         group_id = gene_group.id
 
         postgres_session.execute(
-            text(
-                "INSERT INTO gene_has_family (hgnc_id, family_id) "
-                "VALUES (:gene_id, :group_id)"
-            ),
+            text("INSERT INTO gene_has_family (hgnc_id, family_id) VALUES (:gene_id, :group_id)"),
             {"gene_id": gene_id, "group_id": group_id},
         )
         postgres_session.commit()

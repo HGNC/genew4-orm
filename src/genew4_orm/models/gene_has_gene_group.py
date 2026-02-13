@@ -36,9 +36,7 @@ class GeneHasGeneGroup(SQLModel, table=True):
     )
     gene_group_id: int | None = Field(
         default=None,
-        sa_column=Column(
-            "family_id", ForeignKey("family_new.id", ondelete="CASCADE"), primary_key=True
-        ),
+        sa_column=Column("family_id", ForeignKey("family_new.id", ondelete="CASCADE"), primary_key=True),
         description="Foreign key to family_new table (part of composite primary key)",
     )
 

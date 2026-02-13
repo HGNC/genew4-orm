@@ -1,19 +1,18 @@
 """Unit tests for audit logging module."""
 
-import json
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 from genew4_orm.audit import (
-    should_log_field,
-    is_json_serializable,
-    get_field_changes,
-    get_entity_info,
     audit_write_operations,
     get_audit_entries_for_entity,
+    get_entity_info,
+    get_field_changes,
     get_user_audit_history,
+    is_json_serializable,
+    should_log_field,
 )
-from genew4_orm.models.audit_log import AuditLog
 from genew4_orm.models import Gene, User
+from genew4_orm.models.audit_log import AuditLog
 
 
 class TestShouldLogField:
@@ -108,6 +107,7 @@ class TestIsJsonSerializable:
 
     def test_is_json_serializable_non_serializable(self) -> None:
         """Test non-JSON serializable types."""
+
         # Custom class instance
         class CustomClass:
             pass
@@ -210,7 +210,7 @@ class TestGetFieldChanges:
         # Set up the instance state
         with patch.object(gene, "_sa_instance_state", attrs=mock_attrs):
             gene.__dict__["_sa_instance_state"] = MagicMock(attrs=mock_attrs)
-            changes = get_field_changes(gene, "UPDATE")
+            get_field_changes(gene, "UPDATE")
 
         # Should have changes for the mocked field
         # Note: This test may not work perfectly due to SQLAlchemy internals
@@ -325,7 +325,8 @@ class TestAuditWriteOperations:
         mock_session.deleted = []
 
         with patch("genew4_orm.audit.get_entity_info", return_value=("Gene", 1)):
-            with patch("genew4_orm.audit.get_field_changes", return_value={"approved_symbol": {"old": None, "new": "TEST"}}):
+            field_changes = {"approved_symbol": {"old": None, "new": "TEST"}}
+            with patch("genew4_orm.audit.get_field_changes", return_value=field_changes):
                 audit_write_operations(mock_session)
 
         # Should only add once despite duplicate instance
@@ -343,7 +344,8 @@ class TestAuditWriteOperations:
         mock_session.deleted = []
 
         with patch("genew4_orm.audit.get_entity_info", return_value=("Gene", 1)):
-            with patch("genew4_orm.audit.get_field_changes", return_value={"approved_symbol": {"old": "OLD", "new": "TEST"}}):
+            field_changes = {"approved_symbol": {"old": "OLD", "new": "TEST"}}
+            with patch("genew4_orm.audit.get_field_changes", return_value=field_changes):
                 audit_write_operations(mock_session)
 
         # Should only add once despite duplicate instance
@@ -361,7 +363,8 @@ class TestAuditWriteOperations:
         mock_session.deleted = [mock_instance, mock_instance]  # Same instance twice
 
         with patch("genew4_orm.audit.get_entity_info", return_value=("Gene", 1)):
-            with patch("genew4_orm.audit.get_field_changes", return_value={"approved_symbol": {"old": "TEST", "new": None}}):
+            field_changes = {"approved_symbol": {"old": "TEST", "new": None}}
+            with patch("genew4_orm.audit.get_field_changes", return_value=field_changes):
                 audit_write_operations(mock_session)
 
         # Should only add once despite duplicate instance
@@ -380,7 +383,7 @@ class TestGetAuditEntriesForEntity:
         mock_query.order_by.return_value = mock_query
         mock_query.limit.return_value.all.return_value = []
 
-        result = get_audit_entries_for_entity(mock_session, "Gene", 123)
+        get_audit_entries_for_entity(mock_session, "Gene", 123)
 
         # Verify query chain
         mock_session.query.assert_called_once_with(AuditLog)
@@ -395,7 +398,7 @@ class TestGetAuditEntriesForEntity:
         mock_query.order_by.return_value = mock_query
         mock_query.limit.return_value.all.return_value = []
 
-        result = get_audit_entries_for_entity(mock_session, "Gene", 123, limit=50)
+        get_audit_entries_for_entity(mock_session, "Gene", 123, limit=50)
 
         mock_query.limit.assert_called_once_with(50)
 
@@ -412,7 +415,7 @@ class TestGetUserAuditHistory:
         mock_query.order_by.return_value = mock_query
         mock_query.limit.return_value.all.return_value = []
 
-        result = get_user_audit_history(mock_session, "test_user")
+        get_user_audit_history(mock_session, "test_user")
 
         # Verify query chain
         mock_session.query.assert_called_once_with(AuditLog)
@@ -427,6 +430,6 @@ class TestGetUserAuditHistory:
         mock_query.order_by.return_value = mock_query
         mock_query.limit.return_value.all.return_value = []
 
-        result = get_user_audit_history(mock_session, "test_user", limit=25)
+        get_user_audit_history(mock_session, "test_user", limit=25)
 
         mock_query.limit.assert_called_once_with(25)

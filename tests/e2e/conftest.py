@@ -7,19 +7,17 @@ focusing on test isolation and automatic cleanup.
 from collections.abc import Generator
 
 import pytest
-from datetime import date
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, Session as SQLAlchemySession
-
-from genew4_orm.session import (
-    initialize_engine,
-    get_engine,
-)
-from genew4_orm.models import Gene, GeneGroup, GeneHasGeneGroup, AuditLog
+from sqlalchemy.orm import Session as SQLAlchemySession
+from sqlalchemy.orm import sessionmaker
 
 # Import audit module to register event listeners
 # This ensures audit logging works for E2E tests
 import genew4_orm.audit  # noqa: F401
+from genew4_orm.models import Gene, GeneGroup
+from genew4_orm.session import (
+    get_engine,
+    initialize_engine,
+)
 
 
 @pytest.fixture(scope="function")

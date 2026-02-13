@@ -7,28 +7,20 @@ Tests referential integrity and constraint enforcement:
 - Error handling on invalid data
 """
 
-import json
-
 import pytest
-
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
 
 from genew4_orm.models import (
     Gene,
-    GeneGroup,
     GeneHasGeneGroup,
 )
-from genew4_orm.enums import GeneGroupType
-from sqlalchemy import select
 
 
 @pytest.mark.usefixtures("e2e_session")
 class TestCascadeDeleteBehavior:
     """Test cascade delete behavior."""
 
-    def test_cascade_delete_gene_from_group(
-        self, e2e_session, gene_factory, gene_group_factory
-    ) -> None:
+    def test_cascade_delete_gene_from_group(self, e2e_session, gene_factory, gene_group_factory) -> None:
         """Test deleting gene removes junction entries."""
         # Create group with gene
         group = gene_group_factory()
@@ -55,18 +47,12 @@ class TestCascadeDeleteBehavior:
         e2e_session.commit()
 
         # Verify junction entry was removed (cascade delete works)
-        stmt = select(GeneHasGeneGroup).where(
-            GeneHasGeneGroup.gene_id == gene_id
-        )
+        stmt = select(GeneHasGeneGroup).where(GeneHasGeneGroup.gene_id == gene_id)
         junction_entry = e2e_session.execute(stmt).first()
 
-        assert junction_entry is None, (
-            "Junction entry should be removed after gene delete"
-        )
+        assert junction_entry is None, "Junction entry should be removed after gene delete"
 
-    def test_cascade_delete_group_with_genes(
-        self, e2e_session, gene_factory, gene_group_factory
-    ) -> None:
+    def test_cascade_delete_group_with_genes(self, e2e_session, gene_factory, gene_group_factory) -> None:
         """Test deleting group removes all associated junction entries."""
         # Create group with multiple genes
         group = gene_group_factory()
@@ -98,23 +84,17 @@ class TestCascadeDeleteBehavior:
         e2e_session.commit()
 
         # Verify all junction entries removed
-        stmt = select(GeneHasGeneGroup).where(
-            GeneHasGeneGroup.gene_group_id == group_id
-        )
+        stmt = select(GeneHasGeneGroup).where(GeneHasGeneGroup.gene_group_id == group_id)
         junction_entries = e2e_session.execute(stmt).scalars().all()
 
-        assert len(junction_entries) == 0, (
-            f"All {len(junction_entries)} junction entries should be removed"
-        )
+        assert len(junction_entries) == 0, f"All {len(junction_entries)} junction entries should be removed"
 
 
 @pytest.mark.usefixtures("e2e_session")
 class TestJunctionTableIntegrity:
     """Test junction table integrity."""
 
-    def test_unique_gene_group_association(
-        self, e2e_session, gene_factory, gene_group_factory
-    ) -> None:
+    def test_unique_gene_group_association(self, e2e_session, gene_factory, gene_group_factory) -> None:
         """Test that duplicate gene-group associations are prevented."""
         # Create group with gene
         group = gene_group_factory()
@@ -159,9 +139,7 @@ class TestJunctionTableIntegrity:
         # Should have at least one association
         assert len(result) >= 1
 
-    def test_junction_custom_sort_update(
-        self, e2e_session, gene_factory, gene_group_factory
-    ) -> None:
+    def test_junction_custom_sort_update(self, e2e_session, gene_factory, gene_group_factory) -> None:
         """Test that custom_sort can be updated."""
         # Create group with gene
         group = gene_group_factory()
@@ -191,9 +169,7 @@ class TestJunctionTableIntegrity:
         e2e_session.refresh(association)
         assert association.custom_sort == "2"
 
-    def test_gene_relationship_through_junction(
-        self, e2e_session, gene_factory, gene_group_factory
-    ) -> None:
+    def test_gene_relationship_through_junction(self, e2e_session, gene_factory, gene_group_factory) -> None:
         """Test that genes can be accessed through group relationship."""
         # Create group
         group = gene_group_factory()

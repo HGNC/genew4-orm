@@ -8,25 +8,23 @@ Tests complete audit trails for complex multi-entity operations:
 """
 
 import json
-import pytest
 
-from genew4_orm.models import (
-    Gene,
-    GeneGroup,
-    GeneHasGeneGroup,
-    AuditLog,
-)
-from genew4_orm.enums import GeneStatus
+import pytest
 from sqlalchemy import select
+
+from genew4_orm.enums import GeneStatus
+from genew4_orm.models import (
+    AuditLog,
+    Gene,
+    GeneHasGeneGroup,
+)
 
 
 @pytest.mark.usefixtures("e2e_session")
 class TestMultiEntityAuditTrails:
     """Test audit trails for complex operations."""
 
-    def test_audit_trail_for_gene_group_merge(
-        self, e2e_session, gene_factory, gene_group_factory
-    ) -> None:
+    def test_audit_trail_for_gene_group_merge(self, e2e_session, gene_factory, gene_group_factory) -> None:
         """Test complete audit trail when merging two gene groups."""
         # Create two groups with genes
         group_a = gene_group_factory()
@@ -69,9 +67,13 @@ class TestMultiEntityAuditTrails:
         e2e_session.commit()
 
         # Verify audit trail captured all operations
-        stmt = select(AuditLog).where(
-            AuditLog.entity_type == "GeneGroup",
-        ).order_by(AuditLog.timestamp)
+        stmt = (
+            select(AuditLog)
+            .where(
+                AuditLog.entity_type == "GeneGroup",
+            )
+            .order_by(AuditLog.timestamp)
+        )
         audit_entries = e2e_session.execute(stmt).scalars().all()
 
         # Should have CREATE entries for both groups
@@ -86,9 +88,7 @@ class TestMultiEntityAuditTrails:
         for i in range(len(timestamps) - 1):
             assert timestamps[i] <= timestamps[i + 1], "Audit entries should be sequential"
 
-    def test_user_attribution_across_entities(
-        self, e2e_session, gene_factory, gene_group_factory
-    ) -> None:
+    def test_user_attribution_across_entities(self, e2e_session, gene_factory, gene_group_factory) -> None:
         """Test that user attribution is correct across entity types."""
         # Create gene (should have user in audit)
         gene = gene_factory()
@@ -118,9 +118,7 @@ class TestMultiEntityAuditTrails:
         assert group_audit is not None, "GeneGroup audit entry not found"
         assert gene_audit.user == group_audit.user == "e2e_test_user"
 
-    def test_field_level_change_tracking(
-        self, e2e_session, gene_factory
-    ) -> None:
+    def test_field_level_change_tracking(self, e2e_session, gene_factory) -> None:
         """Test that field-level changes are captured in detail."""
         # Create gene with minimal fields
         gene = Gene(
@@ -139,10 +137,14 @@ class TestMultiEntityAuditTrails:
         e2e_session.commit()
 
         # Query audit log for UPDATE operations
-        stmt = select(AuditLog).where(
-            AuditLog.entity_type == "Gene",
-            AuditLog.operation == "UPDATE",
-        ).order_by(AuditLog.timestamp)
+        stmt = (
+            select(AuditLog)
+            .where(
+                AuditLog.entity_type == "Gene",
+                AuditLog.operation == "UPDATE",
+            )
+            .order_by(AuditLog.timestamp)
+        )
         audit_entries = e2e_session.execute(stmt).scalars().all()
 
         # Find the update for our gene

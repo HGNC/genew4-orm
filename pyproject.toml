@@ -88,7 +88,7 @@ dev = [
 
 [tool.ruff]
 target-version = "py313"
-line-length = 100
+line-length = 120
 indent-width = 4
 exclude = [
     ".git",
@@ -103,14 +103,14 @@ select = ["E", "F", "I", "N", "W", "YTT"]
 ignore = []
 
 [tool.black]
-line-length = 100
+line-length = 120
 target-version = ["py313"]
 skip-string-normalization = true
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-line_length = 100
+line_length = 120
 known_first_party = ["sqlmodel", "pydantic", "sqlalchemy"]
 
 [tool.mypy]

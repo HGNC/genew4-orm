@@ -10,8 +10,8 @@ import pytest
 from sqlalchemy import select, text
 
 from genew4_orm.models.correspondence import Correspondence
-from genew4_orm.models.gene_group import GeneGroup
 from genew4_orm.models.fam_has_corr import FamHasCorr
+from genew4_orm.models.gene_group import GeneGroup
 
 
 @pytest.mark.usefixtures("postgres_session")
@@ -41,8 +41,8 @@ class TestCorrespondenceCRUD:
             last_name=f"Complete Last {ts}",
             email=f"complete{ts}@example.com",
             address=f"123 Test St, Test City {ts}",
-            date_received=f"2024-01-15",
-            date_sent=f"2024-01-16",
+            date_received="2024-01-15",
+            date_sent="2024-01-16",
         )
         postgres_session.add(corr)
         postgres_session.commit()
@@ -127,9 +127,11 @@ class TestCorrespondenceCRUD:
         postgres_session.commit()
 
         # Query with wildcard
-        stmt = select(Correspondence).where(
-            Correspondence.email.like(f"%_{ts}@example.com")
-        ).order_by(Correspondence.email)
+        stmt = (
+            select(Correspondence)
+            .where(Correspondence.email.like(f"%_{ts}@example.com"))
+            .order_by(Correspondence.email)
+        )
         results = postgres_session.execute(stmt).scalars().all()
 
         assert len(results) == 3
@@ -367,9 +369,7 @@ class TestCorrespondenceEmailFields:
         postgres_session.commit()
 
         # Query correspondence with email_received
-        stmt = select(Correspondence).where(
-            Correspondence.email_received.isnot(None)
-        )
+        stmt = select(Correspondence).where(Correspondence.email_received.isnot(None))
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include only the first
@@ -380,7 +380,6 @@ class TestCorrespondenceEmailFields:
 @pytest.mark.usefixtures("postgres_session")
 class TestCorrespondenceOptionalFields:
     """Test Correspondence optional fields."""
-
 
     def test_correspondence_address_field(self, postgres_session):
         """Test correspondence address field."""

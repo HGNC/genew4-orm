@@ -9,7 +9,7 @@ import time
 import pytest
 from sqlalchemy import select
 
-from genew4_orm.models import Gene, GeneGroup, User
+from genew4_orm.models import GeneGroup, User
 
 
 class TestGetGeneGroupWithHierarchy:
@@ -18,6 +18,7 @@ class TestGetGeneGroupWithHierarchy:
     def test_returns_list_of_options(self) -> None:
         """Test that function returns list of selectinload options."""
         from genew4_orm.utils.query_helpers import get_gene_group_with_hierarchy
+
         options = get_gene_group_with_hierarchy()
 
         # Should be a list
@@ -26,6 +27,7 @@ class TestGetGeneGroupWithHierarchy:
     def test_loads_parent_and_children(self) -> None:
         """Test that option loads parent and children relationships."""
         from genew4_orm.utils.query_helpers import get_gene_group_with_hierarchy
+
         options = get_gene_group_with_hierarchy()
 
         # Should have 2 options (parents and children)
@@ -38,6 +40,7 @@ class TestBuildGeneQuery:
     def test_returns_base_select(self) -> None:
         """Test that function returns base Gene select."""
         from genew4_orm.utils.query_helpers import build_gene_query
+
         statement = build_gene_query()
 
         # Should be a Select statement for Gene
@@ -46,6 +49,7 @@ class TestBuildGeneQuery:
     def test_with_no_filters(self) -> None:
         """Test building query with no filters."""
         from genew4_orm.utils.query_helpers import build_gene_query
+
         statement = build_gene_query()
 
         # Should have no where clauses when no filters
@@ -55,6 +59,7 @@ class TestBuildGeneQuery:
     def test_with_status_filter(self) -> None:
         """Test building query with status filter."""
         from genew4_orm.utils.query_helpers import build_gene_query
+
         statement = build_gene_query(status="Approved")
 
         # Should include status filter
@@ -64,6 +69,7 @@ class TestBuildGeneQuery:
     def test_with_limit(self) -> None:
         """Test building query with limit."""
         from genew4_orm.utils.query_helpers import build_gene_query
+
         statement = build_gene_query(limit=50)
 
         # Should include limit
@@ -77,6 +83,7 @@ class TestBuildGeneGroupQuery:
     def test_returns_base_select(self) -> None:
         """Test that function returns base GeneGroup select."""
         from genew4_orm.utils.query_helpers import build_gene_group_query
+
         statement = build_gene_group_query()
 
         # Should be a Select statement for GeneGroup
@@ -85,6 +92,7 @@ class TestBuildGeneGroupQuery:
     def test_with_limit(self) -> None:
         """Test building query with limit."""
         from genew4_orm.utils.query_helpers import build_gene_group_query
+
         statement = build_gene_group_query(limit=50)
 
         # Should include limit
@@ -94,15 +102,17 @@ class TestBuildGeneGroupQuery:
     def test_with_offset(self) -> None:
         """Test building query with offset."""
         from genew4_orm.utils.query_helpers import build_gene_group_query
+
         statement = build_gene_group_query(offset=100)
 
         # Should include offset
         sql_str = str(statement.compile())
-        assert ("OFFSET" in sql_str or "offset" in sql_str.lower())
+        assert "OFFSET" in sql_str or "offset" in sql_str.lower()
 
     def test_with_all_pagination(self) -> None:
         """Test building query with pagination."""
         from genew4_orm.utils.query_helpers import build_gene_group_query
+
         statement = build_gene_group_query(limit=50, offset=100)
 
         # Should include pagination
@@ -118,6 +128,7 @@ class TestPaginatedQueryWithSession:
     def test_returns_correct_tuple(self, postgres_session) -> None:
         """Test that paginated_query returns correct tuple structure."""
         from sqlalchemy import text
+
         from genew4_orm.utils.query_helpers import paginated_query
 
         # Create test data
@@ -131,9 +142,7 @@ class TestPaginatedQueryWithSession:
 
         # Query with pagination
         stmt = select(GeneGroup)
-        results, total_pages, total_count = paginated_query(
-            postgres_session, stmt, page=1, per_page=10
-        )
+        results, total_pages, total_count = paginated_query(postgres_session, stmt, page=1, per_page=10)
 
         # Should return tuple with 3 elements
         assert isinstance(results, list)
@@ -152,6 +161,7 @@ class TestPaginatedQueryWithSession:
     def test_second_page_pagination(self, postgres_session) -> None:
         """Test pagination for second page."""
         from sqlalchemy import text
+
         from genew4_orm.utils.query_helpers import paginated_query
 
         ts = int(time.time() * 1000)
@@ -164,9 +174,7 @@ class TestPaginatedQueryWithSession:
 
         # Query second page
         stmt = select(GeneGroup)
-        results, total_pages, total_count = paginated_query(
-            postgres_session, stmt, page=2, per_page=10
-        )
+        results, total_pages, total_count = paginated_query(postgres_session, stmt, page=2, per_page=10)
 
         # Second page should have at most 10 items
         assert len(results) <= 10
@@ -174,6 +182,7 @@ class TestPaginatedQueryWithSession:
     def test_last_page_pagination(self, postgres_session) -> None:
         """Test pagination for last page."""
         from sqlalchemy import text
+
         from genew4_orm.utils.query_helpers import paginated_query
 
         ts = int(time.time() * 1000)
@@ -186,9 +195,7 @@ class TestPaginatedQueryWithSession:
 
         # Query last page (page 3 or more)
         stmt = select(GeneGroup)
-        results, total_pages, total_count = paginated_query(
-            postgres_session, stmt, page=3, per_page=10
-        )
+        results, total_pages, total_count = paginated_query(postgres_session, stmt, page=3, per_page=10)
 
         # Last page should have at most 10 items
         assert len(results) <= 10
@@ -201,6 +208,7 @@ class TestGetGeneGroupsWithAllRelationsWithSession:
     def test_loads_all_available_relationships(self, postgres_session) -> None:
         """Test that eager loading loads all available relationship types."""
         from sqlalchemy import text
+
         from genew4_orm.utils.query_helpers import get_gene_group_with_all_relations
 
         ts = int(time.time() * 1000)
@@ -254,6 +262,7 @@ class TestStreamGenesWithSession:
     def test_streams_gene_groups_in_chunks(self, postgres_session) -> None:
         """Test that stream_genes yields GeneGroup data in chunks."""
         from sqlalchemy import text
+
         from genew4_orm.utils.query_helpers import stream_genes
 
         ts = int(time.time() * 1000)
@@ -281,6 +290,7 @@ class TestStreamGenesWithSession:
     def test_custom_chunk_size(self, postgres_session) -> None:
         """Test streaming with custom chunk size."""
         from sqlalchemy import text
+
         from genew4_orm.utils.query_helpers import stream_genes
 
         ts = int(time.time() * 1000)

@@ -30,6 +30,7 @@ def initialized_engine():
     state after each test.
     """
     from genew4_orm import session as session_module
+
     original_engine = session_module._global_engine
     original_settings = session_module._global_settings
     original_session_factory = session_module._session_factory

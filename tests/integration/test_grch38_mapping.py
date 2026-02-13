@@ -9,8 +9,8 @@ import time
 import pytest
 from sqlalchemy import select, text
 
+from genew4_orm.enums import Grch38MarkType, Grch38SourceType
 from genew4_orm.models.grch38_mapping import Grch38Mapping
-from genew4_orm.enums import Grch38SourceType, Grch38MarkType
 
 
 @pytest.mark.usefixtures("postgres_session")
@@ -79,9 +79,7 @@ class TestGrch38MappingCRUD:
         postgres_session.commit()
 
         # Query by chromosome
-        stmt = select(Grch38Mapping).where(
-            Grch38Mapping.chromosome == f"query_chr2_{ts}"
-        )
+        stmt = select(Grch38Mapping).where(Grch38Mapping.chromosome == f"query_chr2_{ts}")
         result = postgres_session.execute(stmt).scalar_one_or_none()
 
         assert result is not None

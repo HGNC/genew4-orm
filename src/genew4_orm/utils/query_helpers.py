@@ -213,6 +213,7 @@ def build_gene_group_query(
         search_pattern = f"%{search}%"
         # Use or_() for combining conditions
         from sqlalchemy import or_
+
         # name is not nullable, abbreviation is nullable
         statement = statement.where(
             or_(

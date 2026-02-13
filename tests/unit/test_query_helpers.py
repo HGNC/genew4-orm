@@ -1,21 +1,19 @@
 """Unit tests for query helpers module."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
 from sqlalchemy import Select
 
-from genew4_orm.models import Gene, GeneGroup, User
 from genew4_orm.utils.query_helpers import (
-    get_gene_with_groups,
-    get_gene_group_with_hierarchy,
-    get_gene_group_with_all_relations,
-    get_user_with_reminders,
-    build_gene_query,
     build_gene_group_query,
-    paginated_query,
-    get_genes_by_ids,
+    build_gene_query,
+    get_gene_group_with_all_relations,
+    get_gene_group_with_hierarchy,
     get_gene_groups_by_ids,
+    get_gene_with_groups,
+    get_genes_by_ids,
+    get_user_with_reminders,
+    paginated_query,
     stream_genes,
 )
 
@@ -147,9 +145,7 @@ class TestPaginatedQuery:
         mock_session.scalars.return_value = iter([])
 
         statement = build_gene_query()
-        results, total_pages, total_count = paginated_query(
-            mock_session, statement, page=1, per_page=10
-        )
+        results, total_pages, total_count = paginated_query(mock_session, statement, page=1, per_page=10)
 
         assert isinstance(results, list)
         assert isinstance(total_pages, int)
@@ -163,9 +159,7 @@ class TestPaginatedQuery:
         mock_session.scalars.return_value = iter(mock_results)
 
         statement = build_gene_query()
-        results, total_pages, total_count = paginated_query(
-            mock_session, statement, page=1, per_page=10
-        )
+        results, total_pages, total_count = paginated_query(mock_session, statement, page=1, per_page=10)
 
         # 25 items with 10 per page = 3 total pages
         assert total_pages == 3
@@ -177,9 +171,7 @@ class TestPaginatedQuery:
         mock_session.scalars.return_value = iter([])
 
         statement = build_gene_query()
-        results, total_pages, total_count = paginated_query(
-            mock_session, statement, page=1, per_page=10
-        )
+        results, total_pages, total_count = paginated_query(mock_session, statement, page=1, per_page=10)
 
         assert results == []
         assert total_pages == 0
@@ -195,7 +187,7 @@ class TestGetGenesByIds:
         mock_session.scalars.return_value = iter([])
 
         gene_ids = [12345, 67890]
-        result = get_genes_by_ids(mock_session, gene_ids, eager_load=False)
+        get_genes_by_ids(mock_session, gene_ids, eager_load=False)
 
         # Should execute a query
         mock_session.scalars.assert_called_once()
@@ -206,7 +198,7 @@ class TestGetGenesByIds:
         mock_session.scalars.return_value = iter([])
 
         gene_ids = [12345, 67890]
-        result = get_genes_by_ids(mock_session, gene_ids, eager_load=True)
+        get_genes_by_ids(mock_session, gene_ids, eager_load=True)
 
         # Should execute a query with options
         mock_session.scalars.assert_called_once()
@@ -216,7 +208,7 @@ class TestGetGenesByIds:
         mock_session = MagicMock()
         mock_session.scalars.return_value = iter([])
 
-        result = get_genes_by_ids(mock_session, [], eager_load=False)
+        get_genes_by_ids(mock_session, [], eager_load=False)
 
         # Should still execute query
         mock_session.scalars.assert_called_once()
@@ -231,7 +223,7 @@ class TestGetGeneGroupsByIds:
         mock_session.scalars.return_value = iter([])
 
         group_ids = [1, 2, 3]
-        result = get_gene_groups_by_ids(mock_session, group_ids, eager_load=False)
+        get_gene_groups_by_ids(mock_session, group_ids, eager_load=False)
 
         # Should execute a query
         mock_session.scalars.assert_called_once()
@@ -243,8 +235,9 @@ class TestGetGeneGroupsByIds:
         # The actual query behavior is tested in integration tests
 
         # Import needed to check the function signature
-        from genew4_orm.utils.query_helpers import get_gene_groups_by_ids
         import inspect
+
+        from genew4_orm.utils.query_helpers import get_gene_groups_by_ids
 
         source = inspect.getsource(get_gene_groups_by_ids)
 
@@ -257,7 +250,7 @@ class TestGetGeneGroupsByIds:
         mock_session = MagicMock()
         mock_session.scalars.return_value = iter([])
 
-        result = get_gene_groups_by_ids(mock_session, [], eager_load=False)
+        get_gene_groups_by_ids(mock_session, [], eager_load=False)
 
         # Should still execute query
         mock_session.scalars.assert_called_once()

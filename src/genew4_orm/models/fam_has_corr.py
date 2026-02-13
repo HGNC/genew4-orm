@@ -46,7 +46,4 @@ class FamHasCorr(SQLModel, table=True):
 
     def __repr__(self) -> str:
         """Return string representation of FamHasCorr."""
-        return (
-            f"<FamHasCorr("
-            f"correspondence_id={self.correspondence_id}, gene_group_id={self.gene_group_id})>"
-        )
+        return f"<FamHasCorr(correspondence_id={self.correspondence_id}, gene_group_id={self.gene_group_id})>"

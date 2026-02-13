@@ -68,6 +68,7 @@ class TestGeneGroupCRUD:
     def test_read_gene_group_by_name(self, postgres_session):
         """Test reading gene group by name."""
         import time
+
         ts = int(time.time() * 1000)
 
         gene_group = GeneGroup(
@@ -127,6 +128,7 @@ class TestGeneGroupCRUD:
     def test_query_gene_groups_by_name_pattern(self, postgres_session):
         """Test querying gene groups by name pattern."""
         import time
+
         ts = int(time.time() * 1000)
 
         gene_group1 = GeneGroup(name=f"Wildcard Test Alpha {ts}")
@@ -146,6 +148,7 @@ class TestGeneGroupCRUD:
     def test_query_gene_groups_order_by_name(self, postgres_session):
         """Test ordering gene groups by name."""
         import time
+
         ts = int(time.time() * 1000)
 
         gene_group1 = GeneGroup(name=f"Zebra Group {ts}")
@@ -155,9 +158,11 @@ class TestGeneGroupCRUD:
         postgres_session.commit()
 
         # Query with ordering
-        stmt = select(GeneGroup).where(
-            GeneGroup.name.in_([f"Zebra Group {ts}", f"Alpha Group {ts}", f"Beta Group {ts}"])
-        ).order_by(GeneGroup.name)
+        stmt = (
+            select(GeneGroup)
+            .where(GeneGroup.name.in_([f"Zebra Group {ts}", f"Alpha Group {ts}", f"Beta Group {ts}"]))
+            .order_by(GeneGroup.name)
+        )
         results = postgres_session.execute(stmt).scalars().all()
 
         names = [g.name for g in results]

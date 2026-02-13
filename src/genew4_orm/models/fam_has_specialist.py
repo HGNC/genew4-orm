@@ -46,7 +46,4 @@ class FamHasSpecialist(SQLModel, table=True):
 
     def __repr__(self) -> str:
         """Return string representation of FamHasSpecialist."""
-        return (
-            f"<FamHasSpecialist("
-            f"specialist_id={self.specialist_id}, gene_group_id={self.gene_group_id})>"
-        )
+        return f"<FamHasSpecialist(specialist_id={self.specialist_id}, gene_group_id={self.gene_group_id})>"

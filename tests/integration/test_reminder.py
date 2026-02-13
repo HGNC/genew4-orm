@@ -9,10 +9,10 @@ from datetime import date, timedelta
 import pytest
 from sqlalchemy import select, text
 
-from genew4_orm.models.reminder import Reminder
-from genew4_orm.models.user import User
 from genew4_orm.models.gene import Gene
 from genew4_orm.models.gene_group import GeneGroup
+from genew4_orm.models.reminder import Reminder
+from genew4_orm.models.user import User
 
 
 @pytest.mark.usefixtures("postgres_session")
@@ -115,7 +115,6 @@ class TestReminderCRUD:
         )
         postgres_session.add(reminder)
         postgres_session.commit()
-        reminder_id = reminder.id
 
         # Update fields
         reminder.subject = "Updated Subject"
@@ -197,9 +196,7 @@ class TestReminderCRUD:
         postgres_session.commit()
 
         # Query with wildcard
-        stmt = select(Reminder).where(
-            Reminder.subject.like("Task %")
-        ).order_by(Reminder.subject)
+        stmt = select(Reminder).where(Reminder.subject.like("Task %")).order_by(Reminder.subject)
         results = postgres_session.execute(stmt).scalars().all()
 
         assert len(results) >= 3
@@ -230,7 +227,7 @@ class TestReminderCRUD:
         postgres_session.commit()
 
         # Query unsent reminders
-        stmt = select(Reminder).where(Reminder.sent == False)  # Use == instead of is
+        stmt = select(Reminder).where(not Reminder.sent)  # Use == instead of is
         unsent_reminders = postgres_session.execute(stmt).scalars().all()
 
         unsent_subjects = [r.subject for r in unsent_reminders]
@@ -269,9 +266,7 @@ class TestReminderCRUD:
         postgres_session.commit()
 
         # Query reminders due within next 2 days
-        stmt = select(Reminder).where(
-            Reminder.reminder_date <= tomorrow
-        ).order_by(Reminder.reminder_date)
+        stmt = select(Reminder).where(Reminder.reminder_date <= tomorrow).order_by(Reminder.reminder_date)
         results = postgres_session.execute(stmt).scalars().all()
 
         subjects = [r.subject for r in results]
@@ -560,8 +555,7 @@ class TestReminderDefaultValues:
 
         # Query raw columns - gene_id and group_id should be NULL
         result = postgres_session.execute(
-            text('SELECT hgnc_id, group_id FROM reminder WHERE id = :id'),
-            {"id": reminder.id}
+            text("SELECT hgnc_id, group_id FROM reminder WHERE id = :id"), {"id": reminder.id}
         ).one()
 
         assert result[0] is None  # hgnc_id

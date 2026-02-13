@@ -7,19 +7,18 @@ Tests batch operations with transaction safety:
 """
 
 import uuid
-import pytest
 
-from genew4_orm.models import Gene, AuditLog
+import pytest
 from sqlalchemy import select
+
+from genew4_orm.models import AuditLog, Gene
 
 
 @pytest.mark.usefixtures("e2e_session")
 class TestBatchOperations:
     """Test batch operations with transaction safety."""
 
-    def test_batch_import_success(
-        self, e2e_session
-    ) -> None:
+    def test_batch_import_success(self, e2e_session) -> None:
         """Test successful batch import of 100 genes with unique identifiers."""
         # Use unique prefix to avoid conflicts with previous test runs
         unique_id = str(uuid.uuid4())[:8]
@@ -55,9 +54,7 @@ class TestBatchOperations:
         batch_entries = [e for e in audit_entries if e.field_changes and f"{prefix}" in str(e.field_changes)]
         assert len(batch_entries) >= 1, "Batch operation should create audit log"
 
-    def test_batch_import_transaction_rollback(
-        self, e2e_session
-    ) -> None:
+    def test_batch_import_transaction_rollback(self, e2e_session) -> None:
         """Test that batch import with error causes complete rollback."""
         # Use unique prefix to avoid conflicts
         unique_id = str(uuid.uuid4())[:8]

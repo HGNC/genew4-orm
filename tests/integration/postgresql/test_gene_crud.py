@@ -4,11 +4,11 @@ This module tests Create, Read, Update, Delete (CRUD) operations for Gene model 
 """
 
 from datetime import date
-from sqlalchemy import select, or_
-from sqlalchemy.orm import Session as SQLAlchemySession
-from genew4_orm.models import Gene
 
 import pytest
+from sqlalchemy import select
+
+from genew4_orm.models import Gene
 
 
 @pytest.mark.usefixtures("postgres_session")
@@ -117,6 +117,7 @@ class TestGeneCRUD:
         """Test querying genes with ILIKE pattern matching."""
         # Use timestamp to ensure unique symbols
         import time
+
         ts = int(time.time() * 1000)
 
         # Create test genes with unique symbols to avoid conflicts
@@ -206,8 +207,7 @@ class TestGeneCRUD:
     def test_multiple_genes_create_and_query(self, postgres_session):
         """Test creating multiple genes and querying them."""
         genes = [
-            Gene(approved_symbol=f"TEST{i}", approved_name=f"Test Gene {i}", status="Approved")
-            for i in range(11, 16)
+            Gene(approved_symbol=f"TEST{i}", approved_name=f"Test Gene {i}", status="Approved") for i in range(11, 16)
         ]
         postgres_session.add_all(genes)
         postgres_session.commit()
@@ -231,7 +231,6 @@ class TestGeneCRUD:
         )
         postgres_session.add(gene)
         postgres_session.commit()
-        gene_hgnc_id = gene.hgnc_id
 
         # Update multiple fields
         gene.approved_name = "Updated Name"
@@ -250,6 +249,7 @@ class TestGeneCRUD:
         """Test querying genes ordered by symbol."""
         # Use timestamp to ensure unique symbols
         import time
+
         ts = int(time.time() * 1000)
 
         # Use unique symbols to avoid conflicts with existing data
@@ -262,9 +262,13 @@ class TestGeneCRUD:
         postgres_session.commit()
 
         # Query ordered by symbol
-        stmt = select(Gene).where(
-            Gene.approved_symbol.in_([f"TEST_ORDER_ZEBRA_{ts}", f"TEST_ORDER_ALPHA_{ts}", f"TEST_ORDER_BETA_{ts}"])
-        ).order_by(Gene.approved_symbol)
+        stmt = (
+            select(Gene)
+            .where(
+                Gene.approved_symbol.in_([f"TEST_ORDER_ZEBRA_{ts}", f"TEST_ORDER_ALPHA_{ts}", f"TEST_ORDER_BETA_{ts}"])
+            )
+            .order_by(Gene.approved_symbol)
+        )
         ordered_genes = postgres_session.execute(stmt).scalars().all()
 
         assert ordered_genes[0].approved_symbol == f"TEST_ORDER_ALPHA_{ts}"

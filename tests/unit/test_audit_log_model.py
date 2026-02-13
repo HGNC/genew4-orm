@@ -3,9 +3,9 @@
 from datetime import datetime
 
 from genew4_orm.models.audit_log import (
-    _serialize_field_changes,
-    _deserialize_field_changes,
     AuditLog,
+    _deserialize_field_changes,
+    _serialize_field_changes,
 )
 
 
@@ -98,9 +98,7 @@ class TestAuditLogModel:
             operation="CREATE",
             entity_type="Gene",
             entity_id=123,
-            field_changes={
-                "approved_symbol": {"old": None, "new": "TEST"}
-            },
+            field_changes={"approved_symbol": {"old": None, "new": "TEST"}},
         )
 
         assert audit.id == 1
@@ -215,9 +213,7 @@ class TestAuditLogModel:
             operation="UPDATE",
             entity_type="Gene",
             entity_id=1,
-            field_changes={
-                "field1": {"old": "a", "new": "b"}
-            },
+            field_changes={"field1": {"old": "a", "new": "b"}},
         )
 
         assert isinstance(audit.field_changes, dict)

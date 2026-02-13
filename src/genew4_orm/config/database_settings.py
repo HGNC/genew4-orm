@@ -36,15 +36,9 @@ class DatabaseSettings(BaseSettings):
 
     # Connection pool settings
     pool_size: int = Field(default=5, ge=1, le=100, description="Connection pool size")
-    max_overflow: int = Field(
-        default=10, ge=0, le=100, description="Maximum overflow connections"
-    )
-    pool_timeout: int = Field(
-        default=30, ge=1, le=300, description="Connection timeout in seconds"
-    )
-    pool_recycle: int = Field(
-        default=3600, ge=0, description="Recycle connections after this many seconds"
-    )
+    max_overflow: int = Field(default=10, ge=0, le=100, description="Maximum overflow connections")
+    pool_timeout: int = Field(default=30, ge=1, le=300, description="Connection timeout in seconds")
+    pool_recycle: int = Field(default=3600, ge=0, description="Recycle connections after this many seconds")
 
     def get_connection_url(self, *, with_password: bool = False) -> str:
         """Build PostgreSQL connection URL.
@@ -60,10 +54,7 @@ class DatabaseSettings(BaseSettings):
         if with_password:
             password_part = f":{self.pg_password.get_secret_value()}"
 
-        return (
-            f"postgresql+psycopg://{self.pg_user}{password_part}@"
-            f"{self.pg_host}:{self.pg_port}/{self.pg_name}"
-        )
+        return f"postgresql+psycopg://{self.pg_user}{password_part}@{self.pg_host}:{self.pg_port}/{self.pg_name}"
 
     def get_engine_kwargs(self) -> dict[str, Any]:
         """Get SQLAlchemy engine creation arguments.

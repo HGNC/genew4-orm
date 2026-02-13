@@ -15,7 +15,11 @@ class TestDatabaseSettings:
     def test_database_settings_defaults(self) -> None:
         """Test DatabaseSettings with default values."""
         # Set required environment variables
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings()
 
             assert settings.pg_host == "localhost"
@@ -49,7 +53,12 @@ class TestDatabaseSettings:
 
     def test_database_settings_port_validation_minimum(self) -> None:
         """Test that port validation rejects values below 1."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass", "DATABASESETTINGS_PG_PORT": "0"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+            "DATABASESETTINGS_PG_PORT": "0",
+        }
+        with patch.dict(os.environ, env_vars):
             with pytest.raises(ValidationError) as exc_info:
                 DatabaseSettings()
 
@@ -59,7 +68,12 @@ class TestDatabaseSettings:
 
     def test_database_settings_port_validation_maximum(self) -> None:
         """Test that port validation rejects values above 65535."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass", "DATABASESETTINGS_PG_PORT": "65536"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+            "DATABASESETTINGS_PG_PORT": "65536",
+        }
+        with patch.dict(os.environ, env_vars):
             with pytest.raises(ValidationError) as exc_info:
                 DatabaseSettings()
 
@@ -68,7 +82,12 @@ class TestDatabaseSettings:
 
     def test_database_settings_port_validation_negative(self) -> None:
         """Test that port validation rejects negative values."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass", "DATABASESETTINGS_PG_PORT": "-1"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+            "DATABASESETTINGS_PG_PORT": "-1",
+        }
+        with patch.dict(os.environ, env_vars):
             with pytest.raises(ValidationError) as exc_info:
                 DatabaseSettings()
 
@@ -77,7 +96,11 @@ class TestDatabaseSettings:
 
     def test_database_settings_port_boundary_valid(self) -> None:
         """Test that port boundary values 1 and 65535 are valid."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             # Test minimum valid port
             settings_min = DatabaseSettings(pg_port=1)
             assert settings_min.pg_port == 1
@@ -88,26 +111,42 @@ class TestDatabaseSettings:
 
     def test_database_settings_pool_size_validation(self) -> None:
         """Test that pool_size validates range constraints."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             # Valid pool size
             settings = DatabaseSettings(pool_size=50)
             assert settings.pool_size == 50
 
     def test_database_settings_max_overflow_validation(self) -> None:
         """Test that max_overflow validates range constraints."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings(max_overflow=50)
             assert settings.max_overflow == 50
 
     def test_database_settings_pool_timeout_validation(self) -> None:
         """Test that pool_timeout validates range constraints."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings(pool_timeout=60)
             assert settings.pool_timeout == 60
 
     def test_database_settings_pool_recycle_validation(self) -> None:
         """Test that pool_recycle validates range constraints."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings(pool_recycle=1800)
             assert settings.pool_recycle == 1800
 
@@ -117,7 +156,11 @@ class TestGetConnectionUrl:
 
     def test_get_connection_url_without_password(self) -> None:
         """Test get_connection_url without password (default)."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings()
 
             url = settings.get_connection_url()
@@ -132,7 +175,11 @@ class TestGetConnectionUrl:
 
     def test_get_connection_url_with_password(self) -> None:
         """Test get_connection_url with password."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass123"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass123",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings(pg_host="db.example.com", pg_port=5433, pg_name="testdb")
 
             url = settings.get_connection_url(with_password=True)
@@ -141,7 +188,11 @@ class TestGetConnectionUrl:
 
     def test_get_connection_url_custom_settings(self) -> None:
         """Test get_connection_url with custom settings."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "customuser", "DATABASESETTINGS_PG_PASSWORD": "custompass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "customuser",
+            "DATABASESETTINGS_PG_PASSWORD": "custompass",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings(
                 pg_host="custom.host.com",
                 pg_port=3306,
@@ -158,7 +209,11 @@ class TestGetEngineKwargs:
 
     def test_get_engine_kwargs_default(self) -> None:
         """Test get_engine_kwargs returns expected defaults."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings()
 
             kwargs = settings.get_engine_kwargs()
@@ -171,7 +226,11 @@ class TestGetEngineKwargs:
 
     def test_get_engine_kwargs_custom_pool_settings(self) -> None:
         """Test get_engine_kwargs with custom pool settings."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings(
                 pool_size=15,
                 max_overflow=25,
@@ -193,7 +252,11 @@ class TestGetAsyncEngineKwargs:
 
     def test_get_async_engine_kwargs_default(self) -> None:
         """Test get_async_engine_kwargs returns expected defaults."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings()
 
             kwargs = settings.get_async_engine_kwargs()
@@ -206,7 +269,11 @@ class TestGetAsyncEngineKwargs:
 
     def test_get_async_engine_kwargs_custom_settings(self) -> None:
         """Test get_async_engine_kwargs with custom settings."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "testpass"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "testpass",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings(
                 pool_size=20,
                 max_overflow=30,
@@ -228,7 +295,11 @@ class TestSecretStr:
 
     def test_password_is_secret_str(self) -> None:
         """Test that password field is a SecretStr."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "secret123"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "secret123",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings()
 
             # Should be able to get secret value
@@ -236,7 +307,11 @@ class TestSecretStr:
 
     def test_password_repr_does_not_leak(self) -> None:
         """Test that repr of settings doesn't leak password."""
-        with patch.dict(os.environ, {"DATABASESETTINGS_PG_USER": "testuser", "DATABASESETTINGS_PG_PASSWORD": "secret123"}):
+        env_vars = {
+            "DATABASESETTINGS_PG_USER": "testuser",
+            "DATABASESETTINGS_PG_PASSWORD": "secret123",
+        }
+        with patch.dict(os.environ, env_vars):
             settings = DatabaseSettings()
 
             repr_str = repr(settings)

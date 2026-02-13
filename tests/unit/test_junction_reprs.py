@@ -3,8 +3,6 @@
 These tests focus on improving coverage for the Fam* junction table models.
 """
 
-import pytest
-
 from genew4_orm.models import (
     FamHasCorr,
     FamHasExtResource,

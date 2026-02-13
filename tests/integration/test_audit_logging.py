@@ -11,15 +11,13 @@ This module tests:
 from sqlalchemy.orm import Session as SQLAlchemySession
 
 from genew4_orm.audit import get_field_changes
-from genew4_orm.models import AuditLog, Gene, GeneGroup
+from genew4_orm.models import AuditLog, Gene
 
 
 class TestAuditLogging:
     """Test cases for audit logging functionality."""
 
-    def test_audit_log_model_instantiation(
-        self, sqlite_session: SQLAlchemySession
-    ) -> None:
+    def test_audit_log_model_instantiation(self, sqlite_session: SQLAlchemySession) -> None:
         """Test that AuditLog model can be instantiated."""
         audit = AuditLog(
             user="test_user",
@@ -33,9 +31,7 @@ class TestAuditLogging:
         assert audit.operation == "CREATE"
         assert audit.entity_type == "Gene"
 
-    def test_audit_log_field_changes_structure(
-        self, sqlite_session: SQLAlchemySession
-    ) -> None:
+    def test_audit_log_field_changes_structure(self, sqlite_session: SQLAlchemySession) -> None:
         """Test that audit log field changes structure is correct."""
         # Test field changes dict structure (without committing)
         audit = AuditLog(
@@ -43,9 +39,7 @@ class TestAuditLogging:
             operation="UPDATE",
             entity_type="Gene",
             entity_id=1,
-            field_changes={
-                "approved_name": {"old": "Old Name", "new": "Updated Name"}
-            },
+            field_changes={"approved_name": {"old": "Old Name", "new": "Updated Name"}},
         )
 
         assert audit.field_changes is not None
@@ -53,9 +47,7 @@ class TestAuditLogging:
         assert audit.field_changes["approved_name"]["old"] == "Old Name"
         assert audit.field_changes["approved_name"]["new"] == "Updated Name"
 
-    def test_audit_log_delete_structure(
-        self, sqlite_session: SQLAlchemySession
-    ) -> None:
+    def test_audit_log_delete_structure(self, sqlite_session: SQLAlchemySession) -> None:
         """Test that audit log DELETE structure is correct."""
         # Test without committing to avoid JSON serialization issues
         audit = AuditLog(
@@ -85,21 +77,6 @@ class TestFieldChangeTracking:
 
         changes = get_field_changes(gene, "INSERT")
 
-        assert "approved_symbol" in changes
-        assert changes["approved_symbol"]["old"] is None
-        assert changes["approved_symbol"]["new"] == "NEW1"
-
-    def test_get_field_changes_on_insert(self) -> None:
-        """Test field change detection on INSERT."""
-        gene = Gene(
-            approved_symbol="NEW1",
-            approved_name="New Gene",
-            status="Approved",
-        )
-
-        changes = get_field_changes(gene, "INSERT")
-
-        # For INSERT, all fields have old=None
         assert "approved_symbol" in changes
         assert changes["approved_symbol"]["old"] is None
         assert changes["approved_symbol"]["new"] == "NEW1"

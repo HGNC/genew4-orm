@@ -12,7 +12,7 @@ This module tests PostgreSQL-specific data types including:
 from datetime import date
 
 import pytest
-from sqlalchemy import func, select, text
+from sqlalchemy import text
 
 from genew4_orm.models import Gene, GeneGroup
 
@@ -390,14 +390,11 @@ class TestRawSqlQueries:
     def test_raw_ilike_query(self, postgres_session):
         """Test raw SQL with ILIKE (case-insensitive)."""
         import time
+
         ts = int(time.time() * 1000)
 
-        gene1 = Gene(
-            approved_symbol=f"ILIKE1_{ts}", approved_name=f"Test Gene 1 {ts}", status="Approved"
-        )
-        gene2 = Gene(
-            approved_symbol=f"ILIKE2_{ts}", approved_name=f"Test Gene 2 {ts}", status="Approved"
-        )
+        gene1 = Gene(approved_symbol=f"ILIKE1_{ts}", approved_name=f"Test Gene 1 {ts}", status="Approved")
+        gene2 = Gene(approved_symbol=f"ILIKE2_{ts}", approved_name=f"Test Gene 2 {ts}", status="Approved")
         postgres_session.add_all([gene1, gene2])
         postgres_session.commit()
 

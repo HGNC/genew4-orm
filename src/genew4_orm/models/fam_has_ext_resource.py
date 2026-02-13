@@ -45,7 +45,5 @@ class FamHasExtResource(SQLModel, table=True):
     def __repr__(self) -> str:
         """Return string representation of FamHasExtResource."""
         return (
-            f"<FamHasExtResource("
-            f"external_resource_id={self.external_resource_id}, "
-            f"gene_group_id={self.gene_group_id})>"
+            f"<FamHasExtResource(external_resource_id={self.external_resource_id}, gene_group_id={self.gene_group_id})>"
         )

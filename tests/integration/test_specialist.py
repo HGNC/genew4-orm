@@ -9,9 +9,9 @@ import time
 import pytest
 from sqlalchemy import select, text
 
-from genew4_orm.models.specialist import Specialist
-from genew4_orm.models.gene_group import GeneGroup
 from genew4_orm.models.fam_has_specialist import FamHasSpecialist
+from genew4_orm.models.gene_group import GeneGroup
+from genew4_orm.models.specialist import Specialist
 
 
 @pytest.mark.usefixtures("postgres_session")
@@ -140,9 +140,7 @@ class TestSpecialistCRUD:
         postgres_session.commit()
 
         # Query with wildcard - use pattern that matches our test data only
-        stmt = select(Specialist).where(
-            Specialist.name.like(f"Specialist Pattern {ts}-%")
-        ).order_by(Specialist.name)
+        stmt = select(Specialist).where(Specialist.name.like(f"Specialist Pattern {ts}-%")).order_by(Specialist.name)
         results = postgres_session.execute(stmt).scalars().all()
 
         assert len(results) == 3
@@ -164,10 +162,7 @@ class TestSpecialistCRUD:
         postgres_session.commit()
 
         # Query specialists with URLs - filter by our test data
-        stmt = select(Specialist).where(
-            Specialist.url.isnot(None),
-            Specialist.name.like(f"%{ts}%")
-        )
+        stmt = select(Specialist).where(Specialist.url.isnot(None), Specialist.name.like(f"%{ts}%"))
         with_url = postgres_session.execute(stmt).scalars().all()
 
         names = {s.name for s in with_url}
@@ -451,8 +446,7 @@ class TestSpecialistUrlField:
 
         # Query raw columns - url should be NULL
         result = postgres_session.execute(
-            text('SELECT url FROM specialist WHERE id = :id'),
-            {"id": specialist.id}
+            text("SELECT url FROM specialist WHERE id = :id"), {"id": specialist.id}
         ).one()
 
         assert result[0] is None
@@ -477,9 +471,7 @@ class TestSpecialistUrlField:
         postgres_session.commit()
 
         # Query and verify URLs are preserved
-        stmt = select(Specialist).where(
-            Specialist.name.like(f"URL Specialist {ts}-%")
-        ).order_by(Specialist.name)
+        stmt = select(Specialist).where(Specialist.name.like(f"URL Specialist {ts}-%")).order_by(Specialist.name)
         results = postgres_session.execute(stmt).scalars().all()
 
         assert len(results) == 4

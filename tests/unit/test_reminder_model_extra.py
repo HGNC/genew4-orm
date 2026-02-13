@@ -1,7 +1,5 @@
 """Additional unit tests for Reminder model to improve coverage."""
 
-import pytest
-
 from genew4_orm.models import Reminder
 
 

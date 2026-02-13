@@ -1,6 +1,6 @@
 """Alembic environment configuration for genew4-orm.
 
-This module configures the Alembic migration environment for the genew4-orm project.
+This module configures Alembic migration environment for genew4-orm project.
 It supports both online and offline migration modes.
 """
 
@@ -13,8 +13,17 @@ from sqlmodel import SQLModel
 
 from alembic import context
 
+# Add src directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+# Import DatabaseSettings for URL resolution
+# Import all models to ensure they're registered with SQLAlchemy
+# This must be done before we can use autogenerate
+import genew4_orm.models  # noqa: F401
+from genew4_orm.config import DatabaseSettings
+
 # this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+# access to values within the .ini file in use.
 config = context.config
 
 # Interpret the config file for Python logging.
@@ -22,28 +31,18 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Add src directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-# Import DatabaseSettings for URL resolution
-from genew4_orm.config import DatabaseSettings
-
-# Import all models to ensure they're registered with SQLAlchemy
-# This must be done before we can use autogenerate
-import genew4_orm.models  # noqa: F401
-
 # For SQLModel, we need to get metadata from SQLModel declarative base
 # The target_metadata will be used by autogenerate to detect model changes
 target_metadata = SQLModel.metadata
 
 # Set the database URL from environment variables
-# This allows alembic to use the same configuration as the application
+# This allows alembic to use same configuration as application
 try:
     settings = DatabaseSettings()
     db_url = settings.get_connection_url(with_password=True)
     config.set_main_option("sqlalchemy.url", db_url)
 except Exception:
-    # If DatabaseSettings fails, use the default from alembic.ini
+    # If DatabaseSettings fails, use default from alembic.ini
     pass
 
 
@@ -85,7 +84,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    # Override sqlalchemy.url with the actual connection URL
+    # Override sqlalchemy.url with actual connection URL
     # This ensures environment variables are respected
     try:
         settings = DatabaseSettings()

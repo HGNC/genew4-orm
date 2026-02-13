@@ -1,7 +1,5 @@
 """Unit tests for GeneGroup model."""
 
-import pytest
-
 from genew4_orm.models import GeneGroup
 
 

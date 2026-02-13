@@ -10,21 +10,20 @@ Each test verifies entire workflow with audit trail validation.
 """
 
 import json
-import pytest
 from datetime import date
 
-from genew4_orm.models import Gene, GeneGroup, GeneHasGeneGroup, AuditLog
-from genew4_orm.enums import GeneStatus
+import pytest
 from sqlalchemy import select
+
+from genew4_orm.enums import GeneStatus
+from genew4_orm.models import AuditLog, Gene
 
 
 @pytest.mark.usefixtures("e2e_session")
 class TestGeneLifecycleWorkflow:
     """Test gene lifecycle curation workflow."""
 
-    def test_complete_gene_curation_workflow(
-        self, e2e_session, gene_factory
-    ) -> None:
+    def test_complete_gene_curation_workflow(self, e2e_session, gene_factory) -> None:
         """Test gene from pending submission through final withdrawal."""
         # Create pending gene (simulating curator submission)
         gene = gene_factory(
@@ -59,9 +58,13 @@ class TestGeneLifecycleWorkflow:
 
         # Verify audit trail captured ALL changes
         # Note: CREATE entries have entity_id=0, so we filter by entity_type only
-        stmt = select(AuditLog).where(
-            AuditLog.entity_type == "Gene",
-        ).order_by(AuditLog.timestamp)
+        stmt = (
+            select(AuditLog)
+            .where(
+                AuditLog.entity_type == "Gene",
+            )
+            .order_by(AuditLog.timestamp)
+        )
         all_audit_entries = e2e_session.execute(stmt).scalars().all()
 
         # Filter to entries related to our gene

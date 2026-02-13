@@ -10,8 +10,8 @@ import pytest
 from sqlalchemy import select, text
 
 from genew4_orm.models.external_resource import ExternalResource
-from genew4_orm.models.gene_group import GeneGroup
 from genew4_orm.models.fam_has_ext_resource import FamHasExtResource
+from genew4_orm.models.gene_group import GeneGroup
 
 
 @pytest.mark.usefixtures("postgres_session")
@@ -122,9 +122,7 @@ class TestExternalResourceCRUD:
         postgres_session.commit()
 
         # Query by name pattern
-        stmt = select(ExternalResource).where(
-            ExternalResource.name.like(f"%Query Test%{ts}")
-        )
+        stmt = select(ExternalResource).where(ExternalResource.name.like(f"%Query Test%{ts}"))
         result = postgres_session.execute(stmt).scalar_one_or_none()
 
         assert result is not None
@@ -179,7 +177,7 @@ class TestExternalResourceApproved:
         postgres_session.commit()
 
         # Query only approved resources
-        stmt = select(ExternalResource).where(ExternalResource.approved == True)
+        stmt = select(ExternalResource).where(ExternalResource.approved)
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include approved_resource
@@ -202,7 +200,7 @@ class TestExternalResourceApproved:
         postgres_session.commit()
 
         # Query only unapproved resources
-        stmt = select(ExternalResource).where(ExternalResource.approved == False)
+        stmt = select(ExternalResource).where(not ExternalResource.approved)
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include unapproved_resource
@@ -272,9 +270,7 @@ class TestExternalResourceDescription:
         postgres_session.commit()
 
         # Query by description pattern
-        stmt = select(ExternalResource).where(
-            ExternalResource.description.like(f"%cancer%{ts}")
-        )
+        stmt = select(ExternalResource).where(ExternalResource.description.like(f"%cancer%{ts}"))
         result = postgres_session.execute(stmt).scalar_one_or_none()
 
         assert result is not None
@@ -303,9 +299,7 @@ class TestExternalResourceURL:
         postgres_session.commit()
 
         # Verify all created
-        stmt = select(ExternalResource).where(
-            ExternalResource.url.like(f"%{ts}")
-        )
+        stmt = select(ExternalResource).where(ExternalResource.url.like(f"%{ts}"))
         results = postgres_session.execute(stmt).scalars().all()
         assert len(results) >= 4
 
@@ -320,9 +314,7 @@ class TestExternalResourceURL:
         postgres_session.commit()
 
         # Query by URL pattern
-        stmt = select(ExternalResource).where(
-            ExternalResource.url.like(f"%/genes/%{ts}")
-        )
+        stmt = select(ExternalResource).where(ExternalResource.url.like(f"%/genes/%{ts}"))
         result = postgres_session.execute(stmt).scalar_one_or_none()
 
         assert result is not None
@@ -479,9 +471,7 @@ class TestExternalResourceEdgeCases:
         postgres_session.commit()
 
         # Verify all created
-        stmt = select(ExternalResource).where(
-            ExternalResource.name.like(f"%{ts}")
-        )
+        stmt = select(ExternalResource).where(ExternalResource.name.like(f"%{ts}"))
         results = postgres_session.execute(stmt).scalars().all()
         assert len(results) >= 5
 

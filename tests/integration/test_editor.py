@@ -6,7 +6,7 @@ This module tests Editor CRUD operations with real database connections.
 import time
 
 import pytest
-from sqlalchemy import select, text
+from sqlalchemy import select
 
 from genew4_orm.models.editor import Editor
 
@@ -36,7 +36,7 @@ class TestEditorCRUD:
             full_name=f"Test Editor {ts}",
             editor=f"complete_editor_{ts}",
             password=f"hashed_password_{ts}",
-            preferences=f"theme=dark;language=en",
+            preferences="theme=dark;language=en",
             current=True,
         )
         postgres_session.add(editor)
@@ -46,7 +46,7 @@ class TestEditorCRUD:
         assert editor.full_name == f"Test Editor {ts}"
         assert editor.editor == f"complete_editor_{ts}"
         assert editor.password == f"hashed_password_{ts}"
-        assert editor.preferences == f"theme=dark;language=en"
+        assert editor.preferences == "theme=dark;language=en"
         assert editor.current is True
 
     def test_read_editor_by_id(self, postgres_session):
@@ -157,7 +157,7 @@ class TestEditorActiveStatus:
         postgres_session.commit()
 
         # Query only active editors
-        stmt = select(Editor).where(Editor.current == True)
+        stmt = select(Editor).where(Editor.current)
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include active_editor
@@ -350,10 +350,7 @@ class TestEditorEdgeCases:
     def test_create_multiple_editors(self, postgres_session):
         """Test creating multiple editors."""
         ts = int(time.time() * 1000)
-        editors = [
-            Editor(editor=f"editor_{i}_{ts}", current=True)
-            for i in range(5)
-        ]
+        editors = [Editor(editor=f"editor_{i}_{ts}", current=True) for i in range(5)]
         postgres_session.add_all(editors)
         postgres_session.commit()
 

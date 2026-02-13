@@ -7,8 +7,7 @@ patterns in genew4 application.
 from datetime import date
 
 import pytest
-from sqlalchemy import select, text
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
 
 from genew4_orm.models import Gene, GeneGroup
 
@@ -79,6 +78,7 @@ class TestBatchOperations:
     def test_batch_gene_import(self, postgres_session):
         """Test importing multiple genes in batch."""
         import time
+
         ts = int(time.time() * 1000)
 
         genes_to_import = []
@@ -130,9 +130,7 @@ class TestTransactionRollback:
         postgres_session.rollback()
 
         # Verify neither gene was saved
-        stmt = select(Gene).where(
-            Gene.approved_symbol.in_(["ROLLBACK1", "ROLLBACK2"])
-        )
+        stmt = select(Gene).where(Gene.approved_symbol.in_(["ROLLBACK1", "ROLLBACK2"]))
         results = postgres_session.execute(stmt).scalars().all()
         assert len(results) == 0
 
@@ -177,6 +175,7 @@ class TestComplexQueries:
 
         # Count genes by status
         from sqlalchemy import func
+
         stmt = select(Gene.status, func.count(Gene.hgnc_id)).group_by(Gene.status)
         results = postgres_session.execute(stmt).all()
 
@@ -187,6 +186,7 @@ class TestComplexQueries:
     def test_order_by_multiple_fields(self, postgres_session):
         """Test ordering by multiple fields."""
         import time
+
         ts = int(time.time() * 1000)
 
         # Create genes with different combinations

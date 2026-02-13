@@ -16,7 +16,6 @@ from sqlalchemy.orm import Session as SQLAlchemySession
 
 # Import audit module FIRST to ensure event listeners are registered
 import genew4_orm.audit  # noqa: F401 - Import to register event listeners
-
 from genew4_orm.audit import get_audit_entries_for_entity, get_user_audit_history
 from genew4_orm.models import AuditLog, Gene, GeneGroup
 
@@ -25,9 +24,7 @@ from genew4_orm.models import AuditLog, Gene, GeneGroup
 class TestAuditLoggingIntegration:
     """Integration tests for audit logging event listeners."""
 
-    def test_create_gene_creates_audit_log_entry(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_create_gene_creates_audit_log_entry(self, postgres_session: SQLAlchemySession) -> None:
         """Test that INSERT operations create audit log entries."""
         # Session info is already set by fixture
         assert postgres_session.info.get("read_only") is False
@@ -61,9 +58,7 @@ class TestAuditLoggingIntegration:
         assert audit_entry.operation == "CREATE"
         assert audit_entry.entity_type == "Gene"
 
-    def test_update_gene_creates_audit_log_entry(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_update_gene_creates_audit_log_entry(self, postgres_session: SQLAlchemySession) -> None:
         """Test that UPDATE operations create audit log entries."""
         # First create a gene
         gene = Gene(
@@ -97,9 +92,7 @@ class TestAuditLoggingIntegration:
 
         assert "approved_name" in field_changes or "status" in field_changes
 
-    def test_delete_gene_creates_audit_log_entry(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_delete_gene_creates_audit_log_entry(self, postgres_session: SQLAlchemySession) -> None:
         """Test that DELETE operations create audit log entries."""
         # First create a gene
         gene = Gene(
@@ -126,9 +119,7 @@ class TestAuditLoggingIntegration:
         assert audit_entry is not None, "DELETE should create audit log"
         assert audit_entry.operation == "DELETE"
 
-    def test_read_only_session_does_not_create_audit_logs(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_read_only_session_does_not_create_audit_logs(self, postgres_session: SQLAlchemySession) -> None:
         """Test that read-only sessions don't create audit logs."""
         # Mark session as read-only
         postgres_session.info["read_only"] = True
@@ -143,15 +134,13 @@ class TestAuditLoggingIntegration:
         all_entries = postgres_session.execute(stmt).scalars().all()
 
         # Filter for ones created in this test
-        test_entries = [e for e in all_entries if e.user == "test_user"]
+        [e for e in all_entries if e.user == "test_user"]
 
         # With read_only=True, no new audit logs should be created
         # But we might have entries from previous tests
         # Just verify the session completes without error
 
-    def test_audit_log_for_gene_group_create(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_audit_log_for_gene_group_create(self, postgres_session: SQLAlchemySession) -> None:
         """Test audit logging works for different entity types."""
         gene_group = GeneGroup(
             name="Audit Test Group",
@@ -179,9 +168,7 @@ class TestAuditLoggingIntegration:
         assert audit_entry is not None, "GeneGroup CREATE should create audit log"
         assert audit_entry.entity_type == "GeneGroup"
 
-    def test_get_audit_entries_for_entity(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_get_audit_entries_for_entity(self, postgres_session: SQLAlchemySession) -> None:
         """Test get_audit_entries_for_entity helper function."""
         # Create and modify a gene
         gene = Gene(
@@ -196,15 +183,11 @@ class TestAuditLoggingIntegration:
         postgres_session.commit()
 
         # Use helper function
-        entries = get_audit_entries_for_entity(
-            postgres_session, "Gene", gene.hgnc_id
-        )
+        entries = get_audit_entries_for_entity(postgres_session, "Gene", gene.hgnc_id)
 
         assert len(entries) >= 1, "Should have at least one audit entry"
 
-    def test_get_user_audit_history(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_get_user_audit_history(self, postgres_session: SQLAlchemySession) -> None:
         """Test get_user_audit_history helper function."""
         # Create a gene with a unique user
         postgres_session.info["user"] = "history_user"
@@ -221,9 +204,7 @@ class TestAuditLoggingIntegration:
 
         assert len(entries) >= 1, "Should have at least one entry for history_user"
 
-    def test_audit_log_timestamp_ordering(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_audit_log_timestamp_ordering(self, postgres_session: SQLAlchemySession) -> None:
         """Test that audit log entries are ordered by timestamp."""
         # Create a gene
         gene = Gene(
@@ -240,11 +221,7 @@ class TestAuditLoggingIntegration:
             postgres_session.commit()
 
         # Get all entries and verify ordering
-        stmt = (
-            select(AuditLog)
-            .where(AuditLog.entity_type == "Gene")
-            .order_by(AuditLog.timestamp.desc())
-        )
+        stmt = select(AuditLog).where(AuditLog.entity_type == "Gene").order_by(AuditLog.timestamp.desc())
         entries = postgres_session.execute(stmt).scalars().all()
 
         # Verify timestamps are in descending order
@@ -252,12 +229,11 @@ class TestAuditLoggingIntegration:
             assert entries[i].timestamp >= entries[i + 1].timestamp
 
     @pytest.mark.skip("Test disabled - database cleanup fixture needs debugging")
-    def test_user_captured_from_session(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_user_captured_from_session(self, postgres_session: SQLAlchemySession) -> None:
         """Test that user is captured from session.info."""
         # Set a unique user (using timestamp to ensure uniqueness)
         import time
+
         unique_user = f"user_{int(time.time())}"
 
         # Set user info
@@ -284,14 +260,12 @@ class TestAuditLoggingIntegration:
         # Should find exactly one (the one we just created)
         if audit_entry:
             # Access user value directly from row (avoid string indexing issue)
-            user_value = audit_entry._mapping['user']
+            user_value = audit_entry._mapping["user"]
             assert user_value == unique_user, f"User {unique_user} captured in audit log"
         else:
             pytest.skip("No audit entry found (expected after cleanup)")
 
-    def test_field_changes_are_captured(
-        self, postgres_session: SQLAlchemySession
-    ) -> None:
+    def test_field_changes_are_captured(self, postgres_session: SQLAlchemySession) -> None:
         """Test that field changes are properly captured in JSON."""
         # Create a gene with specific values
         gene = Gene(

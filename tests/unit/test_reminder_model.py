@@ -2,8 +2,6 @@
 
 from datetime import date
 
-import pytest
-
 from genew4_orm.models import Reminder
 
 

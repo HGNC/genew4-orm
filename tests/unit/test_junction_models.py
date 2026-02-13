@@ -1,15 +1,11 @@
 """Unit tests for junction table models."""
 
-from datetime import date
-
-import pytest
-
 from genew4_orm.models import (
     FamHasCorr,
     FamHasExtResource,
     FamHasSpecialist,
-    GeneHasGeneGroup,
     GeneGroupAlias,
+    GeneHasGeneGroup,
 )
 
 

@@ -1,19 +1,16 @@
 """Unit tests for enums module."""
 
-import pytest
-from sqlalchemy import create_engine, Column, Integer, inspect
-from sqlalchemy.orm import Session
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field, SQLModel
 
 from genew4_orm.enums import (
-    enum_field,
-    GeneLocusType,
-    GeneStatus,
+    CytobandSourceType,
     GeneGroupStatus,
     GeneGroupType,
-    Grch38SourceType,
+    GeneLocusType,
+    GeneStatus,
     Grch38MarkType,
-    CytobandSourceType,
+    Grch38SourceType,
+    enum_field,
 )
 
 
@@ -59,6 +56,7 @@ class TestEnumField:
 
     def test_enum_field_in_model(self) -> None:
         """Test enum_field within a SQLModel."""
+
         class TestModel(SQLModel, table=True):
             __tablename__ = "test_model"
 
