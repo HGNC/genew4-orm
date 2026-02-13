@@ -1,7 +1,36 @@
 # CHANGELOG
 
 
+## v0.2.11 (2026-02-13)
+
+
 ## v0.2.10 (2026-02-13)
+
+### Bug Fixes
+
+- **ci**: Add debug output and better error handling in coverage check
+  ([`eefc354`](https://github.com/HGNC/genew4-orm/commit/eefc354d9733355eeaad9b452517eb95550029ff))
+
+- Add explicit cov_file variable for coverage.xml path - Check if file exists before parsing - Catch
+  ET.ParseError specifically - Add generic exception fallback - More descriptive error messages
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+- **ci**: Add explicit shell: bash to coverage threshold step
+  ([`244ee5f`](https://github.com/HGNC/genew4-orm/commit/244ee5fd4a094674769ef0eec23bdbf602ca50e5))
+
+Add explicit shell: bash directive to ensure proper output capture for GitHub Actions warning
+  annotations from the Python script.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+- **ci**: Use python3 in coverage check (test.yml)
+  ([`34799cd`](https://github.com/HGNC/genew4-orm/commit/34799cd03b6c40db7c9af64fc2ee2590622d4e92))
+
+Use python3 explicitly to avoid issues with python command not being found or pointing to wrong
+  Python version.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.9 (2026-02-13)
