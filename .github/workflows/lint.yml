@@ -17,15 +17,11 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install uv
-        run: pip install uv
+      - name: Install dependencies
+        run: pip install uv && uv sync
 
-      - name: Install ruff
-        run: uv pip install ruff
-
-      - uses: chartlr/ruff-action@v1
-        with:
-          args: check .
+      - name: Lint with ruff
+        run: uv run ruff check .
 
   mypy:
     runs-on: ubuntu-latest
@@ -37,15 +33,11 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install uv
-        run: pip install uv
+      - name: Install dependencies
+        run: pip install uv && uv sync
 
-      - name: Install mypy
-        run: uv pip install mypy-protobuf==3.17.0
-
-      - uses: chartlr/mypy-action@v1
-        with:
-          require_serial: true
+      - name: Type check with mypy
+        run: uv run mypy src/
 
   formatters:
     runs-on: ubuntu-latest
@@ -57,11 +49,8 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install uv
-        run: pip install uv
-
-      - name: Install formatters
-        run: uv pip install ruff black isort
+      - name: Install dependencies
+        run: pip install uv && uv sync
 
       - name: Check formatting with ruff
         run: uv run ruff format --check .

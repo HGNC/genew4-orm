@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-      python-version: ["3.13"]
+        python-version: ["3.13"]
 
     services:
       postgres:
@@ -69,7 +69,6 @@ jobs:
           DATABASESETTINGS__PG_PORT: 5432
           DATABASESETTINGS__PG_NAME: genew4_test
           DATABASESETTINGS__PG_USER: genew4_test
-          DATABASESETTINGS__PG_PASSWORD: genew4_test_password
           DATABASESETTINGS__PG_PASSWORD: genew4_test_password
 
       - name: Run unit tests
