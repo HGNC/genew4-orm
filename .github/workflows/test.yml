@@ -136,7 +136,7 @@ jobs:
           echo \"Current coverage: ${COVERAGE}\"
 
           # Fail if coverage is below 90%
-          if (( $(echo \"${COVERAGE} < 90\" | bc -l)); then
+          if [ 1 -eq "$(echo "${COVERAGE} < 90" | bc -l)" ]; then
             echo \"::warning::Coverage is below 90% threshold\"
             exit 1
           fi
