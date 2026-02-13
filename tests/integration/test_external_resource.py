@@ -200,7 +200,7 @@ class TestExternalResourceApproved:
         postgres_session.commit()
 
         # Query only unapproved resources
-        stmt = select(ExternalResource).where(not ExternalResource.approved)
+        stmt = select(ExternalResource).where(ExternalResource.approved == False)
         results = postgres_session.execute(stmt).scalars().all()
 
         # Should include unapproved_resource
