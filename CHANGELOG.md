@@ -1,7 +1,20 @@
 # CHANGELOG
 
 
+## v0.2.10 (2026-02-13)
+
+
 ## v0.2.9 (2026-02-13)
+
+### Bug Fixes
+
+- **ci**: Use heredoc for coverage check script in test.yml
+  ([`a7e6c7f`](https://github.com/HGNC/genew4-orm/commit/a7e6c7f2737c4799d52c4b6a7641193925ea66a0))
+
+Use heredoc (<<'EOF' ... EOF) instead of quoted Python -c to avoid YAML parsing issues with
+  multi-line strings and special characters.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.8 (2026-02-13)
