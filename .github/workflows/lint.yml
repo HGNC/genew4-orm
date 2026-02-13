@@ -54,9 +54,3 @@ jobs:
 
       - name: Check formatting with ruff
         run: uv run ruff format --check .
-
-      - name: Check formatting with black
-        run: uv run black --check .
-
-      - name: Check import sorting with isort
-        run: uv run isort --check-only --profile black .
