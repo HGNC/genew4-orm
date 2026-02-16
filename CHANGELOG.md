@@ -1,7 +1,38 @@
 # CHANGELOG
 
 
+## v0.2.15 (2026-02-16)
+
+### Bug Fixes
+
+- **ci**: Multiply line-rate by 100 for coverage percentage
+  ([`843dd24`](https://github.com/HGNC/genew4-orm/commit/843dd24039e56f8d969c22a54dee270fe8a56273))
+
+The coverage.xml line-rate attribute is stored as a decimal (0-1), not a percentage. Multiply by 100
+  to convert to percentage before comparing to 90% threshold.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+
 ## v0.2.14 (2026-02-16)
+
+### Chores
+
+- **ci**: Print all coverage.xml content for debugging
+  ([`dc281c6`](https://github.com/HGNC/genew4-orm/commit/dc281c63fa1cc5ff935a884ba136277812655d6b))
+
+Change from printing first 50 lines to printing entire coverage.xml file content to help diagnose
+  coverage threshold issues.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+- **ci**: Print coverage.xml content for debugging
+  ([`9a16cb3`](https://github.com/HGNC/genew4-orm/commit/9a16cb39cd7901f3923fea3e0a4b0a30b52e9ea4))
+
+Add debug output to print first 50 lines of coverage.xml before checking threshold. This helps
+  diagnose why coverage is showing 1.0% instead of the expected value.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.13 (2026-02-16)
