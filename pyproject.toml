@@ -41,10 +41,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/genew4/genew4-orm"
+Homepage = "https://github.com/HGNC/genew4-orm"
 Documentation = "https://hgnc.github.io/genew4-orm"
-Repository = "https://github.com/genew4/genew4-orm.git"
-"Bug Tracker" = "https://github.com/genew4/genew4-orm/issues"
+Repository = "https://github.com/HGNC/genew4-orm.git"
+"Bug Tracker" = "https://github.com/HGNC/genew4-orm/issues"
 
 [tool.pytest]
 testpaths = ["tests"]

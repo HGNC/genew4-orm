@@ -3,7 +3,7 @@ site_name: genew4-orm
 site_description: Python ORM for the genew4 PostgreSQL database
 site_author: Gene Nomenclature Team
 site_url: https://hgnc.github.io/genew4-orm/
-repo_url: https://github.com/genew4/genew4-orm
+repo_url: https://github.com/HGNC/genew4-orm
 edit_uri: edit/main/docs/
 
 # Navigation structure
