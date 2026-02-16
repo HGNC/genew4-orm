@@ -122,16 +122,10 @@ jobs:
               print(f'::warning::Coverage file {cov_file} not found')
               sys.exit(1)
 
-          # Print coverage.xml content for debugging
-          print('=== Coverage.xml content ===')
-          with open(cov_file, 'r') as f:
-              print(f.read())
-          print('=== End of coverage.xml ===')
-
           try:
               tree = ET.parse(cov_file)
               root = tree.getroot()
-              line_rate = float(root.get('line-rate', '0').replace('%', ''))
+              line_rate = float(root.get('line-rate', '0')) * 100
               print(f'Current coverage: {line_rate:.1f}%')
               if line_rate < 90:
                   print('::warning::Coverage is below 90% threshold')
