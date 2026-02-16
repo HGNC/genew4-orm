@@ -135,11 +135,8 @@ jobs:
 
           try:
               tree = ET.parse(cov_file)
-              coverage = tree.find('.//coverage')
-              if coverage is None:
-                  print('::warning::Could not find coverage element in coverage.xml')
-                  sys.exit(1)
-              line_rate = float(coverage.get('line-rate', '0').replace('%', ''))
+              root = tree.getroot()
+              line_rate = float(root.get('line-rate', '0').replace('%', ''))
               print(f'Current coverage: {line_rate:.1f}%')
               if line_rate < 90:
                   print('::warning::Coverage is below 90% threshold')
