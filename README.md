@@ -2,7 +2,6 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
-[![PyPI - Version](https://img.shields.io/pypi/v/genew4-orm)](https://pypi.org/project/genew4-orm)
 
 Python ORM for the genew4 PostgreSQL database.
 

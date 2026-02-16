@@ -42,7 +42,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/genew4/genew4-orm"
-Documentation = "https://genew4-orm.hgnc.github.io"
+Documentation = "https://hgnc.github.io/genew4-orm"
 Repository = "https://github.com/genew4/genew4-orm.git"
 "Bug Tracker" = "https://github.com/genew4/genew4-orm/issues"
 
