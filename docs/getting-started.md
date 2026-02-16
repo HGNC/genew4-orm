@@ -6,7 +6,7 @@ This guide will help you get started with genew4-orm.
 
 ### Requirements
 
-- Python 3.11 or higher
+- Python 3.13 or higher
 - PostgreSQL 12 or higher
 - uv (recommended) or pip for package management
 
