@@ -130,7 +130,15 @@ with get_readwrite_session(user="your_name") as session:
             print(f"Group: {association.gene_group.name}")
 ```
 
-## Next Steps
+## Getting Help
+
+### MCP Server
+
+You can get interactive help with the documentation via the [genew4-orm MCP server](https://hgnc.gitmcp.io/genew4-orm). The MCP (Model Context Protocol) server provides AI-assisted documentation search and code examples directly within compatible tools like Claude Code.
+
+You can also chat with the MCP server at [https://hgnc.gitmcp.io/hgnc/genew4-orm/chat](https://hgnc.gitmcp.io/hgnc/genew4-orm/chat) for quick questions and code examples.
+
+### Documentation
 
 - [Models](models.md) - Learn about available database models
 - [Querying](querying.md) - Advanced querying techniques
