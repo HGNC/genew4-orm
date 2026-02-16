@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.2.20 (2026-02-16)
+
+### Bug Fixes
+
+- Remove destination_dir for project pages
+  ([`31fdbbd`](https://github.com/HGNC/genew4-orm/commit/31fdbbd367f01e6cfaa2637dd539e68d1ad7a40e))
+
+For GitHub Pages project pages (orgname.github.io/repo), files should be at the root of gh-pages
+  branch. GitHub automatically serves them at the repo-name subdirectory.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+
 ## v0.2.19 (2026-02-16)
 
 ### Bug Fixes
