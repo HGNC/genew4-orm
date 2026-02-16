@@ -1,7 +1,20 @@
 # CHANGELOG
 
 
+## v0.2.13 (2026-02-16)
+
+
 ## v0.2.12 (2026-02-13)
+
+### Bug Fixes
+
+- **ci**: Add None check for coverage element in XML parsing
+  ([`cbc0019`](https://github.com/HGNC/genew4-orm/commit/cbc001944cf98e8a12d5b583bab5c23be2e13103))
+
+The tree.find() method returns None when element is not found, which causes AttributeError when
+  calling .get() on None. Add explicit check to handle missing coverage element gracefully.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.11 (2026-02-13)
