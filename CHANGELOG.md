@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.2.19 (2026-02-16)
+
+### Bug Fixes
+
+- Deploy docs to genew4-orm subdirectory for org GitHub Pages
+  ([`7b46617`](https://github.com/HGNC/genew4-orm/commit/7b46617ca02536e784e56560636392379be04388))
+
+For organization GitHub Pages (hgnc.github.io), projects must be in subdirectories. Set
+  destination_dir to genew4-orm so docs are deployed to hgnc.github.io/genew4-orm/
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+
 ## v0.2.18 (2026-02-16)
 
 ### Bug Fixes
