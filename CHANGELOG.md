@@ -1,7 +1,32 @@
 # CHANGELOG
 
 
+## v0.2.14 (2026-02-16)
+
+
 ## v0.2.13 (2026-02-16)
+
+### Bug Fixes
+
+- **ci**: Use getroot() instead of find() for coverage.xml parsing
+  ([`a748d15`](https://github.com/HGNC/genew4-orm/commit/a748d15e9bb1dab42b50b7e7eb0dac73f8691c3f))
+
+The coverage.xml file from coverage.py has <coverage> as the root element with line-rate as a direct
+  attribute. Using tree.getroot() is more direct and reliable than tree.find('.//coverage').
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+### Chores
+
+- **ci**: Remove artifact upload and HTML report from test.yml
+  ([`339cb8e`](https://github.com/HGNC/genew4-orm/commit/339cb8edba09592f89b12ebb18fa8e2c4f9953b8))
+
+Since test.yml doesn't use Codecov and we're not keeping coverage artifacts, remove: - Upload
+  coverage to Artifacts step - --cov-report=html flag (no longer needed without artifact upload)
+
+Simplifies workflow and reduces CI time.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.12 (2026-02-13)
