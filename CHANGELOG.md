@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.2.16 (2026-02-16)
+
+### Bug Fixes
+
+- Correct badge formatting in README
+  ([`f34e3f1`](https://github.com/HGNC/genew4-orm/commit/f34e3f17f592acd5c445ef6ebd5cb30bff3d83a1))
+
+
 ## v0.2.15 (2026-02-16)
 
 ### Bug Fixes
@@ -12,6 +20,11 @@ The coverage.xml line-rate attribute is stored as a decimal (0-1), not a percent
   to convert to percentage before comparing to 90% threshold.
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+### Documentation
+
+- Update documentation links to use the correct base URL
+  ([`47493a8`](https://github.com/HGNC/genew4-orm/commit/47493a8340da8d759b9230a60031ac454a9c6c41))
 
 
 ## v0.2.14 (2026-02-16)
