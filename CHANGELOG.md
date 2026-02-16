@@ -1,6 +1,18 @@
 # CHANGELOG
 
 
+## v0.2.21 (2026-02-16)
+
+### Bug Fixes
+
+- Correct GitHub organization name in URLs
+  ([`717589b`](https://github.com/HGNC/genew4-orm/commit/717589b80c48caa89d62fb98bd58b7b0372fe5a7))
+
+Change repo URLs from genew4 to HGNC (correct organization name).
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+
 ## v0.2.20 (2026-02-16)
 
 ### Bug Fixes
