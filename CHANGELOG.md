@@ -1,12 +1,18 @@
 # CHANGELOG
 
 
+## v0.2.17 (2026-02-16)
+
+
 ## v0.2.16 (2026-02-16)
 
 ### Bug Fixes
 
 - Correct badge formatting in README
   ([`f34e3f1`](https://github.com/HGNC/genew4-orm/commit/f34e3f17f592acd5c445ef6ebd5cb30bff3d83a1))
+
+- Update deploy condition to allow manual workflow dispatch
+  ([`70a8a40`](https://github.com/HGNC/genew4-orm/commit/70a8a408782604bd34c51087c52a9b437476b094))
 
 
 ## v0.2.15 (2026-02-16)
