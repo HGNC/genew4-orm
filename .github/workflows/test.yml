@@ -122,14 +122,11 @@ jobs:
               print(f'::warning::Coverage file {cov_file} not found')
               sys.exit(1)
 
-          # Print first 50 lines of coverage.xml for debugging
-          print('=== Coverage.xml content (first 50 lines) ===')
+          # Print coverage.xml content for debugging
+          print('=== Coverage.xml content ===')
           with open(cov_file, 'r') as f:
-              for i, line in enumerate(f):
-                  if i >= 50:
-                      break
-                  print(line.rstrip())
-          print('=== End of coverage.xml preview ===')
+              print(f.read())
+          print('=== End of coverage.xml ===')
 
           try:
               tree = ET.parse(cov_file)
