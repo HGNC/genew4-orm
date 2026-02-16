@@ -1,7 +1,30 @@
 # CHANGELOG
 
 
+## v0.2.18 (2026-02-16)
+
+### Bug Fixes
+
+- Download artifact in docs deploy job
+  ([`c768256`](https://github.com/HGNC/genew4-orm/commit/c7682566186d09c5b399fffa128af61f2514e00a))
+
+The deploy job was not downloading the site artifact from the build job, so it was deploying an
+  empty directory. Added download-artifact step to properly deploy the built documentation.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+
 ## v0.2.17 (2026-02-16)
+
+### Documentation
+
+- Update URLs and badges for GitHub Pages
+  ([`63cac7d`](https://github.com/HGNC/genew4-orm/commit/63cac7d3c921fe96984bf2fadd16d0f3438cc7a3))
+
+- Update documentation links to hgnc.github.io/genew4-orm - Add site_url to mkdocs.yml - Update
+  documentation URL in pyproject.toml - Remove PyPI badge (package not yet published)
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 
 
 ## v0.2.16 (2026-02-16)
