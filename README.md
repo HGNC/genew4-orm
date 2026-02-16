@@ -209,11 +209,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Documentation
 
-- [Getting Started](https://genew4-orm.hgnc.github.io/getting-started/) - Installation and configuration
-- [Configuration](https://genew4-orm.hgnc.github.io/configuration/) - Environment variables and settings
-- [Models](https://genew4-orm.hgnc.github.io/models/) - Database model reference
-- [Querying](https://genew4-orm.hgnc.github.io/querying/) - Query helpers and eager loading
-- [API Reference](https://genew4-orm.hgnc.github.io/api-reference/) - Auto-generated API docs
-- [CRUD Operations](https://genew4-orm.hgnc.github.io/crud-operations/) - Create, read, update, delete guide
-- [Audit Logging](https://genew4-orm.hgnc.github.io/audit-logging/) - Automatic audit trail
-- [Testing](https://genew4-orm.hgnc.github.io/testing/) - Test suite guide
+- [Getting Started](https://hgnc.github.io/genew4-orm/getting-started/) - Installation and configuration
+- [Configuration](https://hgnc.github.io/genew4-orm/configuration/) - Environment variables and settings
+- [Models](https://hgnc.github.io/genew4-orm/models/) - Database model reference
+- [Querying](https://hgnc.github.io/genew4-orm/querying/) - Query helpers and eager loading
+- [API Reference](https://hgnc.github.io/genew4-orm/api-reference/) - Auto-generated API docs
+- [CRUD Operations](https://hgnc.github.io/genew4-orm/crud-operations/) - Create, read, update, delete guide
+- [Audit Logging](https://hgnc.github.io/genew4-orm/audit-logging/) - Automatic audit trail
+- [Testing](https://hgnc.github.io/genew4-orm/testing/) - Test suite guide
