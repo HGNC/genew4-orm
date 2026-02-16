@@ -107,18 +107,7 @@ jobs:
           DATABASESETTINGS__PG_USER: genew4
           DATABASESETTINGS__PG_PASSWORD: genew4_test_password
         run: |
-          uv run pytest --cov=genew4_orm --cov-report=xml --cov-report=html --cov-report=term
-
-      - name: Upload coverage to Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: |
-            htmlcov/
-            .coverage.*
-            coverage.xml
-          retention-days: 7
+          uv run pytest --cov=genew4_orm --cov-report=xml --cov-report=term
 
       - name: Check coverage threshold
         shell: bash
