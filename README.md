@@ -221,4 +221,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 You can get interactive help with the documentation via the [genew4-orm MCP server](https://hgnc.gitmcp.io/genew4-orm). The MCP (Model Context Protocol) server provides AI-assisted documentation search and code examples directly within compatible tools like Claude Code.
 
-You can also chat with the MCP server at [https://hgnc.gitmcp.io/hgnc/genew4-orm/chat](https://hgnc.gitmcp.io/hgnc/genew4-orm/chat) for quick questions and code examples.
+You can also chat with the MCP server at [https://hgnc.gitmcp.io/genew4-orm/chat](https://hgnc.gitmcp.io/genew4-orm/chat) for quick questions and code examples.
