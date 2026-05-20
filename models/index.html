@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -626,6 +626,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#genehascomment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeneHasComment
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -698,6 +709,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#comment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comment
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -753,6 +775,17 @@
     <span class="md-ellipsis">
       
         GeneGroupType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publishstatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PublishStatus
       
     </span>
   </a>
@@ -1202,6 +1235,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#genehascomment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeneHasComment
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1274,6 +1318,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#comment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comment
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1329,6 +1384,17 @@
     <span class="md-ellipsis">
       
         GeneGroupType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publishstatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PublishStatus
       
     </span>
   </a>
@@ -1443,7 +1509,8 @@
 </tbody>
 </table>
 <p><strong>Relationships:</strong>
-- <code>gene_has_gene_groups</code> - Many-to-many with GeneGroup</p>
+- <code>gene_has_gene_groups</code> - Many-to-many with GeneGroup
+- <code>gene_has_comments</code> - One-to-many with GeneHasComment</p>
 <h3 id="genegroup">GeneGroup<a class="headerlink" href="#genegroup" title="Permanent link">&para;</a></h3>
 <p>Represents a gene family/group in the <code>family_new</code> table.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneGroup</span>
@@ -1575,62 +1642,185 @@
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">gene_group_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">)</span>
 </code></pre></div>
+<h3 id="genehascomment">GeneHasComment<a class="headerlink" href="#genehascomment" title="Permanent link">&para;</a></h3>
+<p>Junction table for Gene ↔ Comment many-to-many relationship.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneHasComment</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">association</span> <span class="o">=</span> <span class="n">GeneHasComment</span><span class="p">(</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">comment_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">hgnc_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">editor_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">)</span>
+</code></pre></div>
+<p><strong>Key Fields:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>comment_id</code></td>
+<td><code>int</code></td>
+<td>Foreign key to comment.id (composite PK)</td>
+</tr>
+<tr>
+<td><code>hgnc_id</code></td>
+<td><code>int</code></td>
+<td>Foreign key to hgnc.hgnc_id (composite PK)</td>
+</tr>
+<tr>
+<td><code>date_added</code></td>
+<td><code>date</code></td>
+<td>Date the comment was linked to the gene</td>
+</tr>
+<tr>
+<td><code>editor_id</code></td>
+<td><code>int</code></td>
+<td>Foreign key to editor.ed_id</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relationships:</strong>
+- <code>comment</code> - Belongs to Comment
+- <code>gene</code> - Belongs to Gene
+- <code>editor</code> - Belongs to Editor</p>
 <h2 id="related-models">Related Models<a class="headerlink" href="#related-models" title="Permanent link">&para;</a></h2>
 <h3 id="specialist">Specialist<a class="headerlink" href="#specialist" title="Permanent link">&para;</a></h3>
 <p>External specialist organizations that collaborate with HGNC.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Specialist</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">specialist</span> <span class="o">=</span> <span class="n">Specialist</span><span class="p">(</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Test Specialist&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">address</span><span class="o">=</span><span class="s2">&quot;123 Test Street&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Specialist</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">specialist</span> <span class="o">=</span> <span class="n">Specialist</span><span class="p">(</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Test Specialist&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">address</span><span class="o">=</span><span class="s2">&quot;123 Test Street&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://example.com&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="p">)</span>
 </code></pre></div>
 <h3 id="externalresource">ExternalResource<a class="headerlink" href="#externalresource" title="Permanent link">&para;</a></h3>
 <p>External databases and resources linked to gene groups.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExternalResource</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">resource</span> <span class="o">=</span> <span class="n">ExternalResource</span><span class="p">(</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;UniProt&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://uniprot.org&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Universal Protein Resource&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExternalResource</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">resource</span> <span class="o">=</span> <span class="n">ExternalResource</span><span class="p">(</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;UniProt&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://uniprot.org&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Universal Protein Resource&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="p">)</span>
 </code></pre></div>
 <h3 id="correspondence">Correspondence<a class="headerlink" href="#correspondence" title="Permanent link">&para;</a></h3>
 <p>Records of correspondence with researchers and organizations.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Correspondence</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">corr</span> <span class="o">=</span> <span class="n">Correspondence</span><span class="p">(</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">first_name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">last_name</span><span class="o">=</span><span class="s2">&quot;Doe&quot;</span><span class="p">,</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">email</span><span class="o">=</span><span class="s2">&quot;john.doe@example.com&quot;</span><span class="p">,</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Correspondence</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">corr</span> <span class="o">=</span> <span class="n">Correspondence</span><span class="p">(</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="n">first_name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">last_name</span><span class="o">=</span><span class="s2">&quot;Doe&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">email</span><span class="o">=</span><span class="s2">&quot;john.doe@example.com&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="p">)</span>
 </code></pre></div>
 <h3 id="user">User<a class="headerlink" href="#user" title="Permanent link">&para;</a></h3>
 <p>User accounts for the application.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;jdoe&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">first_name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">last_name</span><span class="o">=</span><span class="s2">&quot;Doe&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">email</span><span class="o">=</span><span class="s2">&quot;john.doe@example.com&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">display_name</span><span class="o">=</span><span class="s2">&quot;jdoe&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="n">first_name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="n">last_name</span><span class="o">=</span><span class="s2">&quot;Doe&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    <span class="n">email</span><span class="o">=</span><span class="s2">&quot;john.doe@example.com&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="p">)</span>
 </code></pre></div>
 <h3 id="auditlog">AuditLog<a class="headerlink" href="#auditlog" title="Permanent link">&para;</a></h3>
 <p>Automatic audit trail for all write operations.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLog</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">audit</span> <span class="o">=</span> <span class="n">AuditLog</span><span class="p">(</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;username&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;CREATE&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;Gene&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    <span class="n">entity_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>    <span class="n">field_changes</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>        <span class="s2">&quot;approved_name&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span> <span class="s2">&quot;New Name&quot;</span><span class="p">}</span>
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>    <span class="p">},</span>
-<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLog</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">audit</span> <span class="o">=</span> <span class="n">AuditLog</span><span class="p">(</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;username&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;CREATE&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;Gene&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    <span class="n">entity_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>    <span class="n">field_changes</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>        <span class="s2">&quot;approved_name&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span> <span class="s2">&quot;New Name&quot;</span><span class="p">}</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="p">},</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="p">)</span>
 </code></pre></div>
+<h3 id="comment">Comment<a class="headerlink" href="#comment" title="Permanent link">&para;</a></h3>
+<p>Comments linked to genes with a publication workflow.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Comment</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">PublishStatus</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;This gene requires further review&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    <span class="n">author_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>    <span class="n">status</span><span class="o">=</span><span class="n">PublishStatus</span><span class="o">.</span><span class="n">PENDING</span><span class="p">,</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="p">)</span>
+</code></pre></div>
+<p><strong>Key Fields:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>int</code></td>
+<td>Primary key (auto-increment)</td>
+</tr>
+<tr>
+<td><code>comment</code></td>
+<td><code>str</code></td>
+<td>Comment text content</td>
+</tr>
+<tr>
+<td><code>author_id</code></td>
+<td><code>int</code></td>
+<td>Foreign key to editor (author)</td>
+</tr>
+<tr>
+<td><code>lock</code></td>
+<td><code>str</code></td>
+<td>Editing lock</td>
+</tr>
+<tr>
+<td><code>created</code></td>
+<td><code>date</code></td>
+<td>Date comment was created</td>
+</tr>
+<tr>
+<td><code>publisher_id</code></td>
+<td><code>int</code></td>
+<td>Foreign key to editor (publisher)</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td><code>PublishStatus</code></td>
+<td>pending, published, or rejected</td>
+</tr>
+<tr>
+<td><code>status_date</code></td>
+<td><code>date</code></td>
+<td>Date of last status change</td>
+</tr>
+<tr>
+<td><code>replace_id</code></td>
+<td><code>int</code></td>
+<td>Foreign key to comment (replaces)</td>
+</tr>
+<tr>
+<td><code>replacement_id</code></td>
+<td><code>int</code></td>
+<td>Foreign key to comment (replacement)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relationships:</strong>
+- <code>author</code> - Belongs to Editor (via author_id)
+- <code>publisher</code> - Belongs to Editor (via publisher_id)
+- <code>gene_has_comments</code> - One-to-many with GeneHasComment</p>
 <h2 id="enum-types">Enum Types<a class="headerlink" href="#enum-types" title="Permanent link">&para;</a></h2>
 <h3 id="genestatus">GeneStatus<a class="headerlink" href="#genestatus" title="Permanent link">&para;</a></h3>
 <p>Gene status values: <code>APPROVED</code>, <code>PENDING</code>, <code>RESERVED</code>, <code>RESERVED_NON_HUMAN</code>, <code>SUSPENDED</code>, <code>DELETE</code>, <code>ENTRY_WITHDRAWN</code>, <code>SYMBOL_WITHDRAWN</code></p>
@@ -1640,17 +1830,21 @@
 <p>Group status values: <code>INTERNAL</code>, <code>EXPORTED</code>, <code>PUBLISHED</code>, <code>APPROVED</code></p>
 <h3 id="genegrouptype">GeneGroupType<a class="headerlink" href="#genegrouptype" title="Permanent link">&para;</a></h3>
 <p>Group type values: <code>SET</code>, <code>SUBSET</code>, <code>OTHER</code>, <code>FAMILY</code></p>
+<h3 id="publishstatus">PublishStatus<a class="headerlink" href="#publishstatus" title="Permanent link">&para;</a></h3>
+<p>Comment publication status: <code>PENDING</code>, <code>PUBLISHED</code>, <code>REJECTED</code></p>
 <h2 id="full-model-list">Full Model List<a class="headerlink" href="#full-model-list" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>Gene</code> - Gene information</li>
 <li><code>GeneGroup</code> - Gene family/group</li>
 <li><code>GeneHasGeneGroup</code> - Gene-Group junction</li>
+<li><code>GeneHasComment</code> - Gene-Comment junction</li>
 <li><code>FamHasSpecialist</code> - Specialist-Group junction</li>
 <li><code>FamHasExtResource</code> - Resource-Group junction</li>
 <li><code>FamHasCorr</code> - Correspondence-Group junction</li>
 <li><code>Specialist</code> - Specialist organizations</li>
 <li><code>ExternalResource</code> - External resources</li>
 <li><code>Correspondence</code> - Correspondence records</li>
+<li><code>Comment</code> - Gene comments with publication workflow</li>
 <li><code>User</code> - Application users</li>
 <li><code>Editor</code> - Curator accounts</li>
 <li><code>Reminder</code> - Reminder records</li>
