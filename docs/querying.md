@@ -63,6 +63,25 @@ with Session(engine) as session:
     group = session.exec(statement).first()
 ```
 
+### Get Comments for a Gene
+
+```python
+from sqlmodel import select
+from genew4_orm.models import Gene, GeneHasComment, Comment
+
+with Session(engine) as session:
+    statement = (
+        select(Comment)
+        .join(GeneHasComment)
+        .join(Gene)
+        .where(Gene.approved_symbol == "BRCA1")
+    )
+    comments = session.exec(statement).all()
+
+    for comment in comments:
+        print(f"Comment: {comment.comment} (status: {comment.status})")
+```
+
 ### Bulk Queries with Eager Loading
 
 ```python

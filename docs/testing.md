@@ -15,14 +15,17 @@ genew4-orm uses **pytest** as the test framework with the following extensions:
 ```
 tests/
 ├── unit/
-│   ├── test_config.py         # Configuration tests
-│   ├── test_models.py          # Model field validation tests
-│   └── test_relationships.py   # Relationship integrity tests
+│   ├── test_config.py              # Configuration tests
+│   ├── test_models.py              # Model field validation tests
+│   ├── test_comment_model.py       # Comment model tests
+│   ├── test_gene_has_comment_model.py  # GeneHasComment junction tests
+│   ├── test_enums.py               # Enum tests (including PublishStatus)
+│   └── test_relationships.py       # Relationship integrity tests
 ├── integration/
-│   ├── test_session.py         # Session management tests
-│   ├── test_crud.py            # CRUD operation tests
-│   └── test_audit_log.py       # Audit logging tests
-└── conftest.py                 # Pytest configuration and fixtures
+│   ├── test_session.py             # Session management tests
+│   ├── test_crud.py                # CRUD operation tests
+│   └── test_audit_log.py           # Audit logging tests
+└── conftest.py                     # Pytest configuration and fixtures
 ```
 
 ## Running Tests

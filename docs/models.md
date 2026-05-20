@@ -35,6 +35,7 @@ gene = Gene(
 
 **Relationships:**
 - `gene_has_gene_groups` - Many-to-many with GeneGroup
+- `gene_has_comments` - One-to-many with GeneHasComment
 
 ### GeneGroup
 
@@ -131,6 +132,34 @@ association = FamHasCorr(
 )
 ```
 
+### GeneHasComment
+
+Junction table for Gene ↔ Comment many-to-many relationship.
+
+```python
+from genew4_orm.models import GeneHasComment
+
+association = GeneHasComment(
+    comment_id=1,
+    hgnc_id=12345,
+    editor_id=1,
+)
+```
+
+**Key Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `comment_id` | `int` | Foreign key to comment.id (composite PK) |
+| `hgnc_id` | `int` | Foreign key to hgnc.hgnc_id (composite PK) |
+| `date_added` | `date` | Date the comment was linked to the gene |
+| `editor_id` | `int` | Foreign key to editor.ed_id |
+
+**Relationships:**
+- `comment` - Belongs to Comment
+- `gene` - Belongs to Gene
+- `editor` - Belongs to Editor
+
 ## Related Models
 
 ### Specialist
@@ -208,6 +237,41 @@ audit = AuditLog(
 )
 ```
 
+### Comment
+
+Comments linked to genes with a publication workflow.
+
+```python
+from genew4_orm.models import Comment
+from genew4_orm.enums import PublishStatus
+
+comment = Comment(
+    comment="This gene requires further review",
+    author_id=1,
+    status=PublishStatus.PENDING,
+)
+```
+
+**Key Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `int` | Primary key (auto-increment) |
+| `comment` | `str` | Comment text content |
+| `author_id` | `int` | Foreign key to editor (author) |
+| `lock` | `str` | Editing lock |
+| `created` | `date` | Date comment was created |
+| `publisher_id` | `int` | Foreign key to editor (publisher) |
+| `status` | `PublishStatus` | pending, published, or rejected |
+| `status_date` | `date` | Date of last status change |
+| `replace_id` | `int` | Foreign key to comment (replaces) |
+| `replacement_id` | `int` | Foreign key to comment (replacement) |
+
+**Relationships:**
+- `author` - Belongs to Editor (via author_id)
+- `publisher` - Belongs to Editor (via publisher_id)
+- `gene_has_comments` - One-to-many with GeneHasComment
+
 ## Enum Types
 
 ### GeneStatus
@@ -226,17 +290,23 @@ Group status values: `INTERNAL`, `EXPORTED`, `PUBLISHED`, `APPROVED`
 
 Group type values: `SET`, `SUBSET`, `OTHER`, `FAMILY`
 
+### PublishStatus
+
+Comment publication status: `PENDING`, `PUBLISHED`, `REJECTED`
+
 ## Full Model List
 
 - `Gene` - Gene information
 - `GeneGroup` - Gene family/group
 - `GeneHasGeneGroup` - Gene-Group junction
+- `GeneHasComment` - Gene-Comment junction
 - `FamHasSpecialist` - Specialist-Group junction
 - `FamHasExtResource` - Resource-Group junction
 - `FamHasCorr` - Correspondence-Group junction
 - `Specialist` - Specialist organizations
 - `ExternalResource` - External resources
 - `Correspondence` - Correspondence records
+- `Comment` - Gene comments with publication workflow
 - `User` - Application users
 - `Editor` - Curator accounts
 - `Reminder` - Reminder records

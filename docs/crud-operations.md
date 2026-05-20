@@ -136,6 +136,32 @@ with get_readwrite_session(user="curator") as session:
     session.commit()
 ```
 
+### Create Comment Linked to Gene
+
+```python
+from genew4_orm.models import Comment, GeneHasComment
+from genew4_orm.enums import PublishStatus
+
+with get_readwrite_session(user="curator") as session:
+    # Create a comment
+    comment = Comment(
+        comment="This gene requires further review",
+        author_id=1,
+        status=PublishStatus.PENDING,
+    )
+    session.add(comment)
+    session.flush()
+
+    # Link comment to a gene
+    gene_comment = GeneHasComment(
+        comment_id=comment.id,
+        hgnc_id=12345,
+        editor_id=1,
+    )
+    session.add(gene_comment)
+    session.commit()
+```
+
 ## Read Operations
 
 ### Get by ID

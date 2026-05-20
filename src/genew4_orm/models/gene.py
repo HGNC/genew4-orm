@@ -5,11 +5,14 @@ TypeScript ORM implementation in hgnc-tools-api.
 """
 
 from datetime import date
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Column, Date, Integer, String, Text
 from sqlmodel import Field, Relationship, SQLModel
 
-from genew4_orm.models.gene_has_gene_group import GeneHasGeneGroup
+if TYPE_CHECKING:
+    from genew4_orm.models.gene_has_comment import GeneHasComment
+    from genew4_orm.models.gene_has_gene_group import GeneHasGeneGroup
 
 
 class Gene(SQLModel, table=True):
@@ -241,6 +244,10 @@ class Gene(SQLModel, table=True):
 
     # Region: Relationships
     gene_has_gene_groups: list["GeneHasGeneGroup"] = Relationship(
+        back_populates="gene",
+        cascade_delete=True,
+    )
+    gene_has_comments: list["GeneHasComment"] = Relationship(
         back_populates="gene",
         cascade_delete=True,
     )

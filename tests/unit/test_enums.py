@@ -10,6 +10,7 @@ from genew4_orm.enums import (
     GeneStatus,
     Grch38MarkType,
     Grch38SourceType,
+    PublishStatus,
     enum_field,
 )
 
@@ -223,6 +224,26 @@ class TestCytobandSourceType:
         assert actual_count == expected_count
 
 
+class TestPublishStatus:
+    """Test cases for PublishStatus enum."""
+
+    def test_publish_status_values(self) -> None:
+        """Test PublishStatus has expected values."""
+        assert PublishStatus.PENDING == "pending"
+        assert PublishStatus.PUBLISHED == "published"
+        assert PublishStatus.REJECTED == "rejected"
+
+    def test_publish_status_str_method(self) -> None:
+        """Test PublishStatus __str__ method returns value."""
+        assert str(PublishStatus.PENDING) == "pending"
+        assert str(PublishStatus.PUBLISHED) == "published"
+        assert str(PublishStatus.REJECTED) == "rejected"
+
+    def test_publish_status_all_values_exist(self) -> None:
+        """Test that all 3 PublishStatus values exist."""
+        assert len(PublishStatus) == 3
+
+
 class TestEnumStringComparison:
     """Test cases for enum string comparison."""
 
@@ -254,3 +275,11 @@ class TestEnumIteration:
         assert len(values) == 8
         assert GeneStatus.APPROVED in values
         assert GeneStatus.DELETE in values
+
+    def test_iterate_publish_status(self) -> None:
+        """Test iterating over PublishStatus values."""
+        values = list(PublishStatus)
+        assert len(values) == 3
+        assert PublishStatus.PENDING in values
+        assert PublishStatus.PUBLISHED in values
+        assert PublishStatus.REJECTED in values

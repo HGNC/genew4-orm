@@ -101,8 +101,17 @@ async with get_async_readonly_session() as session:
 ## Available Models
 
 - **Gene** - Gene information
+- **GeneGroup** - Gene families and groups
+- **GeneHasGeneGroup** - Gene-Group junction table
+- **GeneHasComment** - Gene-Comment junction table
+- **Comment** - Gene comments with publication workflow
+- **Specialist** - External specialist organizations
+- **ExternalResource** - External database links
+- **Correspondence** - Communication records
 - **User** - User accounts
-- **Reminder** - User reminders
+- **Editor** - Curator accounts
+- **Reminder** - User task reminders
+- **AuditLog** - Automatic audit trail for all writes
 
 ## Development
 

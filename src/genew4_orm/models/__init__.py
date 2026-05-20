@@ -4,6 +4,7 @@ This module contains all SQLModel classes representing database tables.
 """
 
 from genew4_orm.models.audit_log import AuditLog
+from genew4_orm.models.comment import Comment
 from genew4_orm.models.correspondence import Correspondence
 from genew4_orm.models.editor import Editor
 from genew4_orm.models.external_resource import ExternalResource
@@ -13,6 +14,7 @@ from genew4_orm.models.fam_has_specialist import FamHasSpecialist
 from genew4_orm.models.gene import Gene
 from genew4_orm.models.gene_group import GeneGroup
 from genew4_orm.models.gene_group_alias import GeneGroupAlias
+from genew4_orm.models.gene_has_comment import GeneHasComment
 from genew4_orm.models.gene_has_gene_group import GeneHasGeneGroup
 from genew4_orm.models.grch38_mapping import Grch38Mapping
 from genew4_orm.models.hierarchy_closure import HierarchyClosure
@@ -27,10 +29,12 @@ __all__ = [
     "Gene",
     "GeneGroup",
     "GeneHasGeneGroup",
+    "GeneHasComment",
     "FamHasSpecialist",
     "FamHasExtResource",
     "FamHasCorr",
     "AuditLog",
+    "Comment",
     "Specialist",
     "ExternalResource",
     "Correspondence",

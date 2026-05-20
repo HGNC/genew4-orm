@@ -106,6 +106,7 @@ from genew4_orm.enums import (
     GeneLocusType,
     GeneGroupStatus,
     GeneGroupType,
+    PublishStatus,
 )
 ```
 

@@ -73,6 +73,8 @@ genew4-orm/
 │       │   ├── reminder.py
 │       │   ├── grch38_mapping.py
 │       │   ├── cytoband.py
+│       │   ├── comment.py
+│       │   ├── gene_has_comment.py
 │       │   └── audit_log.py       # Audit trail table
 │       └── utils/
 │           ├── __init__.py
@@ -133,9 +135,14 @@ All 13 entities from the TypeScript ORM:
 12. **Grch38Mapping** (`coord_match_grch38` table) - GRCh38 coordinate mappings
 13. **Cytoband** (`cytoband` table) - Cytogenetic band data
 
+**Comments**
+
+14. **Comment** (`comment` table) - Gene comments with publication workflow
+15. **GeneHasComment** (`gene_has_comment` table) - Gene-Comment junction
+
 **Audit Trail**
 
-14. **AuditLog** (`audit_log` table) - Write operation tracking (new table)
+16. **AuditLog** (`audit_log` table) - Write operation tracking (new table)
 
 ### 2.4 Type Safety
 
@@ -149,6 +156,7 @@ All 13 entities from the TypeScript ORM:
 * `Grch38SourceType` (4 values)
 * `Grch38MarkType` (2 values)
 * `CytobandSourceType` (2 values)
+* `PublishStatus` (3 values)
 
 **Date/DateTime Handling**
 
@@ -1013,6 +1021,8 @@ mkdocs build  # Generate static site in site/
 | Reminder            | Reminder            | reminder               | Links to Gene/GeneGroup       |
 | Grch38Mapping       | Grch38Mapping       | coord_match_grch38     | Composite PK                  |
 | Cytoband            | Cytoband            | cytoband               | Composite PK                  |
+| Comment             | Comment             | comment                | Publication workflow           |
+| GeneHasComment      | GeneHasComment      | gene_has_comment       | Gene-Comment junction          |
 
 ### 16.2 Key Dependencies
 

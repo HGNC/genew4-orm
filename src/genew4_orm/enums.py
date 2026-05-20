@@ -187,6 +187,20 @@ class CytobandSourceType(StrEnum):
         return self.value
 
 
+class PublishStatus(StrEnum):
+    """Comment publication status (3 values).
+
+    Controls the visibility/state of a comment in the publication workflow.
+    """
+
+    PENDING = "pending"
+    PUBLISHED = "published"
+    REJECTED = "rejected"
+
+    def __str__(self) -> str:
+        return self.value
+
+
 # Export all enums for easy importing
 __all__ = [
     "GeneLocusType",
@@ -196,5 +210,6 @@ __all__ = [
     "Grch38SourceType",
     "Grch38MarkType",
     "CytobandSourceType",
+    "PublishStatus",
     "enum_field",
 ]
