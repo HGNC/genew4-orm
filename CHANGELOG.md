@@ -1,6 +1,29 @@
 # CHANGELOG
 
 
+## v0.3.0 (2026-05-20)
+
+### Documentation
+
+- Add MCP server section for interactive help in README and getting-started
+  ([`2822ac9`](https://github.com/HGNC/genew4-orm/commit/2822ac979389ed451d198fd611cd28c6cf92367c))
+
+- Update MCP server chat URL in documentation
+  ([`f50a3e6`](https://github.com/HGNC/genew4-orm/commit/f50a3e634dde8f10ddb73aa6bfc055b7311e479f))
+
+- Update Python version requirement to 3.13+ in getting-started
+  ([`1709ccd`](https://github.com/HGNC/genew4-orm/commit/1709ccded44210c14323d73f37a94c0f99935bb7))
+
+Align Python version requirement across all documentation.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+### Features
+
+- Add Comment and GeneHasComment models with publication workflow support
+  ([`f18a4f5`](https://github.com/HGNC/genew4-orm/commit/f18a4f5f14e669bcbdbc47e53ffca7c19006710f))
+
+
 ## v0.2.21 (2026-02-16)
 
 ### Bug Fixes
