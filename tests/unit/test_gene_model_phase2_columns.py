@@ -27,15 +27,11 @@ class TestGenePhase2Columns:
         """Assert Gene has hgnc_hseq_ids column mapped to hseq_ids attribute."""
         assert "hgnc_hseq_ids" in gene_columns
 
-    def test_gene_has_public_hseq_id_column(
-        self, gene_columns: dict[str, Column]
-    ) -> None:
+    def test_gene_has_public_hseq_id_column(self, gene_columns: dict[str, Column]) -> None:
         """Assert Gene has hgnc_pub_hseq_id column mapped to public_hseq_id attribute."""
         assert "hgnc_pub_hseq_id" in gene_columns
 
-    def test_gene_has_pseudogene_id_column(
-        self, gene_columns: dict[str, Column]
-    ) -> None:
+    def test_gene_has_pseudogene_id_column(self, gene_columns: dict[str, Column]) -> None:
         """Assert Gene has hgnc_pseudogene_id column mapped to pseudogene_id attribute."""
         assert "hgnc_pseudogene_id" in gene_columns
 
@@ -43,41 +39,31 @@ class TestGenePhase2Columns:
         """Assert Gene has hgnc_vega_ids column mapped to vega_ids attribute."""
         assert "hgnc_vega_ids" in gene_columns
 
-    def test_ccds_ids_is_text_nullable(
-        self, gene_columns: dict[str, Column]
-    ) -> None:
+    def test_ccds_ids_is_text_nullable(self, gene_columns: dict[str, Column]) -> None:
         """Assert hgnc_ccds_ids is Text type and nullable."""
         col = gene_columns["hgnc_ccds_ids"]
         assert isinstance(col.type, Text)
         assert col.nullable is True
 
-    def test_hseq_ids_is_text_nullable(
-        self, gene_columns: dict[str, Column]
-    ) -> None:
+    def test_hseq_ids_is_text_nullable(self, gene_columns: dict[str, Column]) -> None:
         """Assert hgnc_hseq_ids is Text type and nullable."""
         col = gene_columns["hgnc_hseq_ids"]
         assert isinstance(col.type, Text)
         assert col.nullable is True
 
-    def test_public_hseq_id_is_text_nullable(
-        self, gene_columns: dict[str, Column]
-    ) -> None:
+    def test_public_hseq_id_is_text_nullable(self, gene_columns: dict[str, Column]) -> None:
         """Assert hgnc_pub_hseq_id is Text type and nullable."""
         col = gene_columns["hgnc_pub_hseq_id"]
         assert isinstance(col.type, Text)
         assert col.nullable is True
 
-    def test_pseudogene_id_is_integer_nullable(
-        self, gene_columns: dict[str, Column]
-    ) -> None:
+    def test_pseudogene_id_is_integer_nullable(self, gene_columns: dict[str, Column]) -> None:
         """Assert hgnc_pseudogene_id is Integer type and nullable."""
         col = gene_columns["hgnc_pseudogene_id"]
         assert isinstance(col.type, Integer)
         assert col.nullable is True
 
-    def test_vega_ids_is_text_nullable(
-        self, gene_columns: dict[str, Column]
-    ) -> None:
+    def test_vega_ids_is_text_nullable(self, gene_columns: dict[str, Column]) -> None:
         """Assert hgnc_vega_ids is Text type and nullable."""
         col = gene_columns["hgnc_vega_ids"]
         assert isinstance(col.type, Text)

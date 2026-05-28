@@ -3,7 +3,6 @@
 import pytest
 from sqlmodel import SQLModel
 
-
 EXPECTED_PHASE2_EXPORTS = [
     ("TableModDate", "table_mod_dates"),
     ("Ccds", "ccds"),
@@ -31,9 +30,7 @@ def test_phase2_models_in_all() -> None:
     import genew4_orm.models
 
     for class_name, _ in EXPECTED_PHASE2_EXPORTS:
-        assert class_name in genew4_orm.models.__all__, (
-            f"{class_name} missing from __all__"
-        )
+        assert class_name in genew4_orm.models.__all__, f"{class_name} missing from __all__"
 
 
 def test_updated_gene_in_all() -> None:

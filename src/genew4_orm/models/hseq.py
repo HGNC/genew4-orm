@@ -4,7 +4,7 @@ Used by hseq-importer for inserts and post-load lookup of
 canonical sequence records.
 """
 
-from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text
 from sqlmodel import Field, SQLModel
 
 

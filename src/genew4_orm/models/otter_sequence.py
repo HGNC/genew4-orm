@@ -3,7 +3,7 @@
 Used by hseq-importer (VEGA/Otter source sequence lookup).
 """
 
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, Text
 from sqlmodel import Field, SQLModel
 
 

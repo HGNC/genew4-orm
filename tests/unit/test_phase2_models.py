@@ -161,11 +161,22 @@ class TestGene2Refseq:
 
     def test_key_columns_exist(self, columns: dict[str, Column]) -> None:
         expected = [
-            "g2r_tax_id", "g2r_eg_id", "g2r_status", "g2r_rna_nt_acc_ver",
-            "g2r_rna_nt_gi", "g2r_prot_acc_ver", "g2r_prot_gi",
-            "g2r_gen_nt_acc_ver", "g2r_gen_nt_gi", "g2r_start_pos_gen_acc",
-            "g2r_end_pos_gen_acc", "g2r_orientation", "g2r_assembly",
-            "g2r_mat_pept_acc_ver", "g2r_mat_pept_gi", "g2r_symbol",
+            "g2r_tax_id",
+            "g2r_eg_id",
+            "g2r_status",
+            "g2r_rna_nt_acc_ver",
+            "g2r_rna_nt_gi",
+            "g2r_prot_acc_ver",
+            "g2r_prot_gi",
+            "g2r_gen_nt_acc_ver",
+            "g2r_gen_nt_gi",
+            "g2r_start_pos_gen_acc",
+            "g2r_end_pos_gen_acc",
+            "g2r_orientation",
+            "g2r_assembly",
+            "g2r_mat_pept_acc_ver",
+            "g2r_mat_pept_gi",
+            "g2r_symbol",
         ]
         for col_name in expected:
             assert col_name in columns, f"Missing column: {col_name}"
@@ -190,11 +201,22 @@ class TestGeneInfo:
 
     def test_key_columns_exist(self, columns: dict[str, Column]) -> None:
         expected = [
-            "gi_tax_id", "gi_eg_id", "gi_sym", "gi_locustag", "gi_synonyms",
-            "gi_dbxrefs", "gi_chrom", "gi_map_location", "gi_description",
-            "gi_type_of_gene", "gi_sym_from_nome_auth",
-            "gi_full_name_from_nome_auth", "gi_nome_status",
-            "gi_other_designations", "gi_modification_date", "gi_hgnc_id",
+            "gi_tax_id",
+            "gi_eg_id",
+            "gi_sym",
+            "gi_locustag",
+            "gi_synonyms",
+            "gi_dbxrefs",
+            "gi_chrom",
+            "gi_map_location",
+            "gi_description",
+            "gi_type_of_gene",
+            "gi_sym_from_nome_auth",
+            "gi_full_name_from_nome_auth",
+            "gi_nome_status",
+            "gi_other_designations",
+            "gi_modification_date",
+            "gi_hgnc_id",
         ]
         for col_name in expected:
             assert col_name in columns, f"Missing column: {col_name}"
@@ -223,8 +245,15 @@ class TestPseudogeneOrg:
 
     def test_all_columns_exist(self, columns: dict[str, Column]) -> None:
         expected = [
-            "porg_id", "porg_chr", "porg_strand", "porg_start", "porg_end",
-            "porg_seq", "porg_class", "porg_link", "porg_parent_gene",
+            "porg_id",
+            "porg_chr",
+            "porg_strand",
+            "porg_start",
+            "porg_end",
+            "porg_seq",
+            "porg_class",
+            "porg_link",
+            "porg_parent_gene",
         ]
         for col_name in expected:
             assert col_name in columns, f"Missing column: {col_name}"
@@ -274,8 +303,12 @@ class TestEnsemblSequence:
 
     def test_all_columns_exist(self, columns: dict[str, Column]) -> None:
         for col_name in [
-            "eseq_source", "eseq_defline", "eseq_ensembl_gene_id",
-            "eseq_ensembl_transcript_id", "eseq_seq", "eseq_length",
+            "eseq_source",
+            "eseq_defline",
+            "eseq_ensembl_gene_id",
+            "eseq_ensembl_transcript_id",
+            "eseq_seq",
+            "eseq_length",
         ]:
             assert col_name in columns
 
@@ -308,9 +341,18 @@ class TestHseq:
 
     def test_all_columns_exist(self, columns: dict[str, Column]) -> None:
         expected = [
-            "hseq_id", "hseq_ext", "hseq_editor", "hseq_molecule",
-            "hseq_submitted", "hseq_status", "hseq_priority", "hseq_run_notes",
-            "hseq_comment", "hseq_entry_class", "hseq_isnew", "hseq_defline",
+            "hseq_id",
+            "hseq_ext",
+            "hseq_editor",
+            "hseq_molecule",
+            "hseq_submitted",
+            "hseq_status",
+            "hseq_priority",
+            "hseq_run_notes",
+            "hseq_comment",
+            "hseq_entry_class",
+            "hseq_isnew",
+            "hseq_defline",
             "hseq_seq",
         ]
         for col_name in expected:
