@@ -242,6 +242,33 @@ class Gene(SQLModel, table=True):
         description="TGMI stable symbol flag",
     )
 
+    # Region: Phase 2 Cross-Reference and Sequence Fields
+    ccds_ids: str | None = Field(
+        default=None,
+        sa_column=Column("hgnc_ccds_ids", Text),
+        description="Comma-separated CCDS IDs associated with this gene",
+    )
+    hseq_ids: str | None = Field(
+        default=None,
+        sa_column=Column("hgnc_hseq_ids", Text),
+        description="Comma-separated HSeq IDs associated with this gene",
+    )
+    public_hseq_id: str | None = Field(
+        default=None,
+        sa_column=Column("hgnc_pub_hseq_id", Text),
+        description="Public HSeq ID for this gene",
+    )
+    pseudogene_id: int | None = Field(
+        default=None,
+        sa_column=Column("hgnc_pseudogene_id", Integer),
+        description="Pseudogene.org ID linked to this gene",
+    )
+    vega_ids: str | None = Field(
+        default=None,
+        sa_column=Column("hgnc_vega_ids", Text),
+        description="Vega (Otter) gene IDs associated with this gene",
+    )
+
     # Region: Relationships
     gene_has_gene_groups: list["GeneHasGeneGroup"] = Relationship(
         back_populates="gene",
