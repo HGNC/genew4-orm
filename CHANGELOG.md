@@ -1,6 +1,34 @@
 # CHANGELOG
 
 
+## v0.4.0 (2026-05-28)
+
+### Features
+
+- Add 10 Phase 2 ORM models and 5 Gene columns
+  ([`1101fa3`](https://github.com/HGNC/genew4-orm/commit/1101fa3ddf878ee4b97351ea174219ed013d379e))
+
+New SQLModel classes for Phase 2 batch job data access: - TableModDate, Ccds, CcdsSequence,
+  Gene2Refseq, GeneInfo - PseudogeneOrg, OtterSequence, EnsemblSequence, Hseq, HgncId2CcdsId
+
+Gene model gains 5 new columns: - ccds_ids, hseq_ids, public_hseq_id, pseudogene_id, vega_ids
+
+Key pattern: PK fields use Field(primary_key=True) with field name matching column name; non-PK
+  fields with custom column names use sa_column=Column(). This avoids SQLModel's RuntimeError when
+  combining primary_key=True with sa_column=.
+
+53 new tests, all passing. Total: 319 unit tests green.
+
+- Export all Phase 2 models from package __init__
+  ([`85587b9`](https://github.com/HGNC/genew4-orm/commit/85587b905a59b86ff3e51504a4f23f241b803e1f))
+
+Update models/__init__.py to import and re-export all 10 new Phase 2 model classes and add them to
+  __all__.
+
+Add test_phase2_model_exports.py with 12 tests verifying all new models are importable via
+  genew4_orm.models and present in __all__.
+
+
 ## v0.3.0 (2026-05-20)
 
 ### Documentation
