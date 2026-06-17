@@ -32,6 +32,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
+    "db-common>=0.1.0",
     "alembic>=1.15.0",
     "psycopg>=3.3.2",
     "pydantic>=2.12.5",
@@ -39,6 +40,10 @@ dependencies = [
     "sqlalchemy>=2.0.46",
     "sqlmodel>=0.0.33",
 ]
+
+[tool.uv.sources]
+# Pinned to an immutable tag on HGNC/db-common (never a moving branch).
+db-common = { git = "https://github.com/HGNC/db-common.git", tag = "v0.1.0" }
 
 [project.urls]
 Homepage = "https://github.com/HGNC/genew4-orm"
