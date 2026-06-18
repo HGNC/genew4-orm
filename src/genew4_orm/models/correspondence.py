@@ -3,11 +3,12 @@
 This model contains correspondence record information.
 """
 
-from sqlalchemy import Column, Text
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class Correspondence(SQLModel, table=True):
+class Correspondence(DeclarativeBase):
     """Correspondence entity representing the corr table.
 
     Records of correspondence with researchers and organizations.
@@ -16,65 +17,24 @@ class Correspondence(SQLModel, table=True):
     __tablename__ = "corr"
 
     # Region: Editing
-    lock: str | None = Field(
-        default=None,
-        sa_column=Column("corr_lock", Text),
-        description="Lock flag for editing",
-    )
+    lock: Mapped[str | None] = mapped_column("corr_lock", Text, comment="Lock flag for editing")
 
     # Region: Core fields
-    id: int | None = Field(
-        default=None,
-        primary_key=True,
-        sa_column_kwargs={"name": "corr_id"},
-        description="Primary key",
+    id: Mapped[int | None] = mapped_column(
+        "corr_id",
+        primary_key=True, nullable=False,
+        comment="Primary key",
     )
-    first_name: str | None = Field(
-        default=None,
-        sa_column=Column("corr_first_name", Text),
-        description="Contact first name",
-    )
-    last_name: str | None = Field(
-        default=None,
-        sa_column=Column("corr_last_name", Text),
-        description="Contact last name",
-    )
-    email: str | None = Field(
-        default=None,
-        sa_column=Column("corr_email", Text),
-        description="Contact email address",
-    )
-    notes: str | None = Field(
-        default=None,
-        sa_column=Column("corr_notes", Text),
-        description="Correspondence notes",
-    )
-    address: str | None = Field(
-        default=None,
-        sa_column=Column("corr_address", Text),
-        description="Contact address",
-    )
-    date_received: str | None = Field(
-        default=None,
-        sa_column=Column("corr_date_recev", Text),
-        description="Date correspondence received",
-    )
-    date_sent: str | None = Field(
-        default=None,
-        sa_column=Column("corr_date_sent", Text),
-        description="Date correspondence sent",
-    )
+    first_name: Mapped[str | None] = mapped_column("corr_first_name", Text, comment="Contact first name")
+    last_name: Mapped[str | None] = mapped_column("corr_last_name", Text, comment="Contact last name")
+    email: Mapped[str | None] = mapped_column("corr_email", Text, comment="Contact email address")
+    notes: Mapped[str | None] = mapped_column("corr_notes", Text, comment="Correspondence notes")
+    address: Mapped[str | None] = mapped_column("corr_address", Text, comment="Contact address")
+    date_received: Mapped[str | None] = mapped_column("corr_date_recev", Text, comment="Date correspondence received")
+    date_sent: Mapped[str | None] = mapped_column("corr_date_sent", Text, comment="Date correspondence sent")
     # These emails can be large data, only query if needed
-    email_received: str | None = Field(
-        default=None,
-        sa_column=Column("corr_recev_email", Text),
-        description="Received email content",
-    )
-    email_sent: str | None = Field(
-        default=None,
-        sa_column=Column("corr_sent_email", Text),
-        description="Sent email content",
-    )
+    email_received: Mapped[str | None] = mapped_column("corr_recev_email", Text, comment="Received email content")
+    email_sent: Mapped[str | None] = mapped_column("corr_sent_email", Text, comment="Sent email content")
 
     # Note: Many-to-many with GeneGroup is through FamHasCorr junction table
     # Query via: session.query(Correspondence).join(FamHasCorr).join(GeneGroup)

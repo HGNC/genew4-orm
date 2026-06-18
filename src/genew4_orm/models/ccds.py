@@ -4,11 +4,12 @@ Used by coord-builder (CCDS sub-source), xref-loader (CCDS loader + post-load),
 and hseq-importer (CCDS source).
 """
 
-from sqlalchemy import Column, Integer, String, Text
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class Ccds(SQLModel, table=True):
+class Ccds(DeclarativeBase):
     """CCDS (Consensus Coding Sequence) record.
 
     Stores CCDS identifier mappings, chromosomal coordinates,
@@ -17,64 +18,64 @@ class Ccds(SQLModel, table=True):
 
     __tablename__ = "ccds"
 
-    ccds_id: str | None = Field(
-        default=None,
-        primary_key=True,
-        max_length=50,
-        description="CCDS identifier (primary key)",
+    ccds_id: Mapped[str | None] = mapped_column(
+        "ccds_id",
+        String(50),
+        primary_key=True, nullable=False,
+        comment="CCDS identifier (primary key)",
     )
-    chromosome: str | None = Field(
-        default=None,
-        sa_column=Column("ccds_chrom", String(50)),
-        description="Chromosome",
+    chromosome: Mapped[str | None] = mapped_column(
+        "ccds_chrom",
+        String(50),
+        comment="Chromosome",
     )
-    accession: str | None = Field(
-        default=None,
-        sa_column=Column("ccds_acc", String(50)),
-        description="CCDS accession",
+    accession: Mapped[str | None] = mapped_column(
+        "ccds_acc",
+        String(50),
+        comment="CCDS accession",
     )
-    symbol: str | None = Field(
-        default=None,
-        sa_column=Column("ccds_sym", String(255)),
-        description="Gene symbol",
+    symbol: Mapped[str | None] = mapped_column(
+        "ccds_sym",
+        String(255),
+        comment="Gene symbol",
     )
-    ncbi_gene_id: str | None = Field(
-        default=None,
-        sa_column=Column("ccds_eg_id", String(50)),
-        description="NCBI Entrez Gene ID",
+    ncbi_gene_id: Mapped[str | None] = mapped_column(
+        "ccds_eg_id",
+        String(50),
+        comment="NCBI Entrez Gene ID",
     )
-    status: str | None = Field(
-        default=None,
-        sa_column=Column("ccds_status", String(100)),
-        description="CCDS status (Public, Withdrawn, etc.)",
+    status: Mapped[str | None] = mapped_column(
+        "ccds_status",
+        String(100),
+        comment="CCDS status (Public, Withdrawn, etc.)",
     )
-    strand: str | None = Field(
-        default=None,
-        sa_column=Column("ccds_strand", String(5)),
-        description="Strand (+/-)",
+    strand: Mapped[str | None] = mapped_column(
+        "ccds_strand",
+        String(5),
+        comment="Strand (+/-)",
     )
-    start: str | None = Field(
-        default=None,
-        sa_column=Column("ccds_from", String(50)),
-        description="Start coordinate",
+    start: Mapped[str | None] = mapped_column(
+        "ccds_from",
+        String(50),
+        comment="Start coordinate",
     )
-    end: str | None = Field(
-        default=None,
-        sa_column=Column("ccds_to", String(50)),
-        description="End coordinate",
+    end: Mapped[str | None] = mapped_column(
+        "ccds_to",
+        String(50),
+        comment="End coordinate",
     )
-    locations: str | None = Field(
-        default=None,
-        sa_column=Column("ccds_locations", Text),
-        description="Location information",
+    locations: Mapped[str | None] = mapped_column(
+        "ccds_locations",
+        Text,
+        comment="Location information",
     )
-    match_type: str | None = Field(
-        default=None,
-        sa_column=Column("ccds_match_type", String(100)),
-        description="Match type classification",
+    match_type: Mapped[str | None] = mapped_column(
+        "ccds_match_type",
+        String(100),
+        comment="Match type classification",
     )
-    hgnc_id: int | None = Field(
-        default=None,
-        sa_column=Column("ccds_hgnc_id", Integer),
-        description="HGNC ID (back-filled post-load)",
+    hgnc_id: Mapped[int | None] = mapped_column(
+        "ccds_hgnc_id",
+        Integer,
+        comment="HGNC ID (back-filled post-load)",
     )

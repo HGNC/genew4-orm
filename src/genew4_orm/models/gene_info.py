@@ -3,40 +3,41 @@
 Used by coord-builder (NCBI sub-source) and xref-loader (gene_info loader).
 """
 
-from sqlalchemy import Column, Integer, String, Text
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class GeneInfo(SQLModel, table=True):
+class GeneInfo(DeclarativeBase):
     """NCBI Gene Info record.
 
     Stores gene information from NCBI including symbols, synonyms,
     chromosome locations, and cross-references.
 
     Composite primary key: (gi_tax_id, gi_eg_id).
-    The PK field names match their column names so that SQLModel's
-    Field(primary_key=True) mechanism works alongside sa_column fields.
+    The PK field names match their column names so that ``mapped_column(primary_key=True, nullable=False)``
+    works alongside the other ``mapped_column("...", String)`` fields.
     """
 
     __tablename__ = "gene_info"
 
-    gi_tax_id: str | None = Field(default=None, primary_key=True)
-    gi_eg_id: str | None = Field(default=None, primary_key=True)
-    symbol: str | None = Field(default=None, sa_column=Column("gi_sym", String))
-    locus_tag: str | None = Field(default=None, sa_column=Column("gi_locustag", String))
-    synonyms: str | None = Field(default=None, sa_column=Column("gi_synonyms", String))
-    db_xrefs: str | None = Field(default=None, sa_column=Column("gi_dbxrefs", String))
-    chromosome: str | None = Field(default=None, sa_column=Column("gi_chrom", String(255)))
-    map_location: str | None = Field(default=None, sa_column=Column("gi_map_location", String))
-    description: str | None = Field(default=None, sa_column=Column("gi_description", Text))
-    type_of_gene: str | None = Field(default=None, sa_column=Column("gi_type_of_gene", String))
-    symbol_from_nomenclature_authority: str | None = Field(
-        default=None, sa_column=Column("gi_sym_from_nome_auth", String)
+    gi_tax_id: Mapped[str | None] = mapped_column(primary_key=True, nullable=False)
+    gi_eg_id: Mapped[str | None] = mapped_column(primary_key=True, nullable=False)
+    symbol: Mapped[str | None] = mapped_column("gi_sym", String)
+    locus_tag: Mapped[str | None] = mapped_column("gi_locustag", String)
+    synonyms: Mapped[str | None] = mapped_column("gi_synonyms", String)
+    db_xrefs: Mapped[str | None] = mapped_column("gi_dbxrefs", String)
+    chromosome: Mapped[str | None] = mapped_column("gi_chrom", String(255))
+    map_location: Mapped[str | None] = mapped_column("gi_map_location", String)
+    description: Mapped[str | None] = mapped_column("gi_description", Text)
+    type_of_gene: Mapped[str | None] = mapped_column("gi_type_of_gene", String)
+    symbol_from_nomenclature_authority: Mapped[str | None] = mapped_column(
+        "gi_sym_from_nome_auth", String
     )
-    full_name_from_nomenclature_authority: str | None = Field(
-        default=None, sa_column=Column("gi_full_name_from_nome_auth", String)
+    full_name_from_nomenclature_authority: Mapped[str | None] = mapped_column(
+        "gi_full_name_from_nome_auth", String
     )
-    nomenclature_status: str | None = Field(default=None, sa_column=Column("gi_nome_status", String))
-    other_designations: str | None = Field(default=None, sa_column=Column("gi_other_designations", String))
-    modification_date: str | None = Field(default=None, sa_column=Column("gi_modification_date", String))
-    hgnc_id: int | None = Field(default=None, sa_column=Column("gi_hgnc_id", Integer))
+    nomenclature_status: Mapped[str | None] = mapped_column("gi_nome_status", String)
+    other_designations: Mapped[str | None] = mapped_column("gi_other_designations", String)
+    modification_date: Mapped[str | None] = mapped_column("gi_modification_date", String)
+    hgnc_id: Mapped[int | None] = mapped_column("gi_hgnc_id", Integer)

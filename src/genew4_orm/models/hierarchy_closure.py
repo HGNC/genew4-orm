@@ -5,14 +5,15 @@ This model contains transitive closure data for hierarchical gene group relation
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, Integer
-from sqlmodel import Field, Relationship, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from genew4_orm.models.gene_group import GeneGroup
 
 
-class HierarchyClosure(SQLModel, table=True):
+class HierarchyClosure(DeclarativeBase):
     """HierarchyClosure entity representing the hierarchy_closure table.
 
     Transitive closure table for efficient hierarchical queries.
@@ -23,47 +24,37 @@ class HierarchyClosure(SQLModel, table=True):
     __tablename__ = "hierarchy_closure"
 
     # Composite primary key fields
-    ancestor_id: int = Field(
-        sa_column=Column(
-            "parent_fam_id",
-            Integer,
-            ForeignKey("family_new.id", ondelete="CASCADE"),
-            primary_key=True,
-        ),
-        description="Parent/ancestor gene group ID",
+    ancestor_id: Mapped[int] = mapped_column(
+        "parent_fam_id",
+        Integer,
+        ForeignKey("family_new.id", ondelete="CASCADE"),
+        primary_key=True, nullable=False,
+        comment="Parent/ancestor gene group ID",
     )
-    descendant_id: int = Field(
-        sa_column=Column(
-            "child_fam_id",
-            Integer,
-            ForeignKey("family_new.id", ondelete="CASCADE"),
-            primary_key=True,
-        ),
-        description="Child/descendant gene group ID",
+    descendant_id: Mapped[int] = mapped_column(
+        "child_fam_id",
+        Integer,
+        ForeignKey("family_new.id", ondelete="CASCADE"),
+        primary_key=True, nullable=False,
+        comment="Child/descendant gene group ID",
     )
-    distance: int = Field(
-        sa_column=Column(
-            "distance",
-            Integer,
-            primary_key=True,
-        ),
-        description="Number of levels between ancestor and descendant",
+    distance: Mapped[int] = mapped_column(
+        "distance",
+        Integer,
+        primary_key=True, nullable=False,
+        comment="Number of levels between ancestor and descendant",
     )
 
     # Relationships
-    ancestor: "GeneGroup" = Relationship(
+    ancestor: Mapped["GeneGroup"] = relationship(
         back_populates="child_hierarchy_closures",
-        sa_relationship_kwargs={
-            "primaryjoin": "HierarchyClosure.ancestor_id == GeneGroup.id",
-            "foreign_keys": "[HierarchyClosure.ancestor_id]",
-        },
+        primaryjoin="HierarchyClosure.ancestor_id == GeneGroup.id",
+        foreign_keys="[HierarchyClosure.ancestor_id]",
     )
-    descendant: "GeneGroup" = Relationship(
+    descendant: Mapped["GeneGroup"] = relationship(
         back_populates="parent_hierarchy_closures",
-        sa_relationship_kwargs={
-            "primaryjoin": "HierarchyClosure.descendant_id == GeneGroup.id",
-            "foreign_keys": "[HierarchyClosure.descendant_id]",
-        },
+        primaryjoin="HierarchyClosure.descendant_id == GeneGroup.id",
+        foreign_keys="[HierarchyClosure.descendant_id]",
     )
 
     def __repr__(self) -> str:

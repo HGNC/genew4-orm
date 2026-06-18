@@ -3,11 +3,12 @@
 Used by hseq-importer (VEGA/Otter source sequence lookup).
 """
 
-from sqlalchemy import Column, Integer, Text
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class OtterSequence(SQLModel, table=True):
+class OtterSequence(DeclarativeBase):
     """VEGA/Otter sequence record.
 
     Stores nucleotide sequences from the VEGA (Vertebrate Genome Annotation)
@@ -16,24 +17,11 @@ class OtterSequence(SQLModel, table=True):
 
     __tablename__ = "otter_seq"
 
-    oseq_gene_id: str | None = Field(
-        default=None,
-        primary_key=True,
-        max_length=255,
-        description="VEGA gene identifier (primary key, join key)",
+    oseq_gene_id: Mapped[str | None] = mapped_column(
+        String(255),
+        primary_key=True, nullable=False,
+        comment="VEGA gene identifier (primary key, join key)",
     )
-    defline: str | None = Field(
-        default=None,
-        sa_column=Column("oseq_defline", Text),
-        description="FASTA defline",
-    )
-    sequence: str | None = Field(
-        default=None,
-        sa_column=Column("oseq_seq", Text),
-        description="Nucleotide sequence",
-    )
-    length: int | None = Field(
-        default=None,
-        sa_column=Column("oseq_length", Integer),
-        description="Sequence length",
-    )
+    defline: Mapped[str | None] = mapped_column("oseq_defline", Text, comment="FASTA defline")
+    sequence: Mapped[str | None] = mapped_column("oseq_seq", Text, comment="Nucleotide sequence")
+    length: Mapped[int | None] = mapped_column("oseq_length", Integer, comment="Sequence length")

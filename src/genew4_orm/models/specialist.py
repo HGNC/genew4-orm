@@ -3,11 +3,12 @@
 This model contains specialist organization information.
 """
 
-from sqlalchemy import Column, Text
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class Specialist(SQLModel, table=True):
+class Specialist(DeclarativeBase):
     """Specialist entity representing the specialist table.
 
     External specialist organizations that collaborate with HGNC.
@@ -15,25 +16,14 @@ class Specialist(SQLModel, table=True):
 
     __tablename__ = "specialist"
 
-    id: int | None = Field(
-        default=None,
-        primary_key=True,
-        description="Primary key",
+    id: Mapped[int | None] = mapped_column(
+        Integer,
+        primary_key=True, nullable=False,
+        comment="Primary key",
     )
-    name: str = Field(
-        max_length=255,
-        nullable=False,
-        description="Specialist organization name",
-    )
-    address: str = Field(
-        sa_column=Column(Text, nullable=False),
-        description="Specialist organization address",
-    )
-    url: str | None = Field(
-        default=None,
-        max_length=255,
-        description="Specialist organization website URL",
-    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False, comment="Specialist organization name")
+    address: Mapped[str] = mapped_column(Text, nullable=False, comment="Specialist organization address")
+    url: Mapped[str | None] = mapped_column(String(255), comment="Specialist organization website URL")
 
     # Note: Many-to-many with GeneGroup is through FamHasSpecialist junction table
     # Query via: session.query(Specialist).join(FamHasSpecialist).join(GeneGroup)

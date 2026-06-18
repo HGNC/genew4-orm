@@ -1,6 +1,10 @@
 """Unit tests for enums module."""
 
-from sqlmodel import Field, SQLModel
+from typing import Any
+
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import inspect
+from sqlalchemy.orm import Mapped, declarative_base, mapped_column
 
 from genew4_orm.enums import (
     CytobandSourceType,
@@ -15,62 +19,94 @@ from genew4_orm.enums import (
 )
 
 
+def _build_enum_model(**field_kwargs: Any) -> type:
+    """Build an isolated DeclarativeBase model exposing one ``enum_field`` column.
+
+    A fresh ``declarative_base()`` (own registry/metadata) is created per call so
+    each test gets an isolated namespace — no shared-metadata table-name
+    collisions and no subclassing ``DeclarativeBase`` directly (which SQLAlchemy
+    rejects).
+    """
+
+    base = declarative_base()
+
+    class _EnumModel(base):
+        __tablename__ = "test_enum_field_model"
+
+        id: Mapped[int] = mapped_column(primary_key=True)
+        status: Mapped[PublishStatus] = enum_field(PublishStatus, **field_kwargs)
+
+    return _EnumModel
+
+
 class TestEnumField:
     """Test cases for enum_field function."""
 
     def test_enum_field_basic(self) -> None:
-        """Test enum_field creates a proper Field."""
-        field = enum_field(GeneStatus, default=GeneStatus.APPROVED, nullable=False)
+        """Test enum_field creates an Enum column with the enum class."""
+        model = _build_enum_model(default=PublishStatus.PENDING, nullable=False)
+        col = inspect(model).columns["status"]
 
-        assert field is not None
-        assert field.default is GeneStatus.APPROVED
+        assert isinstance(col.type, SAEnum)
+        assert col.type.enum_class is PublishStatus
+        assert col.default is not None
+        assert col.default.arg is PublishStatus.PENDING
 
     def test_enum_field_with_default_none(self) -> None:
         """Test enum_field with None default."""
-        field = enum_field(GeneStatus, default=None, nullable=True)
+        model = _build_enum_model(default=None, nullable=True)
+        col = inspect(model).columns["status"]
 
-        assert field is not None
+        assert col.default is None
+        assert col.nullable is True
 
     def test_enum_field_nullable_false(self) -> None:
         """Test enum_field with nullable=False."""
-        field = enum_field(GeneStatus, default=GeneStatus.APPROVED, nullable=False)
+        model = _build_enum_model(default=PublishStatus.PENDING, nullable=False)
+        col = inspect(model).columns["status"]
 
-        assert field is not None
+        assert col.nullable is False
 
     def test_enum_field_nullable_true(self) -> None:
         """Test enum_field with nullable=True."""
-        field = enum_field(GeneStatus, default=None, nullable=True)
+        model = _build_enum_model(default=None, nullable=True)
+        col = inspect(model).columns["status"]
 
-        assert field is not None
+        assert col.nullable is True
 
     def test_enum_field_with_column_name(self) -> None:
         """Test enum_field with custom column_name."""
-        field = enum_field(
-            GeneStatus,
-            default=GeneStatus.APPROVED,
+        model = _build_enum_model(
+            default=PublishStatus.PENDING,
             nullable=False,
             column_name="custom_status_column",
         )
+        columns = {c.name: c for c in inspect(model).columns}
 
-        assert field is not None
-        # The column name should be set in sa_column_kwargs
+        assert "custom_status_column" in columns
+        assert isinstance(columns["custom_status_column"].type, SAEnum)
 
     def test_enum_field_in_model(self) -> None:
-        """Test enum_field within a SQLModel."""
+        """Test enum_field within a DeclarativeBase model yields an Enum column."""
+        base = declarative_base()
 
-        class TestModel(SQLModel, table=True):
+        class TestModel(base):
             __tablename__ = "test_model"
 
-            id: int | None = Field(default=None, primary_key=True)
-            status: GeneStatus = enum_field(
-                GeneStatus,
-                default=GeneStatus.APPROVED,
+            id: Mapped[int] = mapped_column(primary_key=True)
+            status: Mapped[PublishStatus] = enum_field(
+                PublishStatus,
+                default=PublishStatus.PENDING,
                 nullable=False,
+                column_name="status",
             )
 
-        # Model should be created successfully
         assert TestModel.__tablename__ == "test_model"
-        assert hasattr(TestModel, "status")
+        col = inspect(TestModel).columns["status"]
+        assert isinstance(col.type, SAEnum)
+        assert col.type.enum_class is PublishStatus
+        assert col.type.create_constraint is True
+        assert col.type.native_enum is False
 
 
 class TestGeneLocusType:

@@ -1,7 +1,7 @@
 """Tests verifying Phase 2 model exports from genew4_orm.models."""
 
 import pytest
-from sqlmodel import SQLModel
+from db_common import DeclarativeBase
 
 EXPECTED_PHASE2_EXPORTS = [
     ("TableModDate", "table_mod_dates"),
@@ -22,7 +22,7 @@ def test_phase2_model_importable_from_package(class_name: str, tablename: str) -
     import genew4_orm.models
 
     model_class = getattr(genew4_orm.models, class_name)
-    assert issubclass(model_class, SQLModel)
+    assert issubclass(model_class, DeclarativeBase)
     assert model_class.__tablename__ == tablename
 
 

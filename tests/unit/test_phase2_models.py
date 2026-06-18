@@ -5,8 +5,8 @@ __tablename__, column names, column types, primary keys, and nullability.
 """
 
 import pytest
+from db_common import DeclarativeBase
 from sqlalchemy import Column, DateTime, Integer, String, Text, inspect
-from sqlmodel import SQLModel
 
 
 class TestTableModDate:
@@ -23,10 +23,10 @@ class TestTableModDate:
 
         assert TableModDate.__tablename__ == "table_mod_dates"
 
-    def test_is_sqlmodel_subclass(self) -> None:
+    def test_is_declarative_base_subclass(self) -> None:
         from genew4_orm.models.table_mod_date import TableModDate
 
-        assert issubclass(TableModDate, SQLModel)
+        assert issubclass(TableModDate, DeclarativeBase)
 
     def test_table_name_column(self, columns: dict[str, Column]) -> None:
         col = columns["table_name"]
@@ -63,10 +63,10 @@ class TestCcds:
 
         assert Ccds.__tablename__ == "ccds"
 
-    def test_is_sqlmodel_subclass(self) -> None:
+    def test_is_declarative_base_subclass(self) -> None:
         from genew4_orm.models.ccds import Ccds
 
-        assert issubclass(Ccds, SQLModel)
+        assert issubclass(Ccds, DeclarativeBase)
 
     def test_has_12_columns(self, columns: dict[str, Column]) -> None:
         assert len(columns) == 12

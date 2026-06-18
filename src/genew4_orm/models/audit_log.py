@@ -8,8 +8,9 @@ import json
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Column, DateTime, Integer, String, Text
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import DateTime, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 def _serialize_field_changes(value: dict[str, Any] | None) -> str | None:
@@ -26,7 +27,7 @@ def _deserialize_field_changes(value: str | None) -> dict[str, Any]:
     return json.loads(value)  # type: ignore[no-any-return]
 
 
-class AuditLog(SQLModel, table=True):
+class AuditLog(DeclarativeBase):
     """Audit log entry for tracking write operations.
 
     Records all CREATE, UPDATE, and DELETE operations with field-level
@@ -44,44 +45,43 @@ class AuditLog(SQLModel, table=True):
 
     __tablename__ = "audit_log"
 
-    id: int | None = Field(
-        default=None,
-        primary_key=True,
-        description="Primary key",
+    id: Mapped[int | None] = mapped_column(
+        Integer,
+        primary_key=True, nullable=False,
+        comment="Primary key",
     )
-    timestamp: datetime = Field(
-        default_factory=datetime.utcnow,
-        sa_column=Column(DateTime, default=datetime.utcnow),
-        description="When the operation occurred",
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=True, comment="When the operation occurred"
     )
-    user: str = Field(
-        max_length=100,
-        sa_column=Column(String(100), nullable=False),
-        description="User who performed the operation",
+    user: Mapped[str] = mapped_column(String(100), nullable=False, comment="User who performed the operation")
+    operation: Mapped[str] = mapped_column(
+        String(10), nullable=False, comment="Operation type: CREATE, UPDATE, or DELETE"
     )
-    operation: str = Field(
-        max_length=10,
-        sa_column=Column(String(10), nullable=False),
-        description="Operation type: CREATE, UPDATE, or DELETE",
+    entity_type: Mapped[str] = mapped_column(
+        String(100), nullable=False, comment="Type of entity affected"
     )
-    entity_type: str = Field(
-        max_length=100,
-        sa_column=Column(String(100), nullable=False),
-        description="Type of entity affected",
-    )
-    entity_id: int = Field(
-        sa_column=Column(Integer, nullable=False),
-        description="ID of the affected entity",
-    )
-    field_changes: dict[str, Any] = Field(
+    entity_id: Mapped[int] = mapped_column(Integer, nullable=False, comment="ID of the affected entity")
+    field_changes: Mapped[dict[str, Any]] = mapped_column(
+        "field_changes",
+        Text,
+        nullable=False,
         default={},
-        sa_column=Column(
-            "field_changes",
-            Text,
-            nullable=False,
-        ),
-        description="JSON dict with old/new values for changed fields (stored as Text)",
+        comment="JSON dict with old/new values for changed fields (stored as Text)",
     )
+
+    def __init__(self, **kwargs: object) -> None:
+        """Initialize an AuditLog, applying SQLModel-parity instantiation defaults.
+
+        Plain SQLAlchemy 2.0 only applies ``mapped_column(default=...)`` at flush,
+        not construction. ``timestamp`` defaults to ``datetime.utcnow()`` and
+        ``field_changes`` defaults to a fresh ``{}`` at instantiation (as SQLModel
+        did), unless explicitly provided.
+        """
+        if "timestamp" not in kwargs:
+            self.timestamp = datetime.utcnow()
+        if "field_changes" not in kwargs:
+            self.field_changes = {}
+        super().__init__(**kwargs)  # type: ignore[arg-type]
 
     def __repr__(self) -> str:
         """Return string representation of AuditLog."""

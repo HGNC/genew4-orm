@@ -4,11 +4,12 @@ Used by hseq-importer for inserts and post-load lookup of
 canonical sequence records.
 """
 
-from sqlalchemy import Column, Integer, String, Text
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class Hseq(SQLModel, table=True):
+class Hseq(DeclarativeBase):
     """HGNC sequence record.
 
     Stores curated sequence entries with metadata including source,
@@ -17,68 +18,22 @@ class Hseq(SQLModel, table=True):
 
     __tablename__ = "hseq"
 
-    hseq_id: int | None = Field(
-        default=None,
-        primary_key=True,
-        description="Auto-incrementing primary key",
+    hseq_id: Mapped[int | None] = mapped_column(
+        Integer,
+        primary_key=True, nullable=False,
+        comment="Auto-incrementing primary key",
     )
-    ext: str | None = Field(
-        default=None,
-        sa_column=Column("hseq_ext", String(50)),
-        description="External source identifier",
+    ext: Mapped[str | None] = mapped_column("hseq_ext", String(50), comment="External source identifier")
+    editor: Mapped[str | None] = mapped_column("hseq_editor", String(50), comment="Editor who submitted the record")
+    molecule: Mapped[str | None] = mapped_column("hseq_molecule", String(20), comment="Molecule type (DNA, RNA, etc.)")
+    submitted: Mapped[int | None] = mapped_column("hseq_submitted", Integer, comment="Submission flag")
+    status: Mapped[str | None] = mapped_column("hseq_status", String(50), comment="Record status")
+    priority: Mapped[int | None] = mapped_column("hseq_priority", Integer, comment="Priority ranking")
+    run_notes: Mapped[str | None] = mapped_column("hseq_run_notes", Text, comment="Notes from the import run")
+    comment: Mapped[str | None] = mapped_column("hseq_comment", Text, comment="Comment on the sequence")
+    entry_class: Mapped[str | None] = mapped_column("hseq_entry_class", String(50), comment="Entry classification")
+    is_new: Mapped[str | None] = mapped_column("hseq_isnew", String(10), comment="New entry flag")
+    defline: Mapped[str | None] = mapped_column(
+        "hseq_defline", Text, comment="FASTA defline containing HGNC ID and metadata"
     )
-    editor: str | None = Field(
-        default=None,
-        sa_column=Column("hseq_editor", String(50)),
-        description="Editor who submitted the record",
-    )
-    molecule: str | None = Field(
-        default=None,
-        sa_column=Column("hseq_molecule", String(20)),
-        description="Molecule type (DNA, RNA, etc.)",
-    )
-    submitted: int | None = Field(
-        default=None,
-        sa_column=Column("hseq_submitted", Integer),
-        description="Submission flag",
-    )
-    status: str | None = Field(
-        default=None,
-        sa_column=Column("hseq_status", String(50)),
-        description="Record status",
-    )
-    priority: int | None = Field(
-        default=None,
-        sa_column=Column("hseq_priority", Integer),
-        description="Priority ranking",
-    )
-    run_notes: str | None = Field(
-        default=None,
-        sa_column=Column("hseq_run_notes", Text),
-        description="Notes from the import run",
-    )
-    comment: str | None = Field(
-        default=None,
-        sa_column=Column("hseq_comment", Text),
-        description="Comment on the sequence",
-    )
-    entry_class: str | None = Field(
-        default=None,
-        sa_column=Column("hseq_entry_class", String(50)),
-        description="Entry classification",
-    )
-    is_new: str | None = Field(
-        default=None,
-        sa_column=Column("hseq_isnew", String(10)),
-        description="New entry flag",
-    )
-    defline: str | None = Field(
-        default=None,
-        sa_column=Column("hseq_defline", Text),
-        description="FASTA defline containing HGNC ID and metadata",
-    )
-    sequence: str | None = Field(
-        default=None,
-        sa_column=Column("hseq_seq", Text),
-        description="Nucleotide sequence",
-    )
+    sequence: Mapped[str | None] = mapped_column("hseq_seq", Text, comment="Nucleotide sequence")

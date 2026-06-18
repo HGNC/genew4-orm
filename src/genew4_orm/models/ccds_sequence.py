@@ -3,11 +3,12 @@
 Used by hseq-importer (CCDS source sequence lookup).
 """
 
-from sqlalchemy import Column, String, Text
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class CcdsSequence(SQLModel, table=True):
+class CcdsSequence(DeclarativeBase):
     """CCDS sequence record.
 
     Stores the nucleotide sequence associated with a CCDS identifier,
@@ -16,24 +17,24 @@ class CcdsSequence(SQLModel, table=True):
 
     __tablename__ = "ccds_seq"
 
-    ccdseq_ccds_id: str | None = Field(
-        default=None,
-        primary_key=True,
-        max_length=50,
-        description="CCDS identifier (primary key)",
+    ccdseq_ccds_id: Mapped[str | None] = mapped_column(
+        "ccdseq_ccds_id",
+        String(50),
+        primary_key=True, nullable=False,
+        comment="CCDS identifier (primary key)",
     )
-    build: str | None = Field(
-        default=None,
-        sa_column=Column("ccdseq_build", String(50)),
-        description="Genome build version",
+    build: Mapped[str | None] = mapped_column(
+        "ccdseq_build",
+        String(50),
+        comment="Genome build version",
     )
-    chromosome: str | None = Field(
-        default=None,
-        sa_column=Column("ccdseq_chrom", String(50)),
-        description="Chromosome",
+    chromosome: Mapped[str | None] = mapped_column(
+        "ccdseq_chrom",
+        String(50),
+        comment="Chromosome",
     )
-    sequence: str | None = Field(
-        default=None,
-        sa_column=Column("ccdseq_seq", Text),
-        description="Nucleotide sequence",
+    sequence: Mapped[str | None] = mapped_column(
+        "ccdseq_seq",
+        Text,
+        comment="Nucleotide sequence",
     )

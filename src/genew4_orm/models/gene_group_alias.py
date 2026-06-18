@@ -5,14 +5,15 @@ This model contains alternative names for gene groups.
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, Integer
-from sqlmodel import Field, Relationship, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from genew4_orm.models.gene_group import GeneGroup
 
 
-class GeneGroupAlias(SQLModel, table=True):
+class GeneGroupAlias(DeclarativeBase):
     """GeneGroupAlias entity representing the family_alias table.
 
     Alternative names for gene groups with cascade delete.
@@ -20,32 +21,23 @@ class GeneGroupAlias(SQLModel, table=True):
 
     __tablename__ = "family_alias"
 
-    id: int | None = Field(
-        default=None,
-        primary_key=True,
-        description="Primary key",
+    id: Mapped[int | None] = mapped_column(
+        Integer,
+        primary_key=True, nullable=False,
+        comment="Primary key",
     )
-    alias: str = Field(
-        max_length=255,
-        nullable=False,
-        description="Alternative name for the gene group",
-    )
+    alias: Mapped[str] = mapped_column(String(255), nullable=False, comment="Alternative name for the gene group")
 
     # Foreign key to GeneGroup
-    gene_group_id: int | None = Field(
-        default=None,
-        sa_column=Column(
-            "family_id",
-            Integer,
-            ForeignKey("family_new.id", ondelete="CASCADE"),
-        ),
-        description="Foreign key to family_new (gene group) table",
+    gene_group_id: Mapped[int | None] = mapped_column(
+        "family_id",
+        Integer,
+        ForeignKey("family_new.id", ondelete="CASCADE"),
+        comment="Foreign key to family_new (gene group) table",
     )
-    gene_group: "GeneGroup" = Relationship(
+    gene_group: Mapped["GeneGroup"] = relationship(
         back_populates="aliases",
-        sa_relationship_kwargs={
-            "foreign_keys": "[GeneGroupAlias.gene_group_id]",
-        },
+        foreign_keys="[GeneGroupAlias.gene_group_id]",
     )
 
     def __repr__(self) -> str:

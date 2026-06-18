@@ -1,15 +1,11 @@
 """FamHasCorr junction model for GeneGroup-Correspondence many-to-many relationship."""
 
-from typing import TYPE_CHECKING
-
-from sqlalchemy import Column, ForeignKey, Integer
-from sqlmodel import Field, SQLModel
-
-if TYPE_CHECKING:
-    pass
+from db_common import DeclarativeBase
+from sqlalchemy import ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class FamHasCorr(SQLModel, table=True):
+class FamHasCorr(DeclarativeBase):
     """FamHasCorr junction entity representing family_has_correspondence table.
 
     This is a junction table for many-to-many relationship between
@@ -22,23 +18,19 @@ class FamHasCorr(SQLModel, table=True):
     __tablename__ = "family_has_correspondence"
 
     # Foreign keys (these form the composite primary key)
-    correspondence_id: int = Field(
-        sa_column=Column(
-            "corr_id",
-            Integer,
-            ForeignKey("corr.corr_id", ondelete="CASCADE"),
-            primary_key=True,
-        ),
-        description="Foreign key to corr table",
+    correspondence_id: Mapped[int] = mapped_column(
+        "corr_id",
+        Integer,
+        ForeignKey("corr.corr_id", ondelete="CASCADE"),
+        primary_key=True, nullable=False,
+        comment="Foreign key to corr table",
     )
-    gene_group_id: int = Field(
-        sa_column=Column(
-            "fam_id",
-            Integer,
-            ForeignKey("family_new.id", ondelete="CASCADE"),
-            primary_key=True,
-        ),
-        description="Foreign key to family_new table",
+    gene_group_id: Mapped[int] = mapped_column(
+        "fam_id",
+        Integer,
+        ForeignKey("family_new.id", ondelete="CASCADE"),
+        primary_key=True, nullable=False,
+        comment="Foreign key to family_new table",
     )
 
     # Note: Relationships are defined on the main models (Correspondence, GeneGroup)

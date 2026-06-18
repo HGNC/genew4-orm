@@ -7,9 +7,8 @@ the exact values from the hgnc-tools-api TypeScript implementation.
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import Column
 from sqlalchemy import Enum as SQLEnum
-from sqlmodel import Field
+from sqlalchemy.orm import mapped_column
 
 
 def enum_field(
@@ -19,10 +18,15 @@ def enum_field(
     nullable: bool = False,
     column_name: str | None = None,
 ) -> Any:
-    """Create a SQLModel Field with proper PostgreSQL Enum column configuration.
+    """Create a plain SQLAlchemy column spec for an enum-backed ``mapped_column``.
 
-    This helper creates a SQLModel Field with a SQLAlchemy Enum column
-    properly configured for PostgreSQL compatibility.
+    Returns a :func:`sqlalchemy.orm.mapped_column` configured with an
+    ``Enum(enum_class, create_constraint=True, native_enum=False)`` column type,
+    suitable as the right-hand side of an annotated attribute on a
+    :class:`db_common.DeclarativeBase` subclass. This is the plain-SQLAlchemy
+    replacement for the former ``sqlmodel.Field(..., sa_column=Column(Enum(...)))``
+    wrapper; the call signature is unchanged so the only caller
+    (``Comment.status``) keeps working.
 
     Args:
         enum_class: The StrEnum class to use for this field.
@@ -31,27 +35,25 @@ def enum_field(
         column_name: Optional custom column name (defaults to model field name).
 
     Returns:
-        A SQLModel Field configured with an Enum column.
+        A ``mapped_column`` instance (a ``MappedColumn``) usable directly as the
+        value of an annotated attribute, e.g. ``status: Mapped[...] = enum_field(...)``.
 
     Example:
-        >>> class Gene(SQLModel, table=True):
-        ...     locus_type: GeneLocusType = enum_field(
-        ...         GeneLocusType,
-        ...         default=GeneLocusType.UNDEF,
-        ...         nullable=False
+        >>> class Comment(DeclarativeBase):
+        ...     __tablename__ = "comment"
+        ...     status: Mapped[PublishStatus] = enum_field(
+        ...         PublishStatus,
+        ...         default=PublishStatus.PENDING,
+        ...         nullable=False,
+        ...         column_name="status",
         ...     )
     """
-    sa_column_kwargs: dict[str, Any] = {}
+    kwargs: dict[str, Any] = {"default": default, "nullable": nullable}
     if column_name is not None:
-        sa_column_kwargs["name"] = column_name
-
-    return Field(
-        default=default,
-        sa_column=Column(
-            SQLEnum(enum_class, create_constraint=True, native_enum=False),
-            nullable=nullable,
-            **sa_column_kwargs,
-        ),
+        kwargs["name"] = column_name
+    return mapped_column(
+        SQLEnum(enum_class, create_constraint=True, native_enum=False),
+        **kwargs,
     )
 
 

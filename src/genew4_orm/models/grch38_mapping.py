@@ -3,76 +3,49 @@
 This model contains GRCh38 coordinate mapping data with composite primary key.
 """
 
-from sqlalchemy import Column, Integer, String
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from genew4_orm.enums import Grch38MarkType, Grch38SourceType
 
 
-class Grch38Mapping(SQLModel, table=True):
+class Grch38Mapping(DeclarativeBase):
     """Grch38Mapping entity representing the coord_match_grch38 table.
 
     Genomic coordinate mappings to GRCh38 with composite primary key.
     Note: This table uses all columns as part of the primary key
-    (no auto-incrementing ID).
+    (no auto-incrementing ID). The enum-typed fields map to plain ``String``
+    columns in the database (matching the legacy SQLModel ``sa_column``).
     """
 
     __tablename__ = "coord_match_grch38"
 
     # Composite primary key fields
-    source: Grch38SourceType = Field(
-        sa_column=Column("cm_source", String, primary_key=True),
-        description="Data source (NCBI, Ensembl, Chrom, HGNC)",
+    source: Mapped[Grch38SourceType] = mapped_column(
+        "cm_source", String, primary_key=True, nullable=False, comment="Data source (NCBI, Ensembl, Chrom, HGNC)"
     )
-    strand: str = Field(
-        max_length=1,
-        sa_column=Column("cm_strand", String, primary_key=True),
-        description="Strand orientation (+ or -)",
+    strand: Mapped[str] = mapped_column(
+        "cm_strand", String, primary_key=True, nullable=False, comment="Strand orientation (+ or -)"
     )
-    chromosome: str = Field(
-        max_length=255,
-        sa_column=Column("cm_chr", String, primary_key=True),
-        description="Chromosome name",
+    chromosome: Mapped[str] = mapped_column(
+        "cm_chr", String, primary_key=True, nullable=False, comment="Chromosome name"
     )
-    start: int = Field(
-        sa_column=Column("cm_start", Integer, primary_key=True),
-        description="Start position",
-    )
-    end: int = Field(
-        sa_column=Column("cm_end", Integer, primary_key=True),
-        description="End position",
-    )
-    map_by: str = Field(
-        sa_column=Column("cm_mapby", String, primary_key=True),
-        description="Mapping method/reference",
+    start: Mapped[int] = mapped_column("cm_start", Integer, primary_key=True, nullable=False, comment="Start position")
+    end: Mapped[int] = mapped_column("cm_end", Integer, primary_key=True, nullable=False, comment="End position")
+    map_by: Mapped[str] = mapped_column(
+        "cm_mapby", String, primary_key=True, nullable=False, comment="Mapping method/reference"
     )
 
     # Additional optional fields (not part of primary key)
-    source_id: str | None = Field(
-        default=None,
-        max_length=100,
-        sa_column=Column("cm_source_id", String),
-        description="Source identifier",
+    source_id: Mapped[str | None] = mapped_column(
+        "cm_source_id", String, comment="Source identifier"
     )
-    ncbi_gene_id: int | None = Field(
-        default=None,
-        sa_column=Column("cm_eg_id", Integer),
-        description="NCBI Gene ID",
-    )
-    hgnc_id: int | None = Field(
-        default=None,
-        sa_column=Column("cm_hgnc_id", Integer),
-        description="HGNC Gene ID",
-    )
-    notes: str | None = Field(
-        default=None,
-        sa_column=Column("cm_notes", String),
-        description="Additional notes",
-    )
-    mark: Grch38MarkType | None = Field(
-        default=None,
-        sa_column=Column("cm_mark", String),
-        description="Mark type (max or hidden)",
+    ncbi_gene_id: Mapped[int | None] = mapped_column("cm_eg_id", Integer, comment="NCBI Gene ID")
+    hgnc_id: Mapped[int | None] = mapped_column("cm_hgnc_id", Integer, comment="HGNC Gene ID")
+    notes: Mapped[str | None] = mapped_column("cm_notes", String, comment="Additional notes")
+    mark: Mapped[Grch38MarkType | None] = mapped_column(
+        "cm_mark", String, default=None, comment="Mark type (max or hidden)"
     )
 
     def __repr__(self) -> str:

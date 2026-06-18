@@ -3,11 +3,12 @@
 Used by xref-loader (pseudogene.org loader) for pseudogene cross-references.
 """
 
-from sqlalchemy import Column, Integer, String, Text
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class PseudogeneOrg(SQLModel, table=True):
+class PseudogeneOrg(DeclarativeBase):
     """Pseudogene.org record.
 
     Stores pseudogene annotations from pseudogene.org, including
@@ -16,48 +17,18 @@ class PseudogeneOrg(SQLModel, table=True):
 
     __tablename__ = "pseudogene_org"
 
-    porg_id: int | None = Field(
-        default=None,
-        primary_key=True,
-        description="Pseudogene.org ID (primary key)",
+    porg_id: Mapped[int | None] = mapped_column(
+        Integer,
+        primary_key=True, nullable=False,
+        comment="Pseudogene.org ID (primary key)",
     )
-    chromosome: str | None = Field(
-        default=None,
-        sa_column=Column("porg_chr", String(50)),
-        description="Chromosome",
-    )
-    strand: str | None = Field(
-        default=None,
-        sa_column=Column("porg_strand", String(5)),
-        description="Strand (+/-)",
-    )
-    start: int | None = Field(
-        default=None,
-        sa_column=Column("porg_start", Integer),
-        description="Start coordinate",
-    )
-    end: int | None = Field(
-        default=None,
-        sa_column=Column("porg_end", Integer),
-        description="End coordinate",
-    )
-    sequence: str | None = Field(
-        default=None,
-        sa_column=Column("porg_seq", Text),
-        description="Nucleotide sequence",
-    )
-    class_: str | None = Field(
-        default=None,
-        sa_column=Column("porg_class", String(255)),
-        description="Pseudogene classification",
-    )
-    link: str | None = Field(
-        default=None,
-        sa_column=Column("porg_link", String(255)),
-        description="Link to parent gene or resource",
-    )
-    parent_gene: str | None = Field(
-        default=None,
-        sa_column=Column("porg_parent_gene", String(255)),
-        description="Parent gene identifier",
+    chromosome: Mapped[str | None] = mapped_column("porg_chr", String(50), comment="Chromosome")
+    strand: Mapped[str | None] = mapped_column("porg_strand", String(5), comment="Strand (+/-)")
+    start: Mapped[int | None] = mapped_column("porg_start", Integer, comment="Start coordinate")
+    end: Mapped[int | None] = mapped_column("porg_end", Integer, comment="End coordinate")
+    sequence: Mapped[str | None] = mapped_column("porg_seq", Text, comment="Nucleotide sequence")
+    class_: Mapped[str | None] = mapped_column("porg_class", String(255), comment="Pseudogene classification")
+    link: Mapped[str | None] = mapped_column("porg_link", String(255), comment="Link to parent gene or resource")
+    parent_gene: Mapped[str | None] = mapped_column(
+        "porg_parent_gene", String(255), comment="Parent gene identifier"
     )

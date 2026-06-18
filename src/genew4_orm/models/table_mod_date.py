@@ -6,11 +6,12 @@ to track which data source version was last loaded.
 
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, String
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import DateTime, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class TableModDate(SQLModel, table=True):
+class TableModDate(DeclarativeBase):
     """Version tracking record for genew4 tables.
 
     Tracks the last modification date and version string for each
@@ -19,24 +20,13 @@ class TableModDate(SQLModel, table=True):
 
     __tablename__ = "table_mod_dates"
 
-    table_name: str | None = Field(
-        default=None,
-        primary_key=True,
-        max_length=100,
-        description="Target table name (primary key)",
+    table_name: Mapped[str | None] = mapped_column(
+        String(100),
+        primary_key=True, nullable=False,
+        comment="Target table name (primary key)",
     )
-    version: str | None = Field(
-        default=None,
-        sa_column=Column("version", String(255)),
-        description="Last-loaded source version string",
+    version: Mapped[str | None] = mapped_column("version", String(255), comment="Last-loaded source version string")
+    version_type: Mapped[str | None] = mapped_column(
+        "version_type", String(100), comment="Optional version type classification"
     )
-    version_type: str | None = Field(
-        default=None,
-        sa_column=Column("version_type", String(100)),
-        description="Optional version type classification",
-    )
-    mod_date: datetime | None = Field(
-        default=None,
-        sa_column=Column("mod_date", DateTime),
-        description="Timestamp of last modification",
-    )
+    mod_date: Mapped[datetime | None] = mapped_column("mod_date", DateTime, comment="Timestamp of last modification")

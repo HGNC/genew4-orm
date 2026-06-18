@@ -3,10 +3,12 @@
 This model contains external database/resource information.
 """
 
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import Boolean, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class ExternalResource(SQLModel, table=True):
+class ExternalResource(DeclarativeBase):
     """ExternalResource entity representing the external_resource table.
 
     External databases and resources linked to gene groups.
@@ -14,29 +16,18 @@ class ExternalResource(SQLModel, table=True):
 
     __tablename__ = "external_resource"
 
-    id: int = Field(
-        primary_key=True,
-        description="Primary key",
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True, nullable=False,
+        comment="Primary key",
     )
-    name: str = Field(
-        max_length=255,
-        nullable=False,
-        description="External resource name",
+    name: Mapped[str] = mapped_column(String(255), nullable=False, comment="External resource name")
+    url: Mapped[str] = mapped_column(String(255), nullable=False, comment="External resource URL")
+    description: Mapped[str | None] = mapped_column(
+        String(255), comment="External resource description"
     )
-    url: str = Field(
-        max_length=255,
-        nullable=False,
-        description="External resource URL",
-    )
-    description: str | None = Field(
-        default=None,
-        max_length=255,
-        description="External resource description",
-    )
-    approved: bool = Field(
-        default=False,
-        nullable=False,
-        description="Whether resource is approved",
+    approved: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, comment="Whether resource is approved"
     )
 
     # Note: Many-to-many with GeneGroup is through FamHasExtResource junction table

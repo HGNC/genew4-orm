@@ -3,10 +3,12 @@
 This model contains legacy editor user information.
 """
 
-from sqlmodel import Field, SQLModel
+from db_common import DeclarativeBase
+from sqlalchemy import Boolean, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class Editor(SQLModel, table=True):
+class Editor(DeclarativeBase):
     """Editor entity representing the editor table.
 
     Legacy editor users from the previous system.
@@ -14,36 +16,37 @@ class Editor(SQLModel, table=True):
 
     __tablename__ = "editor"
 
-    id: int | None = Field(
-        default=None,
-        primary_key=True,
-        sa_column_kwargs={"name": "ed_id"},
-        description="Primary key",
+    id: Mapped[int | None] = mapped_column(
+        "ed_id",
+        Integer,
+        primary_key=True, nullable=False,
+        comment="Primary key",
     )
-    full_name: str | None = Field(
-        default=None,
-        sa_column_kwargs={"name": "ed_full_name"},
-        description="Editor full name",
+    full_name: Mapped[str | None] = mapped_column(
+        "ed_full_name",
+        String,
+        comment="Editor full name",
     )
-    password: str | None = Field(
-        default=None,
-        sa_column_kwargs={"name": "ed_passwd"},
-        description="Editor password (hashed)",
+    password: Mapped[str | None] = mapped_column(
+        "ed_passwd",
+        String,
+        comment="Editor password (hashed)",
     )
-    preferences: str | None = Field(
-        default=None,
-        sa_column_kwargs={"name": "ed_pref"},
-        description="Editor preferences",
+    preferences: Mapped[str | None] = mapped_column(
+        "ed_pref",
+        String,
+        comment="Editor preferences",
     )
-    editor: str | None = Field(
-        default=None,
-        sa_column_kwargs={"name": "ed_login"},
-        description="Editor login name",
+    editor: Mapped[str | None] = mapped_column(
+        "ed_login",
+        String,
+        comment="Editor login name",
     )
-    current: bool = Field(
+    current: Mapped[bool] = mapped_column(
+        "ed_active",
+        Boolean,
         default=True,
-        sa_column_kwargs={"name": "ed_active"},
-        description="Whether editor account is active",
+        comment="Whether editor account is active",
     )
 
     def __repr__(self) -> str:
