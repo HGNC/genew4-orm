@@ -1,244 +1,322 @@
-"""Unit tests for session management module."""
+"""Unit tests for the session management module.
 
+Pins the T4 contract: session infrastructure delegates engine/session
+creation to the shared ``db-common`` library, while the genew4 wrappers
+preserve the ``session.info`` audit contract (``user`` / ``read_only``)
+that ``genew4_orm.audit`` reads. The public exception symbols are
+re-exported from ``db_common`` — ``ReadOnlySessionError`` keeps its name
+(now ``db_common.ReadOnlySessionError``) and ``SessionError`` is added —
+so the historical "not initialized" ``RuntimeError`` collapses onto
+``SessionError``.
+
+All behaviour tests run against a real ``sqlite:///:memory:`` engine
+bound through the new code path
+(``initialize_engine(DatabaseSettings(driver='sqlite'))``) — no
+PostgreSQL dependency, no ``inspect.getsource`` string assertions.
+"""
+
+from collections.abc import Generator
 from unittest.mock import patch
 
+import db_common
 import pytest
+from sqlalchemy import Engine
+from sqlalchemy.orm import Session
 
 from genew4_orm.config import DatabaseSettings
 from genew4_orm.session import (
     ReadOnlySessionError,
+    SessionError,
     close_all_sessions,
     get_engine,
     get_readonly_session,
     get_readwrite_session,
     get_settings,
+    initialize_engine,
     refresh_engine,
 )
 
+# ---------------------------------------------------------------------------
+# Fixtures — isolate the module-level singletons across tests.
+# ---------------------------------------------------------------------------
 
-class TestReadOnlySessionError:
-    """Test cases for ReadOnlySessionError exception."""
 
-    def test_read_only_session_error_message(self) -> None:
-        """Test ReadOnlySessionError can be raised with message."""
-        with pytest.raises(ReadOnlySessionError) as exc_info:
-            raise ReadOnlySessionError("Cannot commit in read-only session")
+@pytest.fixture
+def isolated_session_module() -> Generator:
+    """Save/clear/restore the module-level session singletons.
 
-        assert "Cannot commit in read-only session" in str(exc_info.value)
+    Ensures a test that calls ``initialize_engine`` cannot leak engines or
+    sessions into sibling tests, and that the test starts from a clean
+    (uninitialized) state.
+    """
+    import genew4_orm.session as session_module
 
-    def test_read_only_session_error_is_exception(self) -> None:
-        """Test ReadOnlySessionError is an Exception."""
+    saved = (
+        session_module._engine_factory,
+        session_module._session_factory,
+        session_module._global_settings,
+    )
+
+    # Clear state for THIS test (the saved singletons' lifetime is owned by
+    # whoever created them — we only null the module references here).
+    session_module._engine_factory = None
+    session_module._session_factory = None
+    session_module._global_settings = None
+
+    try:
+        yield session_module
+    finally:
+        # Dispose anything the test created, then restore the saved state.
+        if session_module._engine_factory is not None:
+            session_module._engine_factory.dispose()
+        session_module._engine_factory = saved[0]
+        session_module._session_factory = saved[1]
+        session_module._global_settings = saved[2]
+
+
+@pytest.fixture
+def sqlite_session_module(isolated_session_module) -> Generator:
+    """Initialize the session infra against a real in-memory SQLite engine."""
+    initialize_engine(DatabaseSettings(driver="sqlite"))
+    yield isolated_session_module
+
+
+# ---------------------------------------------------------------------------
+# Public symbol re-exports.
+# ---------------------------------------------------------------------------
+
+
+class TestPublicSymbols:
+    """Exception symbols are re-exported from db_common (no local classes)."""
+
+    def test_readonly_session_error_is_db_common_class(self) -> None:
+        """ReadOnlySessionError resolves to db_common.ReadOnlySessionError."""
+        assert ReadOnlySessionError is db_common.ReadOnlySessionError
+
+    def test_readonly_session_error_is_exception(self) -> None:
+        """ReadOnlySessionError is still an Exception subclass."""
         assert issubclass(ReadOnlySessionError, Exception)
 
+    def test_session_error_is_db_common_class(self) -> None:
+        """SessionError is re-exported from db_common (replaces RuntimeError)."""
+        assert SessionError is db_common.SessionError
 
-class TestGetEngine:
-    """Test cases for get_engine function."""
+    def test_public_symbols_listed_in_package_all(self) -> None:
+        """Both exception re-exports are part of the public package API.
 
-    def test_get_engine_without_initialization_raises(self) -> None:
-        """Test get_engine raises RuntimeError if not initialized."""
-        # Reset global state by importing fresh module
-        import importlib
+        Regression guard: ``SessionError`` was imported into the package but
+        absent from ``__all__``, so ``from genew4_orm import *`` and
+        ``__all__``-walking tooling (linters, mock.patch) silently dropped it.
+        """
+        import genew4_orm
 
-        import genew4_orm.session
+        assert "ReadOnlySessionError" in genew4_orm.__all__
+        assert "SessionError" in genew4_orm.__all__
+        assert genew4_orm.SessionError is db_common.SessionError
+        assert genew4_orm.ReadOnlySessionError is db_common.ReadOnlySessionError
 
-        importlib.reload(genew4_orm.session)
 
-        with pytest.raises(RuntimeError) as exc_info:
+# ---------------------------------------------------------------------------
+# Uninitialized state — verify item (c).
+# ---------------------------------------------------------------------------
+
+
+class TestUninitialized:
+    """get_engine/get_settings raise SessionError when uninitialized."""
+
+    def test_get_engine_raises_session_error(self, isolated_session_module) -> None:
+        with pytest.raises(SessionError):
             get_engine()
 
-        assert "Database engine not initialized" in str(exc_info.value)
-
-
-class TestGetSettings:
-    """Test cases for get_settings function."""
-
-    def test_get_settings_without_initialization_raises(self) -> None:
-        """Test get_settings raises RuntimeError if not initialized."""
-        # Reset global state
-        import importlib
-
-        import genew4_orm.session
-
-        importlib.reload(genew4_orm.session)
-
-        with pytest.raises(RuntimeError) as exc_info:
+    def test_get_settings_raises_session_error(self, isolated_session_module) -> None:
+        with pytest.raises(SessionError):
             get_settings()
 
-        assert "Database settings not initialized" in str(exc_info.value)
+    def test_get_engine_no_longer_raises_runtime_error(self, isolated_session_module) -> None:
+        """Regression guard: was RuntimeError before T4, now SessionError."""
+        with pytest.raises(SessionError):
+            get_engine()
 
-    @patch("genew4_orm.session._global_settings", None)
-    def test_get_settings_with_none_settings_raises(self) -> None:
-        """Test get_settings raises when settings is None."""
+    def test_readwrite_session_raises_session_error(self, isolated_session_module) -> None:
+        """get_readwrite_session surfaces SessionError when uninitialized."""
+        with pytest.raises(SessionError):
+            with get_readwrite_session():
+                pass
 
-        with pytest.raises(RuntimeError) as exc_info:
-            get_settings()
-
-        assert "Database settings not initialized" in str(exc_info.value)
-
-
-class TestCloseAllSessions:
-    """Test cases for close_all_sessions function."""
-
-    @patch("genew4_orm.session._global_engine", None)
-    @patch("genew4_orm.session._session_factory", None)
-    @patch("genew4_orm.session._readonly_session_factory", None)
-    def test_close_all_sessions_with_no_engine(self) -> None:
-        """Test close_all_sessions with no engine is safe."""
-        # Should not raise
-        close_all_sessions()
+    def test_readonly_session_raises_session_error(self, isolated_session_module) -> None:
+        """get_readonly_session surfaces SessionError when uninitialized."""
+        with pytest.raises(SessionError):
+            with get_readonly_session():
+                pass
 
 
-class TestRefreshEngine:
-    """Test cases for refresh_engine function."""
-
-    def test_refresh_engine_without_settings_raises(self) -> None:
-        """Test refresh_engine raises RuntimeError if no settings available."""
-        # Reset global state
-        import importlib
-
-        import genew4_orm.session
-
-        importlib.reload(genew4_orm.session)
-
-        with pytest.raises(RuntimeError) as exc_info:
-            refresh_engine()
-
-        assert "Cannot refresh" in str(exc_info.value)
-
-    @patch("genew4_orm.session._global_settings", None)
-    @patch("genew4_orm.session._global_engine", None)
-    def test_refresh_engine_checks_settings_first(self) -> None:
-        """Test refresh_engine checks settings before proceeding."""
-
-        with pytest.raises(RuntimeError, match="Cannot refresh"):
-            refresh_engine()
+# ---------------------------------------------------------------------------
+# Read-write session behaviour — verify item (a).
+# ---------------------------------------------------------------------------
 
 
 class TestReadWriteSession:
-    """Test cases for read-write session behavior."""
+    """get_readwrite_session(user=) populates session.info for audit."""
 
-    def test_readwrite_session_default_user(self) -> None:
-        """Test get_readwrite_session uses 'unknown' as default user."""
-        # We need to initialize engine first
-        import os
-        from unittest.mock import patch
+    def test_default_user_is_unknown(self, sqlite_session_module) -> None:
+        with get_readwrite_session() as session:
+            assert session.info["user"] == "unknown"
+            assert session.info["read_only"] is False
 
-        from genew4_orm.session import initialize_engine
+    def test_custom_user_is_recorded(self, sqlite_session_module) -> None:
+        with get_readwrite_session(user="alice") as session:
+            assert session.info["user"] == "alice"
+            assert session.info["read_only"] is False
 
-        # Mock the environment variables needed for DatabaseSettings
-        with patch.dict(
-            os.environ,
-            {
-                "DATABASESETTINGS_PG_USER": "test",
-                "DATABASESETTINGS_PG_PASSWORD": "test",
-            },
-        ):
-            try:
-                settings = DatabaseSettings()
-                # Note: This may fail if PostgreSQL is not available
-                # So we'll catch the error and continue
-                initialize_engine(settings)
+    def test_yields_sqlalchemy_session(self, sqlite_session_module) -> None:
+        with get_readwrite_session() as session:
+            assert isinstance(session, Session)
 
-                # Test the session context manager
-                with get_readwrite_session() as session:
-                    assert session.info.get("user") == "unknown"
-                    assert session.info.get("read_only") is False
+    def test_exception_propagates_and_rolls_back(self, sqlite_session_module) -> None:
+        class _BoomError(Exception):
+            pass
 
-                # Clean up
-                close_all_sessions()
-            except Exception:
-                # If database connection fails, at least verify the logic
-                # by checking the source code handles it correctly
-                pass
+        with pytest.raises(_BoomError):
+            with get_readwrite_session():
+                raise _BoomError("simulated failure")
 
-    def test_readwrite_session_custom_user(self) -> None:
-        """Test get_readwrite_session sets custom user."""
-        # Verify the code path for custom user
-        # We can test this without database by inspecting function behavior
-        import inspect
 
-        from genew4_orm.session import get_readwrite_session
-
-        source = inspect.getsource(get_readwrite_session)
-        # Verify that user parameter is used
-        assert 'user = "unknown"' in source or "user = 'unknown'" in source
-
-    def test_readwrite_session_exception_handling(self) -> None:
-        """Test get_readwrite_session handles exceptions properly."""
-        import inspect
-
-        from genew4_orm.session import get_readwrite_session
-
-        source = inspect.getsource(get_readwrite_session)
-        # Verify exception handling exists
-        assert "except Exception:" in source
-        assert "rollback()" in source
-        assert "raise" in source
+# ---------------------------------------------------------------------------
+# Read-only session behaviour — verify item (b).
+# ---------------------------------------------------------------------------
 
 
 class TestReadonlySession:
-    """Test cases for read-only session behavior."""
+    """get_readonly_session() rejects commits with ReadOnlySessionError."""
 
-    def test_readonly_session_marks_read_only(self) -> None:
-        """Test get_readonly_session marks session as read-only."""
-        import inspect
+    def test_marks_read_only_with_no_user(self, sqlite_session_module) -> None:
+        with get_readonly_session() as session:
+            assert session.info["read_only"] is True
+            assert session.info["user"] is None
 
-        source = inspect.getsource(get_readonly_session)
-        # Verify read_only flag is set
-        assert 'read_only"] = True' in source or 'read_only"] = True' in source
+    def test_commit_raises_readonly_session_error(self, sqlite_session_module) -> None:
+        with get_readonly_session() as session:
+            with pytest.raises(ReadOnlySessionError):
+                session.commit()
 
-    def test_readonly_session_error_message(self) -> None:
-        """Test that ReadOnlySessionError has appropriate message."""
-        error = ReadOnlySessionError(
-            "Cannot commit changes in a read-only session. Use get_readwrite_session() for modifications."
+
+# ---------------------------------------------------------------------------
+# Initialization / engine / settings.
+# ---------------------------------------------------------------------------
+
+
+class TestInitialization:
+    """initialize_engine builds the EngineFactory + SessionFactory singletons."""
+
+    def test_get_engine_returns_engine(self, sqlite_session_module) -> None:
+        engine = get_engine()
+        assert isinstance(engine, Engine)
+
+    def test_initialize_is_idempotent(self, sqlite_session_module) -> None:
+        first = initialize_engine()
+        second = initialize_engine()
+        assert first is second
+
+    def test_get_settings_returns_settings(self, sqlite_session_module) -> None:
+        settings = get_settings()
+        assert isinstance(settings, DatabaseSettings)
+        assert settings.driver == "sqlite"
+
+    def test_engine_factory_is_genew4_subclass(self, sqlite_session_module) -> None:
+        """The EngineFactory singleton is Genew4EngineFactory (adds pool_timeout)."""
+        from genew4_orm.session import Genew4EngineFactory
+
+        assert isinstance(sqlite_session_module._engine_factory, Genew4EngineFactory)
+
+
+class TestGenew4EngineFactoryPoolTimeout:
+    """``Genew4EngineFactory`` passes ``pool_timeout``; db-common's does not.
+
+    Pins the spec's "pool_timeout preserved" behaviour change: the local
+    ``Genew4EngineFactory`` override adds ``pool_timeout`` for non-SQLite
+    drivers (reading the genew4-only field on ``Genew4DatabaseSettings``),
+    while leaving the SQLite path identical to db-common's.
+    """
+
+    @staticmethod
+    def _engine_kwargs(settings: DatabaseSettings) -> dict:
+        """Build an engine via ``Genew4EngineFactory`` and return the kwargs
+        ``create_engine`` was called with (``create_engine`` is patched out)."""
+        from unittest.mock import MagicMock, patch
+
+        from genew4_orm.session import Genew4EngineFactory
+
+        factory = Genew4EngineFactory(settings)
+        with patch("genew4_orm.session.create_engine") as mock_create:
+            mock_create.return_value = MagicMock(spec=Engine)
+            factory.get_engine()
+        _args, kwargs = mock_create.call_args
+        return kwargs
+
+    def test_pool_timeout_passed_for_non_sqlite(self) -> None:
+        """Non-sqlite engines are created with pool_timeout from settings."""
+        settings = DatabaseSettings(
+            driver="postgresql+psycopg",
+            host="localhost",
+            port=5432,
+            database="genew4",
+            username="u",
+            password="p",
+            pool_timeout=42,
         )
-        assert "read-only session" in str(error)
-        assert "get_readwrite_session" in str(error)
+
+        kwargs = self._engine_kwargs(settings)
+
+        assert kwargs["pool_timeout"] == 42
+        # The inherited pool fields are passed too.
+        assert kwargs["pool_size"] == 5
+        assert kwargs["max_overflow"] == 10
+        assert kwargs["pool_pre_ping"] is True
+
+    def test_pool_timeout_omitted_for_sqlite(self) -> None:
+        """SQLite engines do not pass pool_timeout (matches db-common's path)."""
+        from sqlalchemy.pool import StaticPool
+
+        kwargs = self._engine_kwargs(DatabaseSettings(driver="sqlite"))
+
+        assert "pool_timeout" not in kwargs
+        # SQLite path uses StaticPool (mirrors db-common).
+        assert kwargs["poolclass"] is StaticPool
 
 
-class TestSessionFactories:
-    """Test session factory caching behavior."""
+class TestRefreshAndClose:
+    """refresh_engine and close_all_sessions."""
 
-    def test_session_factory_initialization(self) -> None:
-        """Test that session factories can be initialized."""
-        import inspect
+    def test_refresh_returns_engine(self, sqlite_session_module) -> None:
+        engine = refresh_engine()
+        assert isinstance(engine, Engine)
 
-        from genew4_orm.session import _get_readonly_session_factory, _get_session_factory
+    def test_refresh_without_settings_raises_session_error(self, isolated_session_module) -> None:
+        with pytest.raises(SessionError):
+            refresh_engine()
 
-        # Both should use sessionmaker with similar parameters
-        session_source = inspect.getsource(_get_session_factory)
-        readonly_source = inspect.getsource(_get_readonly_session_factory)
+    def test_close_resets_singletons(self, sqlite_session_module) -> None:
+        close_all_sessions()
+        assert sqlite_session_module._engine_factory is None
+        assert sqlite_session_module._session_factory is None
+        assert sqlite_session_module._global_settings is None
 
-        # Both should create a sessionmaker
-        assert "sessionmaker" in session_source
-        assert "sessionmaker" in readonly_source
+    def test_close_is_idempotent(self, sqlite_session_module) -> None:
+        close_all_sessions()
+        close_all_sessions()  # second call must not raise
 
-    @patch("genew4_orm.session._global_settings", None)
-    @patch("genew4_orm.session._global_engine", None)
-    def test_factory_get_engine_raises(self) -> None:
-        """Test that factory functions raise when engine not initialized."""
-        from genew4_orm.session import _get_session_factory
 
-        with pytest.raises(RuntimeError):
-            _get_session_factory()
-
-    @patch("genew4_orm.session._global_settings", None)
-    @patch("genew4_orm.session._global_engine", None)
-    def test_readonly_factory_get_engine_raises(self) -> None:
-        """Test that readonly factory function raises when engine not initialized."""
-        from genew4_orm.session import _get_readonly_session_factory
-
-        with pytest.raises(RuntimeError):
-            _get_readonly_session_factory()
+# ---------------------------------------------------------------------------
+# DatabaseSettings surface — exercised through the session path. The methods
+# are also pinned in test_config.py; these cover the session-test angle.
+# ---------------------------------------------------------------------------
 
 
 class TestEngineKwargs:
-    """Test engine kwargs generation from settings."""
+    """get_engine_kwargs reads the inherited pool fields + pool_timeout."""
 
     def test_get_engine_kwargs_structure(self) -> None:
-        """Test get_engine_kwargs returns expected structure."""
         import os
-        from unittest.mock import patch
 
         with patch.dict(
             os.environ,
@@ -259,12 +337,10 @@ class TestEngineKwargs:
 
 
 class TestConnectionUrl:
-    """Test connection URL generation."""
+    """get_connection_url is the legacy compat shim delegating to get_url()."""
 
     def test_get_connection_url_without_password(self) -> None:
-        """Test connection URL excludes password by default."""
         import os
-        from unittest.mock import patch
 
         with patch.dict(
             os.environ,
@@ -276,15 +352,12 @@ class TestConnectionUrl:
             settings = DatabaseSettings()
             url = settings.get_connection_url()
 
-            # Should include user but not password
             assert "testuser" in url
             assert "secret123" not in url
             assert "postgresql+psycopg://" in url
 
     def test_get_connection_url_with_password(self) -> None:
-        """Test connection URL includes password when requested."""
         import os
-        from unittest.mock import patch
 
         with patch.dict(
             os.environ,
@@ -296,7 +369,6 @@ class TestConnectionUrl:
             settings = DatabaseSettings()
             url = settings.get_connection_url(with_password=True)
 
-            # Should include both user and password
             assert "testuser" in url
             assert "secret123" in url
             assert "postgresql+psycopg://" in url

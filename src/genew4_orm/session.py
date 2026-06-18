@@ -1,266 +1,245 @@
 """SQLAlchemy session management and engine factory.
 
-This module provides thread-safe session factories for both read-only
-and read-write database operations.
+This module delegates engine/session creation to the shared ``db-common``
+library: a module-level :class:`Genew4EngineFactory` (a
+``db_common.EngineFactory`` subclass that also passes ``pool_timeout``,
+which db-common's own factory does not) and a ``db_common.SessionFactory``
+provide the underlying engine and sessions, while the genew4 wrappers
+preserve the audit-related ``session.info`` contract (``user``,
+``read_only``) that :mod:`genew4_orm.audit` reads.
+
+The seven public symbols — ``initialize_engine``, ``get_engine``,
+``get_settings``, ``get_readwrite_session``, ``get_readonly_session``,
+``close_all_sessions``, ``refresh_engine`` — keep their signatures.
+``ReadOnlySessionError`` is re-exported from ``db_common`` so the public
+name is unchanged; ``SessionError`` is re-exported alongside it, and the
+"not initialized" errors collapse from the historical ``RuntimeError``
+onto ``SessionError`` (a ``db_common.DatabaseError`` subclass).
 """
 
 from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any
 
-from sqlalchemy import Engine, create_engine, event, pool
-from sqlalchemy.orm import Session, sessionmaker
+import db_common
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
 
 from genew4_orm.config.database_settings import DatabaseSettings
 
-_global_engine: Engine | None = None
+# Module-level singletons. Created by ``initialize_engine`` and reset by
+# ``close_all_sessions``. Tests save/restore these to isolate state.
+_engine_factory: "Genew4EngineFactory | None" = None
+_session_factory: db_common.SessionFactory | None = None
 _global_settings: DatabaseSettings | None = None
 
-# Type alias for sessionmaker factory
-SessionMaker = sessionmaker[Session]
+
+# Re-export the shared exceptions so the public symbol names are unchanged.
+# ``ReadOnlySessionError`` was a local class before T4; it is now the
+# db-common class of the same name. ``SessionError`` is added so callers
+# can catch the "not initialized" condition without reaching into db_common.
+ReadOnlySessionError = db_common.ReadOnlySessionError
+SessionError = db_common.SessionError
 
 
-class ReadOnlySessionError(Exception):
-    """Raised when a write operation is attempted on a read-only session."""
+class Genew4EngineFactory(db_common.EngineFactory):
+    """Engine factory that also passes ``pool_timeout`` to ``create_engine``.
 
-    pass
-
-
-def _create_engine(settings: DatabaseSettings) -> Engine:
-    """Create a SQLAlchemy engine with connection pooling.
-
-    Args:
-        settings: DatabaseSettings instance with connection configuration.
-
-    Returns:
-        Configured SQLAlchemy Engine instance.
+    ``db_common.EngineFactory._create_engine`` builds the engine from
+    :meth:`DatabaseSettings.get_url` and the inherited pool fields, but
+    does not pass ``pool_timeout`` (db-common deliberately ships no
+    pool-timeout behaviour). Genew4 historically used a 30s pool timeout,
+    now exposed as the ``pool_timeout`` field on
+    :class:`~genew4_orm.config.database_settings.Genew4DatabaseSettings`,
+    so this subclass overrides ``_create_engine`` to add ``pool_timeout``
+    for non-SQLite drivers while leaving the SQLite path identical to
+    db-common's (StaticPool + ``check_same_thread=False``).
     """
-    engine_kwargs = settings.get_engine_kwargs()
-    engine_kwargs.update(
-        {
-            "poolclass": pool.QueuePool,
-            "echo": False,  # Set to True for SQL query debugging
-        }
-    )
 
-    engine = create_engine(
-        settings.get_connection_url(with_password=True),
-        **engine_kwargs,
-    )
+    def _create_engine(self) -> Engine:
+        url = self._settings.get_url()
+        kwargs: dict = {}
 
-    # Register connection pool event listeners for monitoring
-    @event.listens_for(engine, "connect")
-    def receive_connect(dbapi_conn: Any, connection_record: Any) -> None:
-        """Log new database connections."""
-        pass  # Could add logging here
+        if self._settings.driver == "sqlite":
+            # SQLite in-memory needs StaticPool so the same connection is
+            # shared across threads / sessions (mirrors db-common's logic).
+            kwargs["poolclass"] = StaticPool
+            kwargs["connect_args"] = {"check_same_thread": False}
+        else:
+            kwargs["pool_size"] = self._settings.pool_size
+            kwargs["max_overflow"] = self._settings.max_overflow
+            kwargs["pool_recycle"] = self._settings.pool_recycle
+            kwargs["pool_pre_ping"] = self._settings.pool_pre_ping
+            # genew4-only: pool_timeout is not in db-common's EngineFactory.
+            kwargs["pool_timeout"] = getattr(self._settings, "pool_timeout", 30)
 
-    @event.listens_for(engine, "checkout")
-    def receive_checkout(dbapi_conn: Any, connection_record: Any, connection_proxy: Any) -> None:
-        """Log connection checkout from pool."""
-        pass  # Could add logging here
-
-    return engine
+        return create_engine(url, **kwargs)
 
 
 def initialize_engine(settings: DatabaseSettings | None = None) -> Engine:
     """Initialize the global database engine.
 
-    This should be called once at application startup. If called multiple
-    times, the existing engine will be returned.
+    Builds and caches the ``EngineFactory`` / ``SessionFactory`` singletons.
+    Idempotent: a second call returns the already-cached engine.
 
     Args:
-        settings: DatabaseSettings instance. If None, loads from environment.
+        settings: Optional :class:`DatabaseSettings`. If ``None``, loads
+            from environment via ``DatabaseSettings()``.
 
     Returns:
-        The initialized SQLAlchemy Engine.
+        The initialized SQLAlchemy :class:`~sqlalchemy.engine.Engine`.
     """
-    global _global_engine, _global_settings
+    global _engine_factory, _session_factory, _global_settings
 
-    if _global_engine is not None:
-        return _global_engine
+    if _engine_factory is not None:
+        return _engine_factory.get_engine()
 
     if settings is None:
-        settings = DatabaseSettings()  # type: ignore[call-arg]
+        settings = DatabaseSettings()
 
     _global_settings = settings
-    _global_engine = _create_engine(settings)
+    _engine_factory = Genew4EngineFactory(settings)
+    _session_factory = db_common.SessionFactory(_engine_factory)
 
-    return _global_engine
+    return _engine_factory.get_engine()
 
 
 def get_engine() -> Engine:
     """Get the global database engine.
 
     Returns:
-        The SQLAlchemy Engine instance.
+        The SQLAlchemy :class:`~sqlalchemy.engine.Engine` instance.
 
     Raises:
-        RuntimeError: If engine has not been initialized.
+        db_common.SessionError: If the engine has not been initialized.
     """
-    if _global_engine is None:
-        raise RuntimeError("Database engine not initialized. Call initialize_engine() first.")
-    return _global_engine
+    if _engine_factory is None:
+        raise SessionError("Database engine not initialized. Call initialize_engine() first.")
+    return _engine_factory.get_engine()
 
 
 def get_settings() -> DatabaseSettings:
     """Get the global database settings.
 
     Returns:
-        The DatabaseSettings instance.
+        The :class:`DatabaseSettings` instance.
 
     Raises:
-        RuntimeError: If settings have not been initialized.
+        db_common.SessionError: If settings have not been initialized.
     """
     if _global_settings is None:
-        raise RuntimeError("Database settings not initialized. Call initialize_engine() first.")
+        raise SessionError("Database settings not initialized. Call initialize_engine() first.")
     return _global_settings
 
 
-# Session maker factories (created after engine initialization)
-_session_factory: SessionMaker | None = None
-_readonly_session_factory: SessionMaker | None = None
+def _require_session_factory() -> db_common.SessionFactory:
+    """Return the global SessionFactory, raising SessionError if uninitialized.
 
-
-def _get_session_factory() -> SessionMaker:
-    """Get or create the standard session factory.
-
-    Returns:
-        Session factory for read-write sessions.
+    Shared by :func:`get_readwrite_session` and :func:`get_readonly_session`,
+    which both need the factory (and both surface the same "engine not
+    initialized" error when it is absent).
     """
-    global _session_factory
-
     if _session_factory is None:
-        _session_factory = sessionmaker(bind=get_engine(), autocommit=False, autoflush=False)
-
+        raise SessionError("Database engine not initialized. Call initialize_engine() first.")
     return _session_factory
-
-
-def _get_readonly_session_factory() -> SessionMaker:
-    """Get or create the read-only session factory.
-
-    Returns:
-        Session factory for read-only sessions.
-    """
-    global _readonly_session_factory
-
-    if _readonly_session_factory is None:
-        _readonly_session_factory = sessionmaker(bind=get_engine(), autocommit=False, autoflush=False)
-
-    return _readonly_session_factory
 
 
 @contextmanager
 def get_readwrite_session(user: str | None = None) -> Generator[Session, None, None]:
     """Create a session for read-write operations.
 
-    This session allows modifications to the database. All write operations
-    will be logged to the audit table.
+    The session is obtained from db-common's
+    :meth:`db_common.SessionFactory.get_session`, which commits on clean
+    exit and rolls back on exception. This wrapper only populates
+    ``session.info`` so audit logging (:mod:`genew4_orm.audit`) can read
+    the user / read-only context.
 
     Args:
-        user: Optional user identifier for audit logging. If not provided,
-            defaults to 'unknown'.
+        user: Optional user identifier for audit logging. Defaults to
+            ``'unknown'``.
 
     Yields:
-        A SQLAlchemy Session for database operations.
+        A SQLAlchemy :class:`~sqlalchemy.orm.Session`.
 
     Example:
         >>> with get_readwrite_session(user="john.doe") as session:
         ...     gene = session.get(Gene, 12345)
         ...     gene.approved_symbol = "NEW"
-        ...     session.commit()
     """
-    if user is None:
-        user = "unknown"
+    session_factory = _require_session_factory()
 
-    session_factory = _get_session_factory()
-    session: Session = session_factory()
-
-    # Store user context in session info for audit logging
-    session.info["user"] = user
-    session.info["read_only"] = False
-
-    try:
+    with session_factory.get_session() as session:
+        session.info["user"] = user if user is not None else "unknown"
+        session.info["read_only"] = False
         yield session
-        session.commit()
-    except Exception:
-        session.rollback()
-        raise
-    finally:
-        session.close()
 
 
 @contextmanager
 def get_readonly_session() -> Generator[Session, None, None]:
     """Create a read-only session for database queries.
 
-    This session prevents accidental modifications to the database.
-    Any attempt to commit changes will raise a ReadOnlySessionError.
+    The session is obtained from db-common's
+    :meth:`db_common.SessionFactory.get_readonly_session`, whose
+    ``before_commit`` hook raises :class:`ReadOnlySessionError` on any
+    commit attempt. This wrapper only populates ``session.info`` so audit
+    logging can detect the read-only context.
 
     Yields:
-        A SQLAlchemy Session for read-only database operations.
+        A SQLAlchemy :class:`~sqlalchemy.orm.Session` for read-only
+        database operations.
+
+    Raises:
+        db_common.ReadOnlySessionError: If a commit is attempted.
 
     Example:
         >>> with get_readonly_session() as session:
-        ...     genes = session.exec(select(Gene).limit(10)).all()
-        ...     for gene in genes:
-        ...         print(gene.approved_symbol)
-
-    Raises:
-        ReadOnlySessionError: If a commit is attempted on this session.
+        ...     genes = session.execute(select(Gene).limit(10)).scalars().all()
     """
-    session_factory = _get_readonly_session_factory()
-    session: Session = session_factory()
+    session_factory = _require_session_factory()
 
-    # Mark as read-only for audit logging
-    session.info["read_only"] = True
-    session.info["user"] = None
-
-    # Hook into before_commit to prevent writes
-    @event.listens_for(session, "before_commit")
-    def prevent_writes(session: Session) -> None:
-        raise ReadOnlySessionError(
-            "Cannot commit changes in a read-only session. Use get_readwrite_session() for modifications."
-        )
-
-    try:
+    with session_factory.get_readonly_session() as session:
+        session.info["read_only"] = True
+        session.info["user"] = None
         yield session
-        # Read-only sessions always rollback, never commit
-        session.rollback()
-    except Exception:
-        session.rollback()
-        raise
-    finally:
-        session.close()
 
 
 def close_all_sessions() -> None:
     """Close all database sessions and dispose of the engine.
 
-    This should be called before application shutdown to ensure
-    clean connection closure.
+    Resets the module-level ``EngineFactory`` / ``SessionFactory``
+    singletons so the next :func:`initialize_engine` call rebuilds them.
+    Safe to call when already uninitialized.
     """
-    global _global_engine, _session_factory, _readonly_session_factory
+    global _engine_factory, _session_factory, _global_settings
 
-    if _global_engine is not None:
-        _global_engine.dispose()
-        _global_engine = None
+    if _session_factory is not None:
+        _session_factory.close_all_sessions()
 
+    if _engine_factory is not None:
+        _engine_factory.dispose()
+
+    _engine_factory = None
     _session_factory = None
-    _readonly_session_factory = None
+    _global_settings = None
 
 
 def refresh_engine() -> Engine:
-    """Recreate the database engine with current settings.
+    """Recreate the database engine with the current settings.
 
-    This is useful when database configuration has changed and
-    you need to reconnect with new parameters.
+    Useful when database configuration has changed and a reconnect with
+    new parameters is required.
 
     Returns:
-        The newly created SQLAlchemy Engine.
+        The newly created SQLAlchemy :class:`~sqlalchemy.engine.Engine`.
+
+    Raises:
+        db_common.SessionError: If no settings are available (engine was
+            never initialized).
     """
-    close_all_sessions()
-
     if _global_settings is None:
-        raise RuntimeError("Cannot refresh: no settings available.")
+        raise SessionError("Cannot refresh: no settings available.")
 
-    return initialize_engine(_global_settings)
+    # Capture settings before close_all_sessions clears the singleton.
+    settings = _global_settings
+    close_all_sessions()
+    return initialize_engine(settings)

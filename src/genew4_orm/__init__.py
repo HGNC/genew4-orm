@@ -7,6 +7,7 @@ the genew4 database with built-in audit logging and connection pooling.
 from genew4_orm.config.database_settings import DatabaseSettings
 from genew4_orm.session import (
     ReadOnlySessionError,
+    SessionError,
     close_all_sessions,
     get_engine,
     get_readonly_session,
@@ -18,6 +19,7 @@ from genew4_orm.session import (
 __all__ = [
     "DatabaseSettings",
     "ReadOnlySessionError",
+    "SessionError",
     "initialize_engine",
     "get_engine",
     "get_readonly_session",

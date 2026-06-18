@@ -5,6 +5,7 @@ read-only session behavior, and session lifecycle.
 """
 
 import time
+from contextlib import contextmanager
 
 import pytest
 from sqlalchemy import text
@@ -22,30 +23,41 @@ from genew4_orm.session import (
 )
 
 
+@contextmanager
+def _preserve_session_state():
+    """Snapshot the module-level session singletons and restore them on exit.
+
+    Shared by the ``initialized_engine`` fixture and the close-all-sessions
+    tests, which all mutate the singletons and must not leak that state into
+    sibling tests.
+    """
+    from genew4_orm import session as session_module
+
+    saved = (
+        session_module._engine_factory,
+        session_module._session_factory,
+        session_module._global_settings,
+    )
+    try:
+        yield session_module
+    finally:
+        (
+            session_module._engine_factory,
+            session_module._session_factory,
+            session_module._global_settings,
+        ) = saved
+
+
 @pytest.fixture(scope="function")
 def initialized_engine():
     """Initialize the genew4_orm.session engine for testing.
 
-    This fixture initializes the module-level engine and restores
-    state after each test.
+    This fixture initializes the module-level EngineFactory/SessionFactory
+    singletons and restores state after each test.
     """
-    from genew4_orm import session as session_module
-
-    original_engine = session_module._global_engine
-    original_settings = session_module._global_settings
-    original_session_factory = session_module._session_factory
-    original_readonly_factory = session_module._readonly_session_factory
-
-    # Initialize the engine
-    initialize_engine()
-
-    yield
-
-    # Restore original state after test
-    session_module._global_engine = original_engine
-    session_module._global_settings = original_settings
-    session_module._session_factory = original_session_factory
-    session_module._readonly_session_factory = original_readonly_factory
+    with _preserve_session_state():
+        initialize_engine()
+        yield
 
 
 class TestEngineFunctions:
@@ -100,8 +112,11 @@ class TestReadOnlySession:
             # User should be None for read-only
             assert session.info.get("user") is None
 
-            # Attempting to commit should raise ReadOnlySessionError
-            with pytest.raises(ReadOnlySessionError, match="Cannot commit changes"):
+            # Attempting to commit should raise ReadOnlySessionError.
+            # The message comes from db-common's before_commit hook (delegated
+            # to via SessionFactory.get_readonly_session), so we don't pin
+            # the exact wording here — only the exception type.
+            with pytest.raises(ReadOnlySessionError):
                 session.commit()
 
     def test_readonly_session_allows_queries(self, initialized_engine) -> None:
@@ -181,50 +196,26 @@ class TestCloseAllSessions:
 
     def test_close_all_sessions_handles_initialized_state(self) -> None:
         """Test that close_all_sessions works with initialized engine."""
-        from genew4_orm import session as session_module
+        with _preserve_session_state() as session_module:
+            # First ensure we're initialized
+            if session_module._engine_factory is None:
+                initialize_engine()
 
-        # Store original values for restoration
-        original_engine = session_module._global_engine
-        original_session_factory = session_module._session_factory
-        original_readonly_factory = session_module._readonly_session_factory
+            # Call close_all_sessions
+            close_all_sessions()
 
-        # First ensure we're initialized
-        if session_module._global_engine is None:
-            initialize_engine()
-
-        # Call close_all_sessions
-        close_all_sessions()
-
-        # Verify globals were reset
-        assert session_module._global_engine is None
-        assert session_module._session_factory is None
-        assert session_module._readonly_session_factory is None
-
-        # Restore for other tests
-        session_module._global_engine = original_engine
-        session_module._session_factory = original_session_factory
-        session_module._readonly_session_factory = original_readonly_factory
+            # Verify globals were reset
+            assert session_module._engine_factory is None
+            assert session_module._session_factory is None
+            assert session_module._global_settings is None
 
     def test_close_all_sessions_idempotent(self) -> None:
         """Test that close_all_sessions can be called multiple times."""
-        from genew4_orm import session as session_module
+        with _preserve_session_state() as session_module:
+            # First ensure we're initialized
+            if session_module._engine_factory is None:
+                initialize_engine()
 
-        # Store original values for restoration
-        original_engine = session_module._global_engine
-        original_session_factory = session_module._session_factory
-        original_readonly_factory = session_module._readonly_session_factory
-
-        # First ensure we're initialized
-        if session_module._global_engine is None:
-            initialize_engine()
-
-        try:
-            # First call
+            # First call, then a second call that must not error
             close_all_sessions()
-            # Second call should not error
             close_all_sessions()
-        finally:
-            # Restore for other tests
-            session_module._global_engine = original_engine
-            session_module._session_factory = original_session_factory
-            session_module._readonly_session_factory = original_readonly_factory
