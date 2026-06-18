@@ -39,7 +39,7 @@ def get_gene_with_groups() -> Any:
         >>> from sqlalchemy import select
         >>> from genew4_orm.utils.query_helpers import get_gene_with_groups
         >>> with get_readonly_session() as session:
-        ...     genes = session.exec(
+        ...     genes = session.scalars(
         ...         select(Gene).options(get_gene_with_groups())
         ...     ).all()
         ...     for gene in genes:
@@ -62,7 +62,7 @@ def get_gene_group_with_hierarchy() -> Any:
         >>> from sqlalchemy import select
         >>> from genew4_orm.utils.query_helpers import get_gene_group_with_hierarchy
         >>> with get_readonly_session() as session:
-        ...     groups = session.exec(
+        ...     groups = session.scalars(
         ...         select(GeneGroup).options(get_gene_group_with_hierarchy())
         ...     ).all()
         ...     for group in groups:
@@ -92,7 +92,7 @@ def get_gene_group_with_all_relations() -> Any:
         >>> from sqlalchemy import select
         >>> from genew4_orm.utils.query_helpers import get_gene_group_with_all_relations
         >>> with get_readonly_session() as session:
-        ...     groups = session.exec(
+        ...     groups = session.scalars(
         ...         select(GeneGroup).options(get_gene_group_with_all_relations())
         ...         .limit(10)
         ...     ).all()
@@ -122,7 +122,7 @@ def get_user_with_reminders() -> Any:
         >>> from sqlalchemy import select
         >>> from genew4_orm.utils.query_helpers import get_user_with_reminders
         >>> with get_readonly_session() as session:
-        ...     users = session.exec(
+        ...     users = session.scalars(
         ...         select(User).options(get_user_with_reminders())
         ...     ).all()
         ...     for user in users:
@@ -156,7 +156,7 @@ def build_gene_query(
         >>> from genew4_orm import get_readonly_session
         >>> from genew4_orm.utils.query_helpers import build_gene_query
         >>> with get_readonly_session() as session:
-        ...     genes = session.exec(
+        ...     genes = session.scalars(
         ...         build_gene_query(status="Approved", limit=10)
         ...     ).all()
         ...     for gene in genes:
@@ -196,7 +196,7 @@ def build_gene_group_query(
         >>> from genew4_orm import get_readonly_session
         >>> from genew4_orm.utils.query_helpers import build_gene_group_query
         >>> with get_readonly_session() as session:
-        ...     groups = session.exec(
+        ...     groups = session.scalars(
         ...         build_gene_group_query(search="kinase", limit=10)
         ...     ).all()
         ...     for group in groups:
