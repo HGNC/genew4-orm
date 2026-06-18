@@ -172,7 +172,7 @@ class Genew4DatabaseSettings(db_common.DatabaseSettings):
         Returns:
             The psycopg connection URL string.
         """
-        url = self.get_url()
+        url: URL = self.get_url()
         if not with_password:
             # SQLAlchemy's ``URL.set(password=None)`` is a no-op (None means
             # "unchanged" in 2.0), so rebuild without the password to omit it.

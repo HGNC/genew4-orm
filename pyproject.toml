@@ -10,7 +10,6 @@ authors = [
 ]
 keywords = [
     "sqlalchemy",
-    "sqlmodel",
     "orm",
     "postgresql",
     "genew4",
@@ -38,7 +37,6 @@ dependencies = [
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
     "sqlalchemy>=2.0.46",
-    "sqlmodel>=0.0.33",
 ]
 
 [tool.uv.sources]
@@ -117,7 +115,7 @@ skip-string-normalization = true
 profile = "black"
 multi_line_output = 3
 line_length = 120
-known_first_party = ["sqlmodel", "pydantic", "sqlalchemy"]
+known_first_party = ["pydantic", "sqlalchemy"]
 
 [tool.mypy]
 python_version = "3.13"
@@ -125,11 +123,24 @@ warn_return_any = true
 warn_unused_ignores = true
 disallow_untyped_defs = false
 strict = true
+# db-common ships no py.typed marker, so under ``strict = true`` every
+# ``class X(db_common.DeclarativeBase)`` / ``(db_common.EngineFactory)`` would
+# trip ``disallow_subclassing_any`` (the ``[misc]`` "subclass ... (Any)" errors).
+# Relax it to match the non-strict sibling ensembl-orm's posture: db-common is
+# consumed as ``Any`` (see the db_common override below) and subclassing it is
+# allowed. ``warn_return_any`` stays on so genuinely-Any returns are still
+# surfaced and must be resolved at the call site.
+disallow_subclassing_any = false
 exclude = [
     "venv/*",
     ".venv/*",
     "build/*",
 ]
+
 [[tool.mypy.overrides]]
-module = "sqlmodel"
+# db-common is intentionally consumed untyped (no py.typed in its repo at the
+# pinned v0.1.0 tag). This silences the ``[import-untyped]`` errors; combined
+# with ``disallow_subclassing_any = false`` above it also clears the ``[misc]``
+# subclass errors that ``ignore_missing_imports`` alone does not.
+module = "db_common.*"
 ignore_missing_imports = true

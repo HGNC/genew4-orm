@@ -92,7 +92,7 @@ class Comment(DeclarativeBase):
         """
         if "status" not in kwargs:
             self.status = PublishStatus.PENDING
-        super().__init__(**kwargs)  # type: ignore[arg-type]
+        super().__init__(**kwargs)
 
     def __repr__(self) -> str:
         """Return string representation of Comment."""

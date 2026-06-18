@@ -36,7 +36,7 @@ def get_gene_with_groups() -> Any:
 
     Example:
         >>> from genew4_orm import get_readonly_session
-        >>> from sqlmodel import select
+        >>> from sqlalchemy import select
         >>> from genew4_orm.utils.query_helpers import get_gene_with_groups
         >>> with get_readonly_session() as session:
         ...     genes = session.exec(
@@ -45,9 +45,7 @@ def get_gene_with_groups() -> Any:
         ...     for gene in genes:
         ...         print(f"{gene.approved_symbol}: {len(gene.gene_has_gene_groups)} groups")
     """
-    return selectinload(Gene.gene_has_gene_groups).selectinload(  # type: ignore[arg-type]
-        GeneHasGeneGroup.gene_group  # type: ignore[arg-type]
-    )
+    return selectinload(Gene.gene_has_gene_groups).selectinload(GeneHasGeneGroup.gene_group)
 
 
 def get_gene_group_with_hierarchy() -> Any:
@@ -61,7 +59,7 @@ def get_gene_group_with_hierarchy() -> Any:
 
     Example:
         >>> from genew4_orm import get_readonly_session
-        >>> from sqlmodel import select
+        >>> from sqlalchemy import select
         >>> from genew4_orm.utils.query_helpers import get_gene_group_with_hierarchy
         >>> with get_readonly_session() as session:
         ...     groups = session.exec(
@@ -74,8 +72,8 @@ def get_gene_group_with_hierarchy() -> Any:
         ...         )
     """
     return [
-        selectinload(GeneGroup.parent_hierarchy_closures),  # type: ignore[arg-type]
-        selectinload(GeneGroup.child_hierarchy_closures),  # type: ignore[arg-type]
+        selectinload(GeneGroup.parent_hierarchy_closures),
+        selectinload(GeneGroup.child_hierarchy_closures),
     ]
 
 
@@ -91,7 +89,7 @@ def get_gene_group_with_all_relations() -> Any:
 
     Example:
         >>> from genew4_orm import get_readonly_session
-        >>> from sqlmodel import select
+        >>> from sqlalchemy import select
         >>> from genew4_orm.utils.query_helpers import get_gene_group_with_all_relations
         >>> with get_readonly_session() as session:
         ...     groups = session.exec(
@@ -104,10 +102,10 @@ def get_gene_group_with_all_relations() -> Any:
     # Note: Return as list for compatibility with .options()
     # Each selectinload targets a relationship property
     return [
-        selectinload(GeneGroup.gene_group_has_genes),  # type: ignore[arg-type]
-        selectinload(GeneGroup.aliases),  # type: ignore[arg-type]
-        selectinload(GeneGroup.parent_hierarchy_closures),  # type: ignore[arg-type]
-        selectinload(GeneGroup.child_hierarchy_closures),  # type: ignore[arg-type]
+        selectinload(GeneGroup.gene_group_has_genes),
+        selectinload(GeneGroup.aliases),
+        selectinload(GeneGroup.parent_hierarchy_closures),
+        selectinload(GeneGroup.child_hierarchy_closures),
     ]
 
 
@@ -121,7 +119,7 @@ def get_user_with_reminders() -> Any:
 
     Example:
         >>> from genew4_orm import get_readonly_session
-        >>> from sqlmodel import select
+        >>> from sqlalchemy import select
         >>> from genew4_orm.utils.query_helpers import get_user_with_reminders
         >>> with get_readonly_session() as session:
         ...     users = session.exec(
@@ -130,7 +128,7 @@ def get_user_with_reminders() -> Any:
         ...     for user in users:
         ...         print(f"{user.display_name}: {len(user.reminders)} reminders")
     """
-    return selectinload(User.reminders)  # type: ignore[arg-type]
+    return selectinload(User.reminders)
 
 
 # Query builder functions
@@ -167,10 +165,10 @@ def build_gene_query(
     statement = select(Gene)
 
     if status is not None:
-        statement = statement.where(Gene.status == status)  # type: ignore[arg-type]
+        statement = statement.where(Gene.status == status)
 
     if locus_type is not None:
-        statement = statement.where(Gene.locus_type == locus_type)  # type: ignore[arg-type]
+        statement = statement.where(Gene.locus_type == locus_type)
 
     statement = statement.offset(offset).limit(limit)
     return statement
@@ -207,7 +205,7 @@ def build_gene_group_query(
     statement = select(GeneGroup)
 
     if group_status is not None:
-        statement = statement.where(GeneGroup.name == group_status)  # type: ignore[arg-type]
+        statement = statement.where(GeneGroup.name == group_status)
 
     if search is not None:
         search_pattern = f"%{search}%"
@@ -217,9 +215,9 @@ def build_gene_group_query(
         # name is not nullable, abbreviation is nullable
         statement = statement.where(
             or_(
-                GeneGroup.name.ilike(search_pattern),  # type: ignore[attr-defined]
+                GeneGroup.name.ilike(search_pattern),
                 # Coalesce abbreviation to empty string for ilike comparison
-                GeneGroup.abbreviation.ilike(search_pattern),  # type: ignore[union-attr]
+                GeneGroup.abbreviation.ilike(search_pattern),
             )
         )
 
@@ -246,7 +244,7 @@ def paginated_query(
 
     Example:
         >>> from genew4_orm import get_readonly_session
-        >>> from sqlmodel import select, Gene
+        >>> from sqlalchemy import select
         >>> from genew4_orm.utils.query_helpers import paginated_query
         >>> with get_readonly_session() as session:
         ...     statement = select(Gene)
@@ -293,7 +291,7 @@ def get_genes_by_ids(
         >>> with get_readonly_session() as session:
         ...     genes = get_genes_by_ids(session, [12345, 67890], eager_load=True)
     """
-    statement = select(Gene).where(Gene.hgnc_id.in_(gene_ids))  # type: ignore[union-attr]
+    statement = select(Gene).where(Gene.hgnc_id.in_(gene_ids))
 
     if eager_load:
         statement = statement.options(get_gene_with_groups())
@@ -323,7 +321,7 @@ def get_gene_groups_by_ids(
         >>> with get_readonly_session() as session:
         ...     groups = get_gene_groups_by_ids(session, [1, 2, 3], eager_load=True)
     """
-    statement = select(GeneGroup).where(GeneGroup.id.in_(group_ids))  # type: ignore[union-attr]
+    statement = select(GeneGroup).where(GeneGroup.id.in_(group_ids))
 
     if eager_load:
         statement = statement.options(get_gene_group_with_all_relations())
@@ -365,7 +363,7 @@ def stream_genes(
 
         if status is not None:
             # Filter by name prefix as proxy for status
-            statement = statement.where(GeneGroup.name.like(f"{status}%"))  # type: ignore[attr-defined]
+            statement = statement.where(GeneGroup.name.like(f"{status}%"))
 
         chunk = list(session.scalars(statement))
 

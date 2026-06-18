@@ -269,9 +269,9 @@ def get_audit_entries_for_entity(
     """
     return (
         session.query(AuditLog)
-        .filter(AuditLog.entity_type == entity_type)  # type: ignore[arg-type]
-        .filter(AuditLog.entity_id == entity_id)  # type: ignore[arg-type]
-        .order_by(desc(AuditLog.timestamp))  # type: ignore[arg-type]
+        .filter(AuditLog.entity_type == entity_type)
+        .filter(AuditLog.entity_id == entity_id)
+        .order_by(desc(AuditLog.timestamp))
         .limit(limit)
         .all()
     )
@@ -292,10 +292,4 @@ def get_user_audit_history(
     Returns:
         List of AuditLog entries, ordered by most recent first.
     """
-    return (
-        session.query(AuditLog)
-        .filter(AuditLog.user == user)  # type: ignore[arg-type]
-        .order_by(desc(AuditLog.timestamp))  # type: ignore[arg-type]
-        .limit(limit)
-        .all()
-    )
+    return session.query(AuditLog).filter(AuditLog.user == user).order_by(desc(AuditLog.timestamp)).limit(limit).all()

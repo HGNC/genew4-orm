@@ -8,8 +8,8 @@ import sys
 from logging.config import fileConfig
 from pathlib import Path
 
+from db_common import DeclarativeBase
 from sqlalchemy import engine_from_config, pool
-from sqlmodel import SQLModel
 
 from alembic import context
 
@@ -31,9 +31,11 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# For SQLModel, we need to get metadata from SQLModel declarative base
-# The target_metadata will be used by autogenerate to detect model changes
-target_metadata = SQLModel.metadata
+# All genew4 models subclass db_common.DeclarativeBase, so its metadata is the
+# single shared registry holding every genew4 table (db-common ships no mapped
+# models of its own). target_metadata is used by autogenerate to detect model
+# changes.
+target_metadata = DeclarativeBase.metadata
 
 # Set the database URL from environment variables
 # This allows alembic to use same configuration as application

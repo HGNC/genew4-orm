@@ -1,6 +1,7 @@
 """Database models for genew4-orm.
 
-This module contains all SQLModel classes representing database tables.
+This module contains all SQLAlchemy model classes (subclassing
+``db_common.DeclarativeBase``) representing database tables.
 """
 
 from genew4_orm.models.audit_log import AuditLog

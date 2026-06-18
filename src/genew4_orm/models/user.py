@@ -71,7 +71,7 @@ class User(DeclarativeBase):
         if "current" not in kwargs:
             self.current = True
         known = {k: v for k, v in kwargs.items() if hasattr(type(self), k)}
-        super().__init__(**known)  # type: ignore[arg-type]
+        super().__init__(**known)
 
     def __repr__(self) -> str:
         """Return string representation of User."""

@@ -79,7 +79,7 @@ class Reminder(DeclarativeBase):
         """
         if "sent" not in kwargs:
             self.sent = False
-        super().__init__(**kwargs)  # type: ignore[arg-type]
+        super().__init__(**kwargs)
 
     def __repr__(self) -> str:
         """Return string representation of Reminder."""

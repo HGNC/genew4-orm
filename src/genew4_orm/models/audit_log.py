@@ -81,7 +81,7 @@ class AuditLog(DeclarativeBase):
             self.timestamp = datetime.utcnow()
         if "field_changes" not in kwargs:
             self.field_changes = {}
-        super().__init__(**kwargs)  # type: ignore[arg-type]
+        super().__init__(**kwargs)
 
     def __repr__(self) -> str:
         """Return string representation of AuditLog."""

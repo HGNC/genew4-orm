@@ -9,9 +9,9 @@ from collections.abc import Generator
 
 import pytest
 import sqlalchemy
+from db_common import DeclarativeBase
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
-from sqlmodel import SQLModel
 
 from genew4_orm.config.database_settings import DatabaseSettings
 from genew4_orm.models import Gene, GeneGroup, GeneHasGeneGroup
@@ -87,15 +87,13 @@ def postgres_session(postgres_engine) -> Generator[Session, None, None]:
 
     # Cleanup: truncate all tables after test
     with postgres_engine.begin() as conn:
-        result = conn.execute(
-            text("""
+        result = conn.execute(text("""
             SELECT tablename
             FROM pg_tables
             WHERE schemaname = 'public'
             AND tablename NOT LIKE 'pg_%'
             AND tablename NOT LIKE 'sql_%'
-        """)
-        )
+        """))
         tables = [row[0] for row in result.fetchall()]
         for table in tables:
             conn.execute(text(f'TRUNCATE TABLE public."{table}" CASCADE'))
@@ -117,15 +115,16 @@ def sqlite_unit_engine():
         connect_args={"check_same_thread": False},
     )
 
-    # Create all tables
+    # Create all tables from the shared db-common registry (every genew4 model
+    # subclasses db_common.DeclarativeBase).
     from genew4_orm import models  # noqa: F401
 
-    SQLModel.metadata.create_all(engine)
+    DeclarativeBase.metadata.create_all(engine)
 
     yield engine
 
     # Cleanup
-    SQLModel.metadata.drop_all(engine)
+    DeclarativeBase.metadata.drop_all(engine)
     engine.dispose()
 
 

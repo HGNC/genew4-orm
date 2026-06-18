@@ -72,7 +72,7 @@ class GeneHasComment(DeclarativeBase):
         """
         if "date_added" not in kwargs:
             self.date_added = date.today()
-        super().__init__(**kwargs)  # type: ignore[arg-type]
+        super().__init__(**kwargs)
 
     def __repr__(self) -> str:
         """Return string representation of GeneHasComment."""

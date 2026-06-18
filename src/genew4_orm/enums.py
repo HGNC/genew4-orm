@@ -24,9 +24,9 @@ def enum_field(
     ``Enum(enum_class, create_constraint=True, native_enum=False)`` column type,
     suitable as the right-hand side of an annotated attribute on a
     :class:`db_common.DeclarativeBase` subclass. This is the plain-SQLAlchemy
-    replacement for the former ``sqlmodel.Field(..., sa_column=Column(Enum(...)))``
-    wrapper; the call signature is unchanged so the only caller
-    (``Comment.status``) keeps working.
+    replacement for the former SQLAlchemy-1.x/SQLModel
+    ``Field(..., sa_column=Column(Enum(...)))`` wrapper; the call signature is
+    unchanged so the only caller (``Comment.status``) keeps working.
 
     Args:
         enum_class: The StrEnum class to use for this field.
