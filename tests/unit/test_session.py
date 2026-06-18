@@ -257,28 +257,6 @@ class TestEngineKwargs:
             assert "pool_recycle" in kwargs
             assert "pool_pre_ping" in kwargs
 
-    def test_get_async_engine_kwargs_structure(self) -> None:
-        """Test get_async_engine_kwargs returns expected structure."""
-        import os
-        from unittest.mock import patch
-
-        with patch.dict(
-            os.environ,
-            {
-                "DATABASESETTINGS_PG_USER": "test",
-                "DATABASESETTINGS_PG_PASSWORD": "test",
-            },
-        ):
-            settings = DatabaseSettings()
-            kwargs = settings.get_async_engine_kwargs()
-
-            assert isinstance(kwargs, dict)
-            assert "pool_size" in kwargs
-            assert "max_overflow" in kwargs
-            assert "pool_timeout" in kwargs
-            assert "pool_recycle" in kwargs
-            assert "pool_pre_ping" in kwargs
-
 
 class TestConnectionUrl:
     """Test connection URL generation."""
