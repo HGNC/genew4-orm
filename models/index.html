@@ -792,6 +792,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#other-enums" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other enums
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1401,6 +1412,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#other-enums" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other enums
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1438,18 +1460,21 @@
 
 
 <h1 id="models">Models<a class="headerlink" href="#models" title="Permanent link">&para;</a></h1>
-<p>genew4-orm provides SQLModel classes for all database tables in the genew4 database.</p>
+<p>genew4-orm provides SQLAlchemy 2.0 declarative models for the database tables in
+the genew4 database. All models subclass <code>db_common.DeclarativeBase</code> (a plain
+<code>sqlalchemy.orm.DeclarativeBase</code>), so they share a single <code>MetaData</code>/registry.</p>
 <h2 id="core-models">Core Models<a class="headerlink" href="#core-models" title="Permanent link">&para;</a></h2>
 <h3 id="gene">Gene<a class="headerlink" href="#gene" title="Permanent link">&para;</a></h3>
 <p>Represents a gene in the <code>hgnc</code> table.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gene</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">gene</span> <span class="o">=</span> <span class="n">Gene</span><span class="p">(</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">approved_symbol</span><span class="o">=</span><span class="s2">&quot;BRCA1&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">approved_name</span><span class="o">=</span><span class="s2">&quot;Breast Cancer 1&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">status</span><span class="o">=</span><span class="s2">&quot;Approved&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">locus_type</span><span class="o">=</span><span class="s2">&quot;gene with protein product&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">hgnc_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">approved_symbol</span><span class="o">=</span><span class="s2">&quot;BRCA1&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">approved_name</span><span class="o">=</span><span class="s2">&quot;Breast Cancer 1&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">status</span><span class="o">=</span><span class="s2">&quot;Approved&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">locus_type</span><span class="o">=</span><span class="s2">&quot;gene with protein product&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
 </code></pre></div>
 <p><strong>Key Fields:</strong></p>
 <table>
@@ -1462,64 +1487,81 @@
 </thead>
 <tbody>
 <tr>
-<td><code>id</code></td>
+<td><code>hgnc_id</code></td>
 <td><code>int</code></td>
-<td>Primary key (hgnc_id)</td>
+<td>Primary key (HGNC ID)</td>
 </tr>
 <tr>
 <td><code>approved_symbol</code></td>
-<td><code>str</code></td>
+<td><code>str \| None</code></td>
 <td>HGNC approved gene symbol</td>
 </tr>
 <tr>
 <td><code>approved_name</code></td>
-<td><code>str</code></td>
+<td><code>str \| None</code></td>
 <td>HGNC approved gene name</td>
 </tr>
 <tr>
 <td><code>status</code></td>
-<td><code>GeneStatus</code></td>
-<td>Gene status (Approved, Pending, etc.)</td>
+<td><code>str \| None</code></td>
+<td>Gene status — a <code>GeneStatus</code> value (default <code>"Pending"</code>)</td>
 </tr>
 <tr>
 <td><code>locus_type</code></td>
-<td><code>GeneLocusType</code></td>
-<td>Locus type (37 options)</td>
+<td><code>str \| None</code></td>
+<td>Locus type — a <code>GeneLocusType</code> value (default <code>"undef"</code>)</td>
+</tr>
+<tr>
+<td><code>previous_symbols</code></td>
+<td><code>str \| None</code></td>
+<td>Previous gene symbols</td>
+</tr>
+<tr>
+<td><code>alias_symbols</code></td>
+<td><code>str \| None</code></td>
+<td>Alias gene symbols</td>
 </tr>
 <tr>
 <td><code>chromosomal_location</code></td>
-<td><code>str</code></td>
+<td><code>str \| None</code></td>
 <td>Chromosomal location</td>
 </tr>
 <tr>
+<td><code>editor</code></td>
+<td><code>str \| None</code></td>
+<td>Last editor</td>
+</tr>
+<tr>
 <td><code>date_modified</code></td>
-<td><code>date</code></td>
+<td><code>date \| None</code></td>
 <td>Last modification date</td>
 </tr>
 <tr>
-<td><code>date_approved</code></td>
-<td><code>date</code></td>
-<td>Approval date</td>
-</tr>
-<tr>
-<td><code>editor</code></td>
-<td><code>str</code></td>
-<td>Last editor</td>
+<td><code>date_approved</code> / <code>date_symbol_changed</code> / <code>date_name_changed</code></td>
+<td><code>date \| None</code></td>
+<td>Lifecycle dates</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><code>status</code> and <code>locus_type</code> are stored as plain string columns but hold values
+from the <a href="#genestatus"><code>GeneStatus</code></a> and <a href="#genelocustype"><code>GeneLocusType</code></a>
+enums respectively.</p>
+</blockquote>
 <p><strong>Relationships:</strong>
 - <code>gene_has_gene_groups</code> - Many-to-many with GeneGroup
 - <code>gene_has_comments</code> - One-to-many with GeneHasComment</p>
+<p>The model also exposes Phase 2 cross-reference/sequence columns (<code>ccds_ids</code>,
+<code>hseq_ids</code>, <code>public_hseq_id</code>, <code>pseudogene_id</code>, <code>vega_ids</code>, etc.).</p>
 <h3 id="genegroup">GeneGroup<a class="headerlink" href="#genegroup" title="Permanent link">&para;</a></h3>
 <p>Represents a gene family/group in the <code>family_new</code> table.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneGroup</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">group</span> <span class="o">=</span> <span class="n">GeneGroup</span><span class="p">(</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;BRCA1 Family&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;BRCA1&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">status</span><span class="o">=</span><span class="s2">&quot;exported&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;set&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="nb">id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;BRCA1 Family&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;BRCA1&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;BRCA-related gene family&quot;</span><span class="p">,</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">)</span>
 </code></pre></div>
 <p><strong>Key Fields:</strong></p>
@@ -1535,47 +1577,83 @@
 <tr>
 <td><code>id</code></td>
 <td><code>int</code></td>
-<td>Primary key (fam_id)</td>
+<td>Primary key (<code>fam_id</code>)</td>
 </tr>
 <tr>
 <td><code>name</code></td>
 <td><code>str</code></td>
-<td>Group name (unique)</td>
+<td>Group name (required)</td>
 </tr>
 <tr>
 <td><code>abbreviation</code></td>
-<td><code>str</code></td>
+<td><code>str \| None</code></td>
 <td>Group abbreviation</td>
 </tr>
 <tr>
-<td><code>status</code></td>
-<td><code>GeneGroupStatus</code></td>
-<td>Export status</td>
+<td><code>editor</code></td>
+<td><code>str \| None</code></td>
+<td>Editor responsible</td>
 </tr>
 <tr>
-<td><code>type</code></td>
-<td><code>GeneGroupType</code></td>
-<td>Group type</td>
+<td><code>pubmed_ids</code></td>
+<td><code>str \| None</code></td>
+<td>PubMed IDs</td>
+</tr>
+<tr>
+<td><code>internal_comments</code></td>
+<td><code>str \| None</code></td>
+<td>Internal curator comments (<code>curator_comment</code> column)</td>
+</tr>
+<tr>
+<td><code>public_comments</code></td>
+<td><code>str \| None</code></td>
+<td>Public-facing comments (<code>external_note</code> column)</td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td><code>str \| None</code></td>
+<td>Description label (<code>desc_label</code>)</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td><code>str \| None</code></td>
+<td>Description source (<code>desc_source</code>)</td>
+</tr>
+<tr>
+<td><code>typical_gene</code></td>
+<td><code>str \| None</code></td>
+<td>Typical gene for this group</td>
 </tr>
 <tr>
 <td><code>description</code></td>
-<td><code>str</code></td>
-<td>Full description</td>
+<td><code>str \| None</code></td>
+<td>Full description (<code>desc_comment</code>)</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p>Note: the legacy <code>status</code> and <code>type</code> enum columns are <strong>not</strong> mapped on this
+model (they were removed because the database does not use enum types here).
+The <code>GeneGroupStatus</code> / <code>GeneGroupType</code> enums still exist but are not bound
+to columns.</p>
+</blockquote>
 <p><strong>Relationships:</strong>
 - <code>gene_group_has_genes</code> - One-to-many with GeneHasGeneGroup
-- <code>aliases</code> - One-to-many with GeneGroupAlias</p>
+- <code>aliases</code> - One-to-many with GeneGroupAlias
+- <code>parent_hierarchy_closures</code> / <code>child_hierarchy_closures</code> - One-to-many with HierarchyClosure</p>
+<p>Specialists, external resources, and correspondences are associated via junction
+tables (<code>FamHasSpecialist</code>, <code>FamHasExtResource</code>, <code>FamHasCorr</code>) rather than direct
+relationships — query them with explicit joins.</p>
 <h2 id="junction-models">Junction Models<a class="headerlink" href="#junction-models" title="Permanent link">&para;</a></h2>
 <h3 id="genehasgenegroup">GeneHasGeneGroup<a class="headerlink" href="#genehasgenegroup" title="Permanent link">&para;</a></h3>
-<p>Junction table for Gene ↔ GeneGroup many-to-many relationship.</p>
+<p>Junction table for the Gene ↔ GeneGroup many-to-many relationship
+(<code>gene_has_family</code> table). The two foreign keys form a composite primary key.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneHasGeneGroup</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">association</span> <span class="o">=</span> <span class="n">GeneHasGeneGroup</span><span class="p">(</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">gene_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">gene_group_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">sort_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">custom_sort</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">)</span>
 </code></pre></div>
 <p><strong>Key Fields:</strong></p>
@@ -1589,34 +1667,32 @@
 </thead>
 <tbody>
 <tr>
-<td><code>id</code></td>
-<td><code>int</code></td>
-<td>Primary key</td>
-</tr>
-<tr>
 <td><code>gene_id</code></td>
 <td><code>int</code></td>
-<td>Foreign key to hgnc.hgnc_id</td>
+<td>Foreign key to <code>hgnc.hgnc_id</code> (composite PK, <code>hgnc_id</code> column)</td>
 </tr>
 <tr>
 <td><code>gene_group_id</code></td>
 <td><code>int</code></td>
-<td>Foreign key to family_new.id</td>
+<td>Foreign key to <code>family_new.id</code> (composite PK, <code>family_id</code> column)</td>
 </tr>
 <tr>
-<td><code>sort_order</code></td>
-<td><code>int</code></td>
-<td>Display order</td>
+<td><code>url</code></td>
+<td><code>str \| None</code></td>
+<td>URL for this gene-group association</td>
 </tr>
 <tr>
-<td><code>comments</code></td>
-<td><code>str</code></td>
-<td>Association comments</td>
+<td><code>custom_sort</code></td>
+<td><code>str \| None</code></td>
+<td>Custom sort value for the gene within the group</td>
 </tr>
 </tbody>
 </table>
+<p><strong>Relationships:</strong>
+- <code>gene</code> - Belongs to Gene
+- <code>gene_group</code> - Belongs to GeneGroup</p>
 <h3 id="famhasspecialist">FamHasSpecialist<a class="headerlink" href="#famhasspecialist" title="Permanent link">&para;</a></h3>
-<p>Junction table for Specialist ↔ GeneGroup many-to-many relationship.</p>
+<p>Junction table for the Specialist ↔ GeneGroup many-to-many relationship.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">FamHasSpecialist</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">association</span> <span class="o">=</span> <span class="n">FamHasSpecialist</span><span class="p">(</span>
@@ -1625,7 +1701,7 @@
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="p">)</span>
 </code></pre></div>
 <h3 id="famhasextresource">FamHasExtResource<a class="headerlink" href="#famhasextresource" title="Permanent link">&para;</a></h3>
-<p>Junction table for ExternalResource ↔ GeneGroup many-to-many relationship.</p>
+<p>Junction table for the ExternalResource ↔ GeneGroup many-to-many relationship.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">FamHasExtResource</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">association</span> <span class="o">=</span> <span class="n">FamHasExtResource</span><span class="p">(</span>
@@ -1634,7 +1710,7 @@
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">)</span>
 </code></pre></div>
 <h3 id="famhascorr">FamHasCorr<a class="headerlink" href="#famhascorr" title="Permanent link">&para;</a></h3>
-<p>Junction table for Correspondence ↔ GeneGroup many-to-many relationship.</p>
+<p>Junction table for the Correspondence ↔ GeneGroup many-to-many relationship.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">FamHasCorr</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">association</span> <span class="o">=</span> <span class="n">FamHasCorr</span><span class="p">(</span>
@@ -1643,7 +1719,8 @@
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">)</span>
 </code></pre></div>
 <h3 id="genehascomment">GeneHasComment<a class="headerlink" href="#genehascomment" title="Permanent link">&para;</a></h3>
-<p>Junction table for Gene ↔ Comment many-to-many relationship.</p>
+<p>Junction table for the Gene ↔ Comment many-to-many relationship. The two
+foreign keys form a composite primary key.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneHasComment</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">association</span> <span class="o">=</span> <span class="n">GeneHasComment</span><span class="p">(</span>
@@ -1665,22 +1742,22 @@
 <tr>
 <td><code>comment_id</code></td>
 <td><code>int</code></td>
-<td>Foreign key to comment.id (composite PK)</td>
+<td>Foreign key to <code>comment.id</code> (composite PK)</td>
 </tr>
 <tr>
 <td><code>hgnc_id</code></td>
 <td><code>int</code></td>
-<td>Foreign key to hgnc.hgnc_id (composite PK)</td>
+<td>Foreign key to <code>hgnc.hgnc_id</code> (composite PK)</td>
 </tr>
 <tr>
 <td><code>date_added</code></td>
 <td><code>date</code></td>
-<td>Date the comment was linked to the gene</td>
+<td>Date the comment was linked to the gene (defaults to today)</td>
 </tr>
 <tr>
 <td><code>editor_id</code></td>
 <td><code>int</code></td>
-<td>Foreign key to editor.ed_id</td>
+<td>Foreign key to <code>editor.ed_id</code></td>
 </tr>
 </tbody>
 </table>
@@ -1746,8 +1823,8 @@
 </code></pre></div>
 <h3 id="comment">Comment<a class="headerlink" href="#comment" title="Permanent link">&para;</a></h3>
 <p>Comments linked to genes with a publication workflow.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Comment</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">PublishStatus</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">PublishStatus</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Comment</span>
 <a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
 <a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span>
 <a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;This gene requires further review&quot;</span><span class="p">,</span>
@@ -1768,7 +1845,7 @@
 <tr>
 <td><code>id</code></td>
 <td><code>int</code></td>
-<td>Primary key (auto-increment)</td>
+<td>Primary key (auto-increment via <code>comment_sequence</code>)</td>
 </tr>
 <tr>
 <td><code>comment</code></td>
@@ -1782,62 +1859,78 @@
 </tr>
 <tr>
 <td><code>lock</code></td>
-<td><code>str</code></td>
+<td><code>str \| None</code></td>
 <td>Editing lock</td>
 </tr>
 <tr>
 <td><code>created</code></td>
-<td><code>date</code></td>
+<td><code>date \| None</code></td>
 <td>Date comment was created</td>
 </tr>
 <tr>
 <td><code>publisher_id</code></td>
-<td><code>int</code></td>
+<td><code>int \| None</code></td>
 <td>Foreign key to editor (publisher)</td>
 </tr>
 <tr>
 <td><code>status</code></td>
 <td><code>PublishStatus</code></td>
-<td>pending, published, or rejected</td>
+<td>pending, published, or rejected (defaults to <code>PENDING</code>)</td>
 </tr>
 <tr>
 <td><code>status_date</code></td>
-<td><code>date</code></td>
+<td><code>date \| None</code></td>
 <td>Date of last status change</td>
 </tr>
 <tr>
 <td><code>replace_id</code></td>
-<td><code>int</code></td>
-<td>Foreign key to comment (replaces)</td>
+<td><code>int \| None</code></td>
+<td>Foreign key to comment (comment this replaces)</td>
 </tr>
 <tr>
 <td><code>replacement_id</code></td>
-<td><code>int</code></td>
-<td>Foreign key to comment (replacement)</td>
+<td><code>int \| None</code></td>
+<td>Foreign key to comment (replacement comment)</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Relationships:</strong>
-- <code>author</code> - Belongs to Editor (via author_id)
-- <code>publisher</code> - Belongs to Editor (via publisher_id)
+- <code>author</code> - Belongs to Editor (via <code>author_id</code>)
+- <code>publisher</code> - Belongs to Editor (via <code>publisher_id</code>)
 - <code>gene_has_comments</code> - One-to-many with GeneHasComment</p>
 <h2 id="enum-types">Enum Types<a class="headerlink" href="#enum-types" title="Permanent link">&para;</a></h2>
+<p>All enums are string-based (<code>StrEnum</code>) for PostgreSQL compatibility and are
+defined in <code>genew4_orm.enums</code>.</p>
 <h3 id="genestatus">GeneStatus<a class="headerlink" href="#genestatus" title="Permanent link">&para;</a></h3>
-<p>Gene status values: <code>APPROVED</code>, <code>PENDING</code>, <code>RESERVED</code>, <code>RESERVED_NON_HUMAN</code>, <code>SUSPENDED</code>, <code>DELETE</code>, <code>ENTRY_WITHDRAWN</code>, <code>SYMBOL_WITHDRAWN</code></p>
+<p>Gene approval/status values: <code>APPROVED</code> (<code>"Approved"</code>), <code>PENDING</code> (<code>"Pending"</code>),
+<code>RESERVED</code>, <code>RESERVED_NON_HUMAN</code>, <code>SUSPENDED</code>, <code>DELETE</code>, <code>ENTRY_WITHDRAWN</code>,
+<code>SYMBOL_WITHDRAWN</code> (8 values).</p>
 <h3 id="genelocustype">GeneLocusType<a class="headerlink" href="#genelocustype" title="Permanent link">&para;</a></h3>
-<p>Locus type values: <code>GWPP</code> (gene with protein product), <code>PSEUDOGENE</code>, <code>UNDEF</code>, and 34 more options</p>
+<p>Locus type values (34 values), including <code>GWPP</code> (<code>"gene with protein product"</code>),
+<code>PSEUDOGENE</code>, <code>RNA_LONG_NON_CODING</code>, <code>REGION</code>, <code>UNDEF</code> (<code>"undef"</code>), and others.</p>
 <h3 id="genegroupstatus">GeneGroupStatus<a class="headerlink" href="#genegroupstatus" title="Permanent link">&para;</a></h3>
-<p>Group status values: <code>INTERNAL</code>, <code>EXPORTED</code>, <code>PUBLISHED</code>, <code>APPROVED</code></p>
+<p>Gene group visibility status: <code>DELETE</code> (<code>"delete"</code>), <code>EXPORTED</code> (<code>"exported"</code>),
+<code>INTERNAL</code> (<code>"internal"</code>) (3 values).</p>
 <h3 id="genegrouptype">GeneGroupType<a class="headerlink" href="#genegrouptype" title="Permanent link">&para;</a></h3>
-<p>Group type values: <code>SET</code>, <code>SUBSET</code>, <code>OTHER</code>, <code>FAMILY</code></p>
+<p>Gene group type: <code>SET</code> (<code>"set"</code>) (1 value).</p>
 <h3 id="publishstatus">PublishStatus<a class="headerlink" href="#publishstatus" title="Permanent link">&para;</a></h3>
-<p>Comment publication status: <code>PENDING</code>, <code>PUBLISHED</code>, <code>REJECTED</code></p>
+<p>Comment publication status: <code>PENDING</code> (<code>"pending"</code>), <code>PUBLISHED</code> (<code>"published"</code>),
+<code>REJECTED</code> (<code>"rejected"</code>) (3 values).</p>
+<h3 id="other-enums">Other enums<a class="headerlink" href="#other-enums" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>Grch38SourceType</code> - GRCh38 mapping source: <code>NCBI</code>, <code>ENSEMBL</code>, <code>CHROM</code>, <code>HGNC</code></li>
+<li><code>Grch38MarkType</code> - GRCh38 marking type: <code>MAX</code>, <code>HIDDEN</code></li>
+<li><code>CytobandSourceType</code> - Cytoband source: <code>UCSC</code>, <code>ENSEMBL</code></li>
+</ul>
+<p>The <code>enum_field()</code> helper builds a plain-SQLAlchemy <code>mapped_column</code> backed by an
+<code>Enum(...)</code> column type for use on <code>DeclarativeBase</code> subclasses (used by
+<code>Comment.status</code>).</p>
 <h2 id="full-model-list">Full Model List<a class="headerlink" href="#full-model-list" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>Gene</code> - Gene information</li>
-<li><code>GeneGroup</code> - Gene family/group</li>
-<li><code>GeneHasGeneGroup</code> - Gene-Group junction</li>
-<li><code>GeneHasComment</code> - Gene-Comment junction</li>
+<li><code>Gene</code> - Gene information (<code>hgnc</code>)</li>
+<li><code>GeneGroup</code> - Gene family/group (<code>family_new</code>)</li>
+<li><code>GeneHasGeneGroup</code> - Gene-Group junction (<code>gene_has_family</code>)</li>
+<li><code>GeneHasComment</code> - Gene-Comment junction (<code>gene_has_comment</code>)</li>
 <li><code>FamHasSpecialist</code> - Specialist-Group junction</li>
 <li><code>FamHasExtResource</code> - Resource-Group junction</li>
 <li><code>FamHasCorr</code> - Correspondence-Group junction</li>
@@ -1848,12 +1941,18 @@
 <li><code>User</code> - Application users</li>
 <li><code>Editor</code> - Curator accounts</li>
 <li><code>Reminder</code> - Reminder records</li>
-<li><code>Grch38Mapping</code> - GRCh38 mapping data</li>
-<li><code>Cytoband</code> - Cytoband data</li>
-<li><code>HierarchyClosure</code> - Hierarchical relationship closure</li>
 <li><code>GeneGroupAlias</code> - Group aliases</li>
+<li><code>HierarchyClosure</code> - Hierarchical relationship closure</li>
+<li><code>Grch38Mapping</code> - GRCh38 mapping data</li>
 <li><code>AuditLog</code> - Audit trail</li>
 </ul>
+<p>Phase 2 cross-reference and sequence models: <code>Ccds</code>, <code>CcdsSequence</code>,
+<code>Gene2Refseq</code>, <code>GeneInfo</code>, <code>PseudogeneOrg</code>, <code>OtterSequence</code>, <code>EnsemblSequence</code>,
+<code>Hseq</code>, <code>HgncId2CcdsId</code>, <code>TableModDate</code>.</p>
+<blockquote>
+<p>Note: the <code>cytoband</code> table has no primary key and is intentionally <strong>not</strong>
+mapped as a model — query it with raw SQL via <code>session.execute(text(...))</code>.</p>
+</blockquote>
 
 
 

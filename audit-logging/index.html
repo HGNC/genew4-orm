@@ -822,6 +822,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#helper-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helper functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#get-changes-by-date-range" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1208,6 +1219,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#helper-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helper functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#get-changes-by-date-range" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1350,128 +1372,166 @@
 - <strong>Operation type</strong> - CREATE, UPDATE, or DELETE
 - <strong>Entity</strong> - The model type that was modified
 - <strong>Entity ID</strong> - The primary key of the affected record
-- <strong>Field changes</strong> - Before/after values for UPDATE operations</p>
+- <strong>Field changes</strong> - Before/after values for changed fields, stored as JSON</p>
 <h2 id="audit-log-model">Audit Log Model<a class="headerlink" href="#audit-log-model" title="Permanent link">&para;</a></h2>
+<p>Audit entries are normally created <strong>automatically</strong> by the audit listener
+(see <a href="#implementation-details">Implementation Details</a>). <code>field_changes</code> is a
+Python <code>dict</code> — the column uses a <code>JSONEncodedDict</code> <code>TypeDecorator</code> that
+serializes to JSON text on write and deserializes back to a <code>dict</code> on read, so
+you pass and receive a <code>dict</code> directly (no manual <code>json.dumps</code>/<code>json.loads</code>):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLog</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">audit</span> <span class="o">=</span> <span class="n">AuditLog</span><span class="p">(</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;UPDATE&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;Gene&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">entity_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">field_changes</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="s2">&quot;approved_name&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old&quot;</span><span class="p">:</span> <span class="s2">&quot;Old Name&quot;</span><span class="p">,</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span> <span class="s2">&quot;New Name&quot;</span><span class="p">},</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="s2">&quot;editor&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old&quot;</span><span class="p">:</span> <span class="s2">&quot;previous_curator&quot;</span><span class="p">,</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span> <span class="s2">&quot;curator&quot;</span><span class="p">},</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="p">},</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># field_changes is a dict on the model; it is JSON-serialized for storage.</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">audit</span> <span class="o">=</span> <span class="n">AuditLog</span><span class="p">(</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;UPDATE&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">entity_type</span><span class="o">=</span><span class="s2">&quot;Gene&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">entity_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">field_changes</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="s2">&quot;approved_name&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old&quot;</span><span class="p">:</span> <span class="s2">&quot;Old Name&quot;</span><span class="p">,</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span> <span class="s2">&quot;New Name&quot;</span><span class="p">},</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="s2">&quot;editor&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;old&quot;</span><span class="p">:</span> <span class="s2">&quot;previous_curator&quot;</span><span class="p">,</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span> <span class="s2">&quot;curator&quot;</span><span class="p">},</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="p">},</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
 </code></pre></div>
 <h2 id="automatic-logging">Automatic Logging<a class="headerlink" href="#automatic-logging" title="Permanent link">&para;</a></h2>
 <h3 id="create-operations">CREATE Operations<a class="headerlink" href="#create-operations" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readwrite_session</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gene</span><span class="p">,</span> <span class="n">AuditLog</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gene</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readwrite_session</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">Gene</span><span class="p">(</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="n">approved_symbol</span><span class="o">=</span><span class="s2">&quot;TEST1&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="n">approved_name</span><span class="o">=</span><span class="s2">&quot;Test Gene 1&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;Approved&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="p">)</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="c1"># Audit log entry automatically created:</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="c1"># AuditLog(</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="c1">#     user=&quot;curator&quot;,</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="c1">#     operation=&quot;CREATE&quot;,</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="c1">#     entity_type=&quot;Gene&quot;,</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="c1">#     entity_id=&lt;new_gene_id&gt;,</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="c1">#     field_changes={</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="c1">#         &quot;approved_symbol&quot;: {&quot;old&quot;: None, &quot;new&quot;: &quot;TEST1&quot;},</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="c1">#         &quot;approved_name&quot;: {&quot;old&quot;: None, &quot;new&quot;: &quot;Test Gene 1&quot;},</span>
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="c1">#         &quot;status&quot;: {&quot;old&quot;: None, &quot;new&quot;: &quot;Approved&quot;},</span>
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="c1">#         ...</span>
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="c1">#     }</span>
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="c1"># )</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="n">hgnc_id</span><span class="o">=</span><span class="mi">1100</span><span class="p">,</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="n">approved_symbol</span><span class="o">=</span><span class="s2">&quot;TEST1&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">approved_name</span><span class="o">=</span><span class="s2">&quot;Test Gene 1&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;Approved&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="p">)</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="c1"># The session commits automatically on a clean exit.</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="c1"># Audit log entry automatically created:</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="c1"># AuditLog(</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="c1">#     user=&quot;curator&quot;,</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="c1">#     operation=&quot;CREATE&quot;,</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="c1">#     entity_type=&quot;Gene&quot;,</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="c1">#     entity_id=0,  # 0 for INSERTs — the ID is not assigned at flush time</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="c1">#     field_changes={</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="c1">#         &quot;approved_symbol&quot;: {&quot;old&quot;: None, &quot;new&quot;: &quot;TEST1&quot;},</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="c1">#         &quot;approved_name&quot;: {&quot;old&quot;: None, &quot;new&quot;: &quot;Test Gene 1&quot;},</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="c1">#         &quot;status&quot;: {&quot;old&quot;: None, &quot;new&quot;: &quot;Approved&quot;},</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="c1">#         ...</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="c1">#     },</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="c1"># )</span>
 </code></pre></div>
+<blockquote>
+<p>Note: for INSERT operations the <code>entity_id</code> is recorded as <code>0</code> because the
+ID is not assigned at flush time. Query audit logs by <code>entity_type</code>, <code>user</code>,
+or the <code>field_changes</code> JSON to identify a specific entity.</p>
+</blockquote>
 <h3 id="update-operations">UPDATE Operations<a class="headerlink" href="#update-operations" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;Updated Name&quot;</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">editor</span> <span class="o">=</span> <span class="s2">&quot;curator&quot;</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Audit log entry automatically created:</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># AuditLog(</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1">#     user=&quot;curator&quot;,</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1">#     operation=&quot;UPDATE&quot;,</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="c1">#     entity_type=&quot;Gene&quot;,</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1">#     entity_id=12345,</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="c1">#     field_changes={</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="c1">#         &quot;approved_name&quot;: {&quot;old&quot;: &quot;Original Name&quot;, &quot;new&quot;: &quot;Updated Name&quot;},</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="c1">#         &quot;editor&quot;: {&quot;old&quot;: &quot;previous_editor&quot;, &quot;new&quot;: &quot;curator&quot;},</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="c1">#     }</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="c1"># )</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># Audit log entry automatically created:</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># AuditLog(</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1">#     user=&quot;curator&quot;,</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1">#     operation=&quot;UPDATE&quot;,</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1">#     entity_type=&quot;Gene&quot;,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="c1">#     entity_id=12345,</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1">#     field_changes={</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="c1">#         &quot;approved_name&quot;: {&quot;old&quot;: &quot;Original Name&quot;, &quot;new&quot;: &quot;Updated Name&quot;},</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="c1">#         &quot;editor&quot;: {&quot;old&quot;: &quot;previous_editor&quot;, &quot;new&quot;: &quot;curator&quot;},</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="c1">#     },</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="c1"># )</span>
 </code></pre></div>
 <h3 id="delete-operations">DELETE Operations<a class="headerlink" href="#delete-operations" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># Audit log entry automatically created:</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># AuditLog(</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="c1">#     user=&quot;curator&quot;,</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1">#     operation=&quot;DELETE&quot;,</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1">#     entity_type=&quot;Gene&quot;,</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="c1">#     entity_id=12345,</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1">#     field_changes={}</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="c1"># )</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># Audit log entry automatically created:</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># AuditLog(</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1">#     user=&quot;curator&quot;,</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="c1">#     operation=&quot;DELETE&quot;,</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1">#     entity_type=&quot;Gene&quot;,</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1">#     entity_id=12345,</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="c1">#     field_changes={},</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1"># )</span>
 </code></pre></div>
 <h2 id="querying-audit-logs">Querying Audit Logs<a class="headerlink" href="#querying-audit-logs" title="Permanent link">&para;</a></h2>
+<p><code>field_changes</code> is a Python <code>dict</code> on loaded rows (the <code>JSONEncodedDict</code>
+<code>TypeDecorator</code> deserializes the stored JSON text), so access it directly —
+no <code>json.loads</code> needed.</p>
 <h3 id="get-recent-changes">Get Recent Changes<a class="headerlink" href="#get-recent-changes" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLog</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="c1"># Get last 10 audit entries</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">audits</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="k">for</span> <span class="n">audit</span> <span class="ow">in</span> <span class="n">audits</span><span class="p">:</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">user</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">operation</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">entity_type</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">entity_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readonly_session</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLog</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="c1"># Get last 10 audit entries</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">audits</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="k">for</span> <span class="n">audit</span> <span class="ow">in</span> <span class="n">audits</span><span class="p">:</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">user</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">operation</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">entity_type</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">entity_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="get-changes-by-user">Get Changes by User<a class="headerlink" href="#get-changes-by-user" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">user</span> <span class="o">==</span> <span class="s2">&quot;curator&quot;</span><span class="p">)</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">audits</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">audits</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="get-changes-for-specific-entity">Get Changes for Specific Entity<a class="headerlink" href="#get-changes-for-specific-entity" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>        <span class="n">AuditLog</span><span class="o">.</span><span class="n">entity_type</span> <span class="o">==</span> <span class="s2">&quot;Gene&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>        <span class="n">AuditLog</span><span class="o">.</span><span class="n">entity_id</span> <span class="o">==</span> <span class="mi">12345</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">audits</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="k">for</span> <span class="n">audit</span> <span class="ow">in</span> <span class="n">audits</span><span class="p">:</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">operation</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>        <span class="k">if</span> <span class="n">audit</span><span class="o">.</span><span class="n">field_changes</span><span class="p">:</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>            <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">audit</span><span class="o">.</span><span class="n">field_changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">change</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;old&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">change</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;new&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readonly_session</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLog</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>        <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>        <span class="o">.</span><span class="n">where</span><span class="p">(</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>            <span class="n">AuditLog</span><span class="o">.</span><span class="n">entity_type</span> <span class="o">==</span> <span class="s2">&quot;Gene&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>            <span class="n">AuditLog</span><span class="o">.</span><span class="n">entity_id</span> <span class="o">==</span> <span class="mi">12345</span><span class="p">,</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>        <span class="p">)</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>    <span class="p">)</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>    <span class="n">audits</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>    <span class="k">for</span> <span class="n">audit</span> <span class="ow">in</span> <span class="n">audits</span><span class="p">:</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">operation</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>        <span class="n">changes</span> <span class="o">=</span> <span class="n">audit</span><span class="o">.</span><span class="n">field_changes</span> <span class="ow">or</span> <span class="p">{}</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>        <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">change</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;old&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">change</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;new&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="helper-functions">Helper functions<a class="headerlink" href="#helper-functions" title="Permanent link">&para;</a></h3>
+<p><code>genew4_orm.audit</code> also provides convenience query helpers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.audit</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_audit_entries_for_entity</span><span class="p">,</span> <span class="n">get_user_audit_history</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readonly_session</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="c1"># All audit entries for one entity (most recent first)</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">entries</span> <span class="o">=</span> <span class="n">get_audit_entries_for_entity</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="s2">&quot;Gene&quot;</span><span class="p">,</span> <span class="mi">12345</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="c1"># All audit entries by a user (most recent first)</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="n">history</span> <span class="o">=</span> <span class="n">get_user_audit_history</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="s2">&quot;curator&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="get-changes-by-date-range">Get Changes by Date Range<a class="headerlink" href="#get-changes-by-date-range" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="c1"># Last 7 days</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">start_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="n">start_date</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="n">audits</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="c1"># Last 7 days</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="n">start_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>        <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>        <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="n">start_date</span><span class="p">)</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>    <span class="p">)</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>    <span class="n">audits</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="audit-log-fields">Audit Log Fields<a class="headerlink" href="#audit-log-fields" title="Permanent link">&para;</a></h2>
 <table>
@@ -1511,39 +1571,42 @@
 <tr>
 <td><code>entity_id</code></td>
 <td><code>int</code></td>
-<td>ID of the affected record</td>
+<td>ID of the affected record (<code>0</code> for INSERTs)</td>
 </tr>
 <tr>
 <td><code>field_changes</code></td>
 <td><code>dict</code></td>
-<td>Field name -&gt; {old, new} values</td>
+<td>Dict of field name -&gt; <code>{old, new}</code> values (JSON-serialized for storage)</td>
 </tr>
 </tbody>
 </table>
 <h2 id="session-requirements">Session Requirements<a class="headerlink" href="#session-requirements" title="Permanent link">&para;</a></h2>
-<p>Audit logging requires the <code>user</code> parameter when creating read-write sessions:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># REQUIRED: User parameter for audit logging</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;username&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="c1"># All write operations are logged with this username</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;Updated&quot;</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="c1"># Read-only sessions don&#39;t require user (no write operations)</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<p>Audit logging requires the <code>user</code> keyword when creating read-write sessions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># REQUIRED: user keyword for audit logging</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;username&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="c1"># All write operations are logged with this username</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;Updated&quot;</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># Read-only sessions don&#39;t require user (no write operations)</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="implementation-details">Implementation Details<a class="headerlink" href="#implementation-details" title="Permanent link">&para;</a></h2>
-<p>The audit logging is implemented via SQLAlchemy event listeners in the session module:</p>
+<p>The audit logging is implemented via SQLAlchemy event listeners in <code>genew4_orm.audit</code>:</p>
 <ol>
-<li><strong>Before flush</strong> - Detects dirty (modified) objects and pending (new) objects</li>
-<li><strong>After flush</strong> - Records DELETE operations</li>
-<li><strong>Automatic commit</strong> - Audit log entries are committed in the same transaction as the data changes</li>
+<li><strong>Before flush</strong> (<code>audit_write_operations</code>) - Captures new (INSERT), dirty (UPDATE), and deleted (DELETE) objects and writes <code>AuditLog</code> rows for them.</li>
+<li><strong>Same transaction</strong> - Audit log rows are added to the same session, so they commit (or roll back) atomically with the data changes.</li>
 </ol>
+<p>Read-only sessions are detected via <code>session.info["read_only"]</code> and skipped, and
+the acting user is read from <code>session.info["user"]</code>, both populated by
+<code>get_readonly_session()</code> / <code>get_readwrite_session()</code>.</p>
 <p>This ensures:
 - <strong>Atomicity</strong> - Audit entries are only saved if the data operation succeeds
 - <strong>Consistency</strong> - Every write operation has a corresponding audit trail
 - <strong>Performance</strong> - Minimal overhead on write operations</p>
+<p>Sensitive fields (passwords, tokens, API keys, very large text) are excluded from
+the recorded changes by <code>should_log_field()</code>.</p>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>Always use meaningful usernames</strong> - Use real usernames or service account names</li>
@@ -1553,39 +1616,42 @@
 <li><strong>Include audit context</strong> - Use descriptive usernames that include the application/service</li>
 </ol>
 <h2 id="example-complete-audit-workflow">Example: Complete Audit Workflow<a class="headerlink" href="#example-complete-audit-workflow" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readwrite_session</span><span class="p">,</span> <span class="n">get_readonly_session</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gene</span><span class="p">,</span> <span class="n">AuditLog</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="c1"># Step 1: Make changes</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator_john&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;Updated by John&quot;</span>
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="c1"># Step 2: Review audit trail</span>
-<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>        <span class="n">AuditLog</span><span class="o">.</span><span class="n">entity_type</span> <span class="o">==</span> <span class="s2">&quot;Gene&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>        <span class="n">AuditLog</span><span class="o">.</span><span class="n">entity_id</span> <span class="o">==</span> <span class="mi">12345</span>
-<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
-<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>
-<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>    <span class="n">audits</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>
-<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Audit trail for Gene </span><span class="si">{</span><span class="mi">12345</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>    <span class="k">for</span> <span class="n">audit</span> <span class="ow">in</span> <span class="n">audits</span><span class="p">:</span>
-<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">user</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">operation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>        <span class="k">if</span> <span class="n">audit</span><span class="o">.</span><span class="n">field_changes</span><span class="p">:</span>
-<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a>            <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">audit</span><span class="o">.</span><span class="n">field_changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">change</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;old&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">change</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;new&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readonly_session</span><span class="p">,</span> <span class="n">get_readwrite_session</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLog</span><span class="p">,</span> <span class="n">Gene</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1"># Step 1: Make changes</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator_john&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;Updated by John&quot;</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="c1"># Step 2: Review audit trail</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>        <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>        <span class="o">.</span><span class="n">where</span><span class="p">(</span>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>            <span class="n">AuditLog</span><span class="o">.</span><span class="n">entity_type</span> <span class="o">==</span> <span class="s2">&quot;Gene&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>            <span class="n">AuditLog</span><span class="o">.</span><span class="n">entity_id</span> <span class="o">==</span> <span class="mi">12345</span><span class="p">,</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>        <span class="p">)</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>    <span class="p">)</span>
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>    <span class="n">audits</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a>
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Audit trail for Gene </span><span class="si">{</span><span class="mi">12345</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a>    <span class="k">for</span> <span class="n">audit</span> <span class="ow">in</span> <span class="n">audits</span><span class="p">:</span>
+<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">user</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">audit</span><span class="o">.</span><span class="n">operation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a>        <span class="n">changes</span> <span class="o">=</span> <span class="n">audit</span><span class="o">.</span><span class="n">field_changes</span> <span class="ow">or</span> <span class="p">{}</span>
+<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a>        <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">change</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;old&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">change</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;new&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="missing-audit-entries">Missing Audit Entries<a class="headerlink" href="#missing-audit-entries" title="Permanent link">&para;</a></h3>
 <p>If audit entries are not being created:</p>
 <ol>
-<li><strong>Check user parameter</strong> - Ensure <code>user</code> is passed to <code>get_readwrite_session()</code></li>
-<li><strong>Check session type</strong> - Only read-write sessions create audit logs</li>
-<li><strong>Check commit</strong> - Audit logs are only created on successful commit</li>
+<li><strong>Check the <code>user</code> keyword</strong> - Ensure <code>user=</code> is passed to <code>get_readwrite_session()</code></li>
+<li><strong>Check session type</strong> - Only read-write sessions create audit logs (read-only sessions are skipped)</li>
+<li><strong>Check commit</strong> - Audit logs are only persisted when the session commits (the read-write context manager commits automatically on a clean exit)</li>
 </ol>
 <h3 id="performance-issues">Performance Issues<a class="headerlink" href="#performance-issues" title="Permanent link">&para;</a></h3>
 <p>For high-volume write operations:</p>
@@ -1594,22 +1660,20 @@
 <li><strong>Archive old logs</strong> - Move old audit logs to separate storage</li>
 <li><strong>Add indexes</strong> - Add database indexes on frequently queried audit fields</li>
 </ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Example: Archive old audit logs</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">cutoff_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;archive_job&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    <span class="n">old_logs</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>        <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">cutoff_date</span><span class="p">)</span>
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>    <span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>
-<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>    <span class="c1"># Export to cold storage (CSV, S3, etc.)</span>
-<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>    <span class="c1"># Then delete from database</span>
-<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>    <span class="k">for</span> <span class="n">log</span> <span class="ow">in</span> <span class="n">old_logs</span><span class="p">:</span>
-<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>        <span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
-<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>
-<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="c1"># Example: Archive old audit logs</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="n">cutoff_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;archive_job&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">AuditLog</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">AuditLog</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">cutoff_date</span><span class="p">)</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="n">old_logs</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="c1"># Export to cold storage (CSV, S3, etc.), then delete from the database</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    <span class="k">for</span> <span class="n">log</span> <span class="ow">in</span> <span class="n">old_logs</span><span class="p">:</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>        <span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
 </code></pre></div>
 
 

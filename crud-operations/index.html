@@ -1694,45 +1694,48 @@
 
 
 <h1 id="crud-operations">CRUD Operations<a class="headerlink" href="#crud-operations" title="Permanent link">&para;</a></h1>
-<p>This guide covers Create, Read, Update, and Delete operations with genew4-orm, including session management and audit logging.</p>
+<p>This guide covers Create, Read, Update, and Delete operations with genew4-orm, including session management and audit logging. Queries use the SQLAlchemy 2.0 <code>select()</code> API.</p>
 <h2 id="session-management">Session Management<a class="headerlink" href="#session-management" title="Permanent link">&para;</a></h2>
 <h3 id="initialize-the-engine">Initialize the Engine<a class="headerlink" href="#initialize-the-engine" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">initialize_engine</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatabaseSettings</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatabaseSettings</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">initialize_engine</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Option 1: Load from environment variables</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">initialize_engine</span><span class="p">()</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Option 2: Pass settings directly</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">DatabaseSettings</span><span class="p">(</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">pg_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">pg_port</span><span class="o">=</span><span class="mi">5432</span><span class="p">,</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">pg_name</span><span class="o">=</span><span class="s2">&quot;genew4&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">pg_user</span><span class="o">=</span><span class="s2">&quot;your_user&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">pg_password</span><span class="o">=</span><span class="s2">&quot;your_password&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">port</span><span class="o">=</span><span class="mi">5432</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">database</span><span class="o">=</span><span class="s2">&quot;genew4&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">username</span><span class="o">=</span><span class="s2">&quot;your_user&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;your_password&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">)</span>
 <a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">initialize_engine</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="read-write-sessions">Read-Write Sessions<a class="headerlink" href="#read-write-sessions" title="Permanent link">&para;</a></h3>
 <p>For operations that modify data:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readwrite_session</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gene</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gene</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readwrite_session</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;your_username&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;Updated Name&quot;</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="c1"># The session commits automatically on a clean exit (rolls back on error).</span>
 </code></pre></div>
-<p>The <code>user</code> parameter is required for audit logging. All write operations are automatically tracked with the username and timestamp.</p>
+<p>The <code>user</code> keyword is captured for audit logging. All write operations are
+automatically tracked with the username and timestamp.</p>
 <h3 id="read-only-sessions">Read-Only Sessions<a class="headerlink" href="#read-only-sessions" title="Permanent link">&para;</a></h3>
 <p>For queries only (prevents accidental modifications):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readonly_session</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">sqlmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gene</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readonly_session</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </code></pre></div>
-<p>Read-only sessions reject <code>add()</code>, <code>delete()</code>, and <code>commit()</code> operations.</p>
+<p>Read-only sessions raise <code>db_common.ReadOnlySessionError</code> on any commit attempt.</p>
 <h3 id="close-all-sessions">Close All Sessions<a class="headerlink" href="#close-all-sessions" title="Permanent link">&para;</a></h3>
 <p>When shutting down your application:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">close_all_sessions</span>
@@ -1741,32 +1744,28 @@
 </code></pre></div>
 <h2 id="create-operations">Create Operations<a class="headerlink" href="#create-operations" title="Permanent link">&para;</a></h2>
 <h3 id="create-single-record">Create Single Record<a class="headerlink" href="#create-single-record" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readwrite_session</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneGroup</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneGroup</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readwrite_session</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">group</span> <span class="o">=</span> <span class="n">GeneGroup</span><span class="p">(</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Test Gene Family&quot;</span><span class="p">,</span>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;TGF&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;internal&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;family&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A test gene family&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="p">)</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    <span class="c1"># Refresh to get generated ID</span>
-<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="n">session</span><span class="o">.</span><span class="n">refresh</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
-<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created group with ID: </span><span class="si">{</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A test gene family&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="p">)</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  <span class="c1"># Persist + populate generated ID within the transaction</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created group with ID: </span><span class="si">{</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="c1"># The session commits automatically on a clean exit.</span>
 </code></pre></div>
 <h3 id="create-multiple-records">Create Multiple Records<a class="headerlink" href="#create-multiple-records" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">groups</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>        <span class="n">GeneGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Group 1&quot;</span><span class="p">,</span> <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;G1&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;internal&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;set&quot;</span><span class="p">),</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="n">GeneGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Group 2&quot;</span><span class="p">,</span> <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;G2&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;internal&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;set&quot;</span><span class="p">),</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>        <span class="n">GeneGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Group 1&quot;</span><span class="p">,</span> <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;G1&quot;</span><span class="p">),</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="n">GeneGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Group 2&quot;</span><span class="p">,</span> <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;G2&quot;</span><span class="p">),</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="p">]</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add_all</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="create-with-relationships">Create with Relationships<a class="headerlink" href="#create-with-relationships" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gene</span><span class="p">,</span> <span class="n">GeneGroup</span><span class="p">,</span> <span class="n">GeneHasGeneGroup</span>
@@ -1774,55 +1773,50 @@
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="c1"># Create gene</span>
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">Gene</span><span class="p">(</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>        <span class="n">approved_symbol</span><span class="o">=</span><span class="s2">&quot;TEST1&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>        <span class="n">approved_name</span><span class="o">=</span><span class="s2">&quot;Test Gene 1&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;Approved&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>        <span class="n">locus_type</span><span class="o">=</span><span class="s2">&quot;gene with protein product&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="p">)</span>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>    <span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  <span class="c1"># Get gene ID without committing</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>    <span class="c1"># Create group</span>
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>    <span class="n">group</span> <span class="o">=</span> <span class="n">GeneGroup</span><span class="p">(</span>
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Test Group&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>        <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;TG&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;internal&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;set&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>    <span class="p">)</span>
-<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
-<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>    <span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>
-<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>    <span class="c1"># Create association</span>
-<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>    <span class="n">association</span> <span class="o">=</span> <span class="n">GeneHasGeneGroup</span><span class="p">(</span>
-<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>        <span class="n">gene_id</span><span class="o">=</span><span class="n">gene</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>        <span class="n">gene_group_id</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a>        <span class="n">sort_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a>    <span class="p">)</span>
-<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">association</span><span class="p">)</span>
-<a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>        <span class="n">hgnc_id</span><span class="o">=</span><span class="mi">1100</span><span class="p">,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>        <span class="n">approved_symbol</span><span class="o">=</span><span class="s2">&quot;TEST1&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>        <span class="n">approved_name</span><span class="o">=</span><span class="s2">&quot;Test Gene 1&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;Approved&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>        <span class="n">locus_type</span><span class="o">=</span><span class="s2">&quot;gene with protein product&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>    <span class="p">)</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>    <span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  <span class="c1"># Ensure the gene is visible for the FK</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>    <span class="c1"># Create group</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>    <span class="n">group</span> <span class="o">=</span> <span class="n">GeneGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Test Group&quot;</span><span class="p">,</span> <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;TG&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>    <span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>    <span class="c1"># Create association</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>    <span class="n">association</span> <span class="o">=</span> <span class="n">GeneHasGeneGroup</span><span class="p">(</span>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>        <span class="n">gene_id</span><span class="o">=</span><span class="n">gene</span><span class="o">.</span><span class="n">hgnc_id</span><span class="p">,</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>        <span class="n">gene_group_id</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>        <span class="n">custom_sort</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>    <span class="p">)</span>
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">association</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="create-comment-linked-to-gene">Create Comment Linked to Gene<a class="headerlink" href="#create-comment-linked-to-gene" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Comment</span><span class="p">,</span> <span class="n">GeneHasComment</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">PublishStatus</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="c1"># Create a comment</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>        <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;This gene requires further review&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="n">author_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>        <span class="n">status</span><span class="o">=</span><span class="n">PublishStatus</span><span class="o">.</span><span class="n">PENDING</span><span class="p">,</span>
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="p">)</span>
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
-<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
-<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="c1"># Link comment to a gene</span>
-<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="n">gene_comment</span> <span class="o">=</span> <span class="n">GeneHasComment</span><span class="p">(</span>
-<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>        <span class="n">comment_id</span><span class="o">=</span><span class="n">comment</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>        <span class="n">hgnc_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span>
-<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>        <span class="n">editor_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>    <span class="p">)</span>
-<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gene_comment</span><span class="p">)</span>
-<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">PublishStatus</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Comment</span><span class="p">,</span> <span class="n">GeneHasComment</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readwrite_session</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="c1"># Create a comment</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;This gene requires further review&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>        <span class="n">author_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>        <span class="n">status</span><span class="o">=</span><span class="n">PublishStatus</span><span class="o">.</span><span class="n">PENDING</span><span class="p">,</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="p">)</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>    <span class="n">session</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="c1"># Link comment to a gene</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>    <span class="n">gene_comment</span> <span class="o">=</span> <span class="n">GeneHasComment</span><span class="p">(</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>        <span class="n">comment_id</span><span class="o">=</span><span class="n">comment</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>        <span class="n">hgnc_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>        <span class="n">editor_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>    <span class="p">)</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gene_comment</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="read-operations">Read Operations<a class="headerlink" href="#read-operations" title="Permanent link">&para;</a></h2>
 <h3 id="get-by-id">Get by ID<a class="headerlink" href="#get-by-id" title="Permanent link">&para;</a></h3>
@@ -1832,22 +1826,24 @@
 <a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">gene</span><span class="o">.</span><span class="n">approved_symbol</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="select-with-filters">Select with Filters<a class="headerlink" href="#select-with-filters" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Gene</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;Approved&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">gene</span><span class="o">.</span><span class="n">approved_symbol</span><span class="p">)</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readonly_session</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Gene</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;Approved&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">gene</span><span class="o">.</span><span class="n">approved_symbol</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="select-single-record">Select Single Record<a class="headerlink" href="#select-single-record" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Gene</span><span class="o">.</span><span class="n">approved_symbol</span> <span class="o">==</span> <span class="s2">&quot;BRCA1&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="select-with-multiple-conditions">Select with Multiple Conditions<a class="headerlink" href="#select-with-multiple-conditions" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">and_</span><span class="p">,</span> <span class="n">or_</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">and_</span><span class="p">,</span> <span class="n">select</span>
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
 <a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
@@ -1856,15 +1852,14 @@
 <a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>            <span class="n">Gene</span><span class="o">.</span><span class="n">locus_type</span> <span class="o">==</span> <span class="s2">&quot;gene with protein product&quot;</span><span class="p">,</span>
 <a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>        <span class="p">)</span>
 <a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    <span class="p">)</span>
-<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="count-records">Count Records<a class="headerlink" href="#count-records" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">func</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">func</span><span class="p">,</span> <span class="n">select</span>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
 <a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">Gene</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="n">count</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total genes: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="n">count</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">select</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">Gene</span><span class="o">.</span><span class="n">hgnc_id</span><span class="p">)))</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total genes: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="update-operations">Update Operations<a class="headerlink" href="#update-operations" title="Permanent link">&para;</a></h2>
 <h3 id="update-single-record">Update Single Record<a class="headerlink" href="#update-single-record" title="Permanent link">&para;</a></h3>
@@ -1873,19 +1868,16 @@
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="k">if</span> <span class="n">gene</span><span class="p">:</span>
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>        <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;New Approved Name&quot;</span>
 <a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>        <span class="n">gene</span><span class="o">.</span><span class="n">editor</span> <span class="o">=</span> <span class="s2">&quot;curator&quot;</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>        <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="update-multiple-records">Update Multiple Records<a class="headerlink" href="#update-multiple-records" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
 <a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
 <a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Gene</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;Pending&quot;</span><span class="p">)</span>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 <a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
 <a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
 <a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>        <span class="n">gene</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;Approved&quot;</span>
-<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>
-<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="bulk-update-with-execute">Bulk Update with execute<a class="headerlink" href="#bulk-update-with-execute" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">update</span>
@@ -1893,7 +1885,6 @@
 <a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="n">stmt</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">Gene</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Gene</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;Pending&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">&quot;Approved&quot;</span><span class="p">)</span>
 <a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>    <span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="delete-operations">Delete Operations<a class="headerlink" href="#delete-operations" title="Permanent link">&para;</a></h2>
 <h3 id="delete-single-record">Delete Single Record<a class="headerlink" href="#delete-single-record" title="Permanent link">&para;</a></h3>
@@ -1901,19 +1892,16 @@
 <a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
 <a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="k">if</span> <span class="n">gene</span><span class="p">:</span>
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>        <span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span>
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>        <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="delete-multiple-records">Delete Multiple Records<a class="headerlink" href="#delete-multiple-records" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
 <a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
 <a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Gene</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;Withdrawn&quot;</span><span class="p">)</span>
-<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Gene</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;Entry Withdrawn&quot;</span><span class="p">)</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 <a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>
 <a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
 <a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>        <span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span>
-<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>
-<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="delete-with-relationships">Delete with Relationships<a class="headerlink" href="#delete-with-relationships" title="Permanent link">&para;</a></h3>
 <p>When deleting records with relationships, CASCADE deletes are automatically handled:</p>
@@ -1928,14 +1916,16 @@
 <a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>    <span class="n">group</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">GeneGroup</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>    <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
 <a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>        <span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
-<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>        <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="transaction-management">Transaction Management<a class="headerlink" href="#transaction-management" title="Permanent link">&para;</a></h2>
 <h3 id="commit-changes">Commit Changes<a class="headerlink" href="#commit-changes" title="Permanent link">&para;</a></h3>
+<p>Read-write sessions created with <code>get_readwrite_session()</code> <strong>commit automatically</strong>
+when the <code>with</code> block exits cleanly and <strong>roll back automatically</strong> on any
+exception. You can also commit explicitly mid-session:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
 <a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
 <a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;Updated&quot;</span>
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>  <span class="c1"># Persist changes</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>  <span class="c1"># Persist changes immediately</span>
 </code></pre></div>
 <h3 id="rollback-changes">Rollback Changes<a class="headerlink" href="#rollback-changes" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
@@ -1943,11 +1933,11 @@
 <a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;This will be rolled back&quot;</span>
 <a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>    <span class="n">session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>  <span class="c1"># Undo changes</span>
 <a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>
-<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    <span class="c1"># Or use context manager for automatic rollback on exception</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    <span class="c1"># Or rely on the context manager to roll back on exception:</span>
 <a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>        <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;Updated&quot;</span>
-<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>        <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;something went wrong&quot;</span><span class="p">)</span>
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
 <a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>        <span class="n">session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
 <a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a>        <span class="k">raise</span>
 </code></pre></div>
@@ -1957,18 +1947,16 @@
 <a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
 <a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>    <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>        <span class="c1"># Operations that can be rolled back independently</span>
-<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>        <span class="n">gene</span> <span class="o">=</span> <span class="n">Gene</span><span class="p">(</span><span class="n">approved_symbol</span><span class="o">=</span><span class="s2">&quot;TEST&quot;</span><span class="p">,</span> <span class="n">approved_name</span><span class="o">=</span><span class="s2">&quot;Test&quot;</span><span class="p">)</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>        <span class="n">gene</span> <span class="o">=</span> <span class="n">Gene</span><span class="p">(</span><span class="n">hgnc_id</span><span class="o">=</span><span class="mi">1101</span><span class="p">,</span> <span class="n">approved_symbol</span><span class="o">=</span><span class="s2">&quot;TEST&quot;</span><span class="p">,</span> <span class="n">approved_name</span><span class="o">=</span><span class="s2">&quot;Test&quot;</span><span class="p">)</span>
 <a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>        <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gene</span><span class="p">)</span>
 <a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>        <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>  <span class="c1"># Commits nested transaction</span>
 <a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
 <a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>        <span class="n">session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>  <span class="c1"># Rolls back nested transaction only</span>
-<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>
-<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>  <span class="c1"># Commits outer transaction</span>
 </code></pre></div>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Always use context managers</strong> (<code>with</code> statements) for automatic cleanup</li>
-<li><strong>Specify user parameter</strong> in read-write sessions for audit logging</li>
+<li><strong>Always use context managers</strong> (<code>with</code> statements) for automatic commit/rollback and cleanup</li>
+<li><strong>Pass the <code>user=</code> keyword</strong> to read-write sessions for audit logging</li>
 <li><strong>Use read-only sessions</strong> for queries to prevent accidental modifications</li>
 <li><strong>Commit frequently</strong> to avoid long-running transactions</li>
 <li><strong>Handle exceptions</strong> and rollback on errors</li>
@@ -1988,23 +1976,26 @@
 <a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>
 <a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>    <span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>        <span class="n">group</span> <span class="o">=</span> <span class="n">GeneGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Duplicate Name&quot;</span><span class="p">,</span> <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;DUP&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;internal&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;set&quot;</span><span class="p">)</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>        <span class="n">group</span> <span class="o">=</span> <span class="n">GeneGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Duplicate Name&quot;</span><span class="p">,</span> <span class="n">abbreviation</span><span class="o">=</span><span class="s2">&quot;DUP&quot;</span><span class="p">)</span>
 <a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>        <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
-<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>        <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
-<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="k">except</span> <span class="n">IntegrityError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Constraint violation: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a>    <span class="n">session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="k">except</span> <span class="n">IntegrityError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Constraint violation: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
+<blockquote>
+<p>The read-write session context manager already rolls back on exception, so you
+normally do not need to call <code>session.rollback()</code> yourself in the <code>except</code> block.</p>
+</blockquote>
 <h3 id="handle-connection-errors">Handle Connection Errors<a class="headerlink" href="#handle-connection-errors" title="Permanent link">&para;</a></h3>
-<p>```python
-from sqlalchemy.exc import OperationalError</p>
-<p>try:
-    with get_readwrite_session(user="curator") as session:
-        # Database operations
-        pass
-except OperationalError as e:
-    print(f"Connection error: {e}")
-    # Implement retry logic or alert administrators</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.exc</span><span class="w"> </span><span class="kn">import</span> <span class="n">OperationalError</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>    <span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;curator&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>        <span class="c1"># Database operations</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>        <span class="k">pass</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="k">except</span> <span class="n">OperationalError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>    <span class="c1"># Implement retry logic or alert administrators</span>
+</code></pre></div>
 
 
 

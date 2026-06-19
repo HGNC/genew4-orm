@@ -454,10 +454,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#databasesettings-class" class="md-nav__link">
+  <a href="#genew4databasesettings-class" class="md-nav__link">
     <span class="md-ellipsis">
       
-        DatabaseSettings Class
+        Genew4DatabaseSettings Class
       
     </span>
   </a>
@@ -477,10 +477,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#postgresql-connection" class="md-nav__link">
+  <a href="#driver-and-postgresql-connection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        PostgreSQL Connection
+        Driver and PostgreSQL Connection
       
     </span>
   </a>
@@ -1008,10 +1008,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#databasesettings-class" class="md-nav__link">
+  <a href="#genew4databasesettings-class" class="md-nav__link">
     <span class="md-ellipsis">
       
-        DatabaseSettings Class
+        Genew4DatabaseSettings Class
       
     </span>
   </a>
@@ -1031,10 +1031,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#postgresql-connection" class="md-nav__link">
+  <a href="#driver-and-postgresql-connection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        PostgreSQL Connection
+        Driver and PostgreSQL Connection
       
     </span>
   </a>
@@ -1150,9 +1150,11 @@
 
 
 <h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h1>
-<p>genew4-orm uses Pydantic Settings for configuration management. All settings can be loaded from environment variables or passed directly.</p>
+<p>genew4-orm uses <a href="https://docs.pydantic.dev/latest/concepts/pydantic_settings/">Pydantic Settings</a> for configuration management, layered on top of the shared <a href="https://github.com/HGNC/db-common">db-common</a> <code>DatabaseSettings</code>. All settings can be loaded from environment variables or passed directly.</p>
 <h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
-<p>Create a <code>.env</code> file in your project root:</p>
+<p>Create a <code>.env</code> file in your project root. All variables are prefixed with
+<code>DATABASESETTINGS_</code>; the <code>DATABASESETTINGS_PG_*</code> names are accepted as legacy
+aliases:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># PostgreSQL Configuration</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">DATABASESETTINGS_PG_HOST</span><span class="o">=</span>localhost
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nv">DATABASESETTINGS_PG_PORT</span><span class="o">=</span><span class="m">5432</span>
@@ -1165,28 +1167,35 @@
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="nv">DATABASESETTINGS_MAX_OVERFLOW</span><span class="o">=</span><span class="m">10</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nv">DATABASESETTINGS_POOL_TIMEOUT</span><span class="o">=</span><span class="m">30</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nv">DATABASESETTINGS_POOL_RECYCLE</span><span class="o">=</span><span class="m">3600</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="nv">DATABASESETTINGS_POOL_PRE_PING</span><span class="o">=</span><span class="nb">true</span>
 </code></pre></div>
-<h2 id="databasesettings-class">DatabaseSettings Class<a class="headerlink" href="#databasesettings-class" title="Permanent link">&para;</a></h2>
+<h2 id="genew4databasesettings-class">Genew4DatabaseSettings Class<a class="headerlink" href="#genew4databasesettings-class" title="Permanent link">&para;</a></h2>
+<p>The canonical class is <code>Genew4DatabaseSettings</code> (a subclass of
+<code>db_common.DatabaseSettings</code>). It is re-exported as <code>DatabaseSettings</code> for
+backwards compatibility:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatabaseSettings</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Load from environment variables</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">DatabaseSettings</span><span class="p">()</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Or pass values directly</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Or pass values directly (canonical field names)</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">DatabaseSettings</span><span class="p">(</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">pg_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">pg_port</span><span class="o">=</span><span class="mi">5432</span><span class="p">,</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">pg_name</span><span class="o">=</span><span class="s2">&quot;genew4&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">pg_user</span><span class="o">=</span><span class="s2">&quot;username&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">pg_password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">port</span><span class="o">=</span><span class="mi">5432</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">database</span><span class="o">=</span><span class="s2">&quot;genew4&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">username</span><span class="o">=</span><span class="s2">&quot;username&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">)</span>
 </code></pre></div>
+<p>The legacy <code>pg_host</code> / <code>pg_port</code> / <code>pg_name</code> / <code>pg_user</code> / <code>pg_password</code>
+keyword arguments still work as aliases of the canonical fields.</p>
 <h2 id="configuration-options">Configuration Options<a class="headerlink" href="#configuration-options" title="Permanent link">&para;</a></h2>
-<h3 id="postgresql-connection">PostgreSQL Connection<a class="headerlink" href="#postgresql-connection" title="Permanent link">&para;</a></h3>
+<h3 id="driver-and-postgresql-connection">Driver and PostgreSQL Connection<a class="headerlink" href="#driver-and-postgresql-connection" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Field</th>
+<th>Env var (legacy alias)</th>
 <th>Type</th>
 <th>Default</th>
 <th>Description</th>
@@ -1194,42 +1203,59 @@
 </thead>
 <tbody>
 <tr>
-<td><code>pg_host</code></td>
+<td><code>driver</code></td>
+<td><code>DATABASESETTINGS_DRIVER</code></td>
 <td><code>str</code></td>
+<td><code>"postgresql+psycopg"</code></td>
+<td>SQLAlchemy driver string</td>
+</tr>
+<tr>
+<td><code>host</code></td>
+<td><code>DATABASESETTINGS_HOST</code> (<code>..._PG_HOST</code>)</td>
+<td><code>str \| None</code></td>
 <td><code>"localhost"</code></td>
 <td>PostgreSQL server hostname</td>
 </tr>
 <tr>
-<td><code>pg_port</code></td>
-<td><code>int</code></td>
+<td><code>port</code></td>
+<td><code>DATABASESETTINGS_PORT</code> (<code>..._PG_PORT</code>)</td>
+<td><code>int \| None</code></td>
 <td><code>5432</code></td>
-<td>PostgreSQL server port (1-65535)</td>
+<td>PostgreSQL server port</td>
 </tr>
 <tr>
-<td><code>pg_name</code></td>
-<td><code>str</code></td>
+<td><code>database</code></td>
+<td><code>DATABASESETTINGS_DATABASE</code> (<code>..._PG_NAME</code>)</td>
+<td><code>str \| None</code></td>
 <td><code>"genew4"</code></td>
 <td>Database name</td>
 </tr>
 <tr>
-<td><code>pg_user</code></td>
-<td><code>str</code></td>
+<td><code>username</code></td>
+<td><code>DATABASESETTINGS_USERNAME</code> (<code>..._PG_USER</code>)</td>
+<td><code>str \| None</code></td>
 <td><em>(required)</em></td>
 <td>Database username</td>
 </tr>
 <tr>
-<td><code>pg_password</code></td>
-<td><code>SecretStr</code></td>
+<td><code>password</code></td>
+<td><code>DATABASESETTINGS_PASSWORD</code> (<code>..._PG_PASSWORD</code>)</td>
+<td><code>str \| None</code></td>
 <td><em>(required)</em></td>
-<td>Database password</td>
+<td>Database password (plain <code>str</code>)</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p>Note: <code>password</code> is a plain <code>str</code> (it was <code>pydantic.SecretStr</code> before the
+db-common migration, so <code>.get_secret_value()</code> is no longer available).</p>
+</blockquote>
 <h3 id="connection-pool">Connection Pool<a class="headerlink" href="#connection-pool" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Field</th>
+<th>Env var</th>
 <th>Type</th>
 <th>Default</th>
 <th>Description</th>
@@ -1238,79 +1264,113 @@
 <tbody>
 <tr>
 <td><code>pool_size</code></td>
+<td><code>DATABASESETTINGS_POOL_SIZE</code></td>
 <td><code>int</code></td>
 <td><code>5</code></td>
 <td>Number of persistent connections</td>
 </tr>
 <tr>
 <td><code>max_overflow</code></td>
+<td><code>DATABASESETTINGS_MAX_OVERFLOW</code></td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 <td>Maximum overflow connections</td>
 </tr>
 <tr>
 <td><code>pool_timeout</code></td>
+<td><code>DATABASESETTINGS_POOL_TIMEOUT</code></td>
 <td><code>int</code></td>
 <td><code>30</code></td>
-<td>Connection timeout (seconds)</td>
+<td>Connection timeout (seconds) — genew4 only</td>
 </tr>
 <tr>
 <td><code>pool_recycle</code></td>
+<td><code>DATABASESETTINGS_POOL_RECYCLE</code></td>
 <td><code>int</code></td>
 <td><code>3600</code></td>
 <td>Recycle connections after N seconds</td>
 </tr>
+<tr>
+<td><code>pool_pre_ping</code></td>
+<td><code>DATABASESETTINGS_POOL_PRE_PING</code></td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td>Test connections before checkout</td>
+</tr>
 </tbody>
 </table>
+<p><code>pool_timeout</code> is a genew4-specific field; db-common's own engine layer does not
+pass it, but <code>Genew4EngineFactory</code> reads it when creating the engine.</p>
 <h2 id="connection-url">Connection URL<a class="headerlink" href="#connection-url" title="Permanent link">&para;</a></h2>
-<p>The <code>DatabaseSettings.get_connection_url()</code> method builds the PostgreSQL connection URL:</p>
+<p><code>Genew4DatabaseSettings</code> inherits a <code>get_url()</code> method (from db-common) that
+returns a SQLAlchemy <a href="https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.engine.URL"><code>URL</code></a>,
+and a genew4 convenience method <code>get_connection_url()</code> that renders a string:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatabaseSettings</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">DatabaseSettings</span><span class="p">()</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get_connection_url</span><span class="p">(</span><span class="n">with_password</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># Returns: postgresql+psycopg://user:password@localhost:5432/genew4</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">url_without_password</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get_connection_url</span><span class="p">(</span><span class="n">with_password</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># Returns: postgresql+psycopg://user@localhost:5432/genew4</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># SQLAlchemy URL object (used internally by create_engine)</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get_url</span><span class="p">()</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># String form, password omitted by default</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="n">str_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get_connection_url</span><span class="p">()</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1"># Returns: postgresql+psycopg://username@localhost:5432/genew4</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1"># String form including the password</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="n">str_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get_connection_url</span><span class="p">(</span><span class="n">with_password</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="c1"># Returns: postgresql+psycopg://username:password@localhost:5432/genew4</span>
+</code></pre></div>
+<p><code>get_engine_kwargs()</code> returns the pool keyword arguments (including
+<code>pool_timeout</code>) suitable for <code>sqlalchemy.create_engine()</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">settings</span><span class="o">.</span><span class="n">get_engine_kwargs</span><span class="p">()</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># {&#39;pool_size&#39;: 5, &#39;max_overflow&#39;: 10, &#39;pool_timeout&#39;: 30,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1">#  &#39;pool_recycle&#39;: 3600, &#39;pool_pre_ping&#39;: True}</span>
 </code></pre></div>
 <h2 id="engine-initialization">Engine Initialization<a class="headerlink" href="#engine-initialization" title="Permanent link">&para;</a></h2>
 <p>Initialize the global database engine:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">initialize_engine</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Load settings from environment</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">engine</span> <span class="o">=</span> <span class="n">initialize_engine</span><span class="p">()</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># Or pass custom settings</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatabaseSettings</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">DatabaseSettings</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="n">engine</span> <span class="o">=</span> <span class="n">initialize_engine</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">initialize_engine</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># Load settings from environment</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">engine</span> <span class="o">=</span> <span class="n">initialize_engine</span><span class="p">()</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># Or pass custom settings</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatabaseSettings</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">DatabaseSettings</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="n">engine</span> <span class="o">=</span> <span class="n">initialize_engine</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
 </code></pre></div>
+<p><code>initialize_engine()</code> is idempotent: calling it a second time returns the
+already-cached engine. Use <code>refresh_engine()</code> to rebuild the engine after
+configuration changes, and <code>get_settings()</code> / <code>get_engine()</code> to read back the
+cached singletons.</p>
 <h2 id="session-management">Session Management<a class="headerlink" href="#session-management" title="Permanent link">&para;</a></h2>
 <p>After initialization, create sessions for database operations:</p>
 <h3 id="read-write-session">Read-Write Session<a class="headerlink" href="#read-write-session" title="Permanent link">&para;</a></h3>
-<p>For operations that modify data:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readwrite_session</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;username&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="c1"># Write operations allowed</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;Updated&quot;</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<p>For operations that modify data. Pass <code>user=</code> so writes can be attributed in
+the audit log:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readwrite_session</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">with</span> <span class="n">get_readwrite_session</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;username&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="c1"># Write operations allowed</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">gene</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Gene</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">gene</span><span class="o">.</span><span class="n">approved_name</span> <span class="o">=</span> <span class="s2">&quot;Updated&quot;</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="c1"># The session commits automatically on a clean exit (rolls back on error).</span>
 </code></pre></div>
 <h3 id="read-only-session">Read-Only Session<a class="headerlink" href="#read-only-session" title="Permanent link">&para;</a></h3>
-<p>For queries only (prevents accidental modifications):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readonly_session</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="c1"># Read operations only</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">sqlmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<p>For queries only. Any commit attempt raises
+<code>db_common.ReadOnlySessionError</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_readonly_session</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="k">with</span> <span class="n">get_readonly_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="c1"># Read operations only</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">results</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">scalars</span><span class="p">(</span><span class="n">select</span><span class="p">(</span><span class="n">Gene</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="closing-connections">Closing Connections<a class="headerlink" href="#closing-connections" title="Permanent link">&para;</a></h2>
 <p>When shutting down your application:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">close_all_sessions</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">close_all_sessions</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">genew4_orm.session</span><span class="w"> </span><span class="kn">import</span> <span class="n">close_all_sessions</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">close_all_sessions</span><span class="p">()</span>
 </code></pre></div>
 
 

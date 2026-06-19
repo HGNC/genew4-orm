@@ -2,42 +2,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://hgnc.github.io/genew4-orm/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-06-19</lastmod>
     </url>
     <url>
          <loc>https://hgnc.github.io/genew4-orm/api-reference/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-06-19</lastmod>
     </url>
     <url>
          <loc>https://hgnc.github.io/genew4-orm/audit-logging/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-06-19</lastmod>
     </url>
     <url>
          <loc>https://hgnc.github.io/genew4-orm/configuration/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-06-19</lastmod>
     </url>
     <url>
          <loc>https://hgnc.github.io/genew4-orm/crud-operations/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-06-19</lastmod>
     </url>
     <url>
          <loc>https://hgnc.github.io/genew4-orm/development-workflow/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-06-19</lastmod>
     </url>
     <url>
          <loc>https://hgnc.github.io/genew4-orm/getting-started/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-06-19</lastmod>
     </url>
     <url>
          <loc>https://hgnc.github.io/genew4-orm/models/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-06-19</lastmod>
     </url>
     <url>
          <loc>https://hgnc.github.io/genew4-orm/querying/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-06-19</lastmod>
     </url>
     <url>
          <loc>https://hgnc.github.io/genew4-orm/testing/</loc>
-         <lastmod>2026-05-28</lastmod>
+         <lastmod>2026-06-19</lastmod>
     </url>
 </urlset>
