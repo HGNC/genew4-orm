@@ -51,7 +51,7 @@ def test_listener_registered_on_package_import() -> None:
         else:
             attached = False
 
-        print("OK=" + str(pulled_in and attached))
+        print(f"pulled_in={pulled_in} attached={attached} OK={pulled_in and attached}")
         """,
     )
 
