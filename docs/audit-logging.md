@@ -20,24 +20,24 @@ Each audit entry includes:
 ## Audit Log Model
 
 Audit entries are normally created **automatically** by the audit listener
-(see [Implementation Details](#implementation-details)). `field_changes` is
-persisted as a JSON **string**:
+(see [Implementation Details](#implementation-details)). `field_changes` is a
+Python `dict` — the column uses a `JSONEncodedDict` `TypeDecorator` that
+serializes to JSON text on write and deserializes back to a `dict` on read, so
+you pass and receive a `dict` directly (no manual `json.dumps`/`json.loads`):
 
 ```python
 from genew4_orm.models import AuditLog
 
-# Auto-generated entries store field_changes as a JSON string.
+# field_changes is a dict on the model; it is JSON-serialized for storage.
 audit = AuditLog(
     user="curator",
     operation="UPDATE",
     entity_type="Gene",
     entity_id=12345,
-    field_changes=json.dumps(
-        {
-            "approved_name": {"old": "Old Name", "new": "New Name"},
-            "editor": {"old": "previous_curator", "new": "curator"},
-        }
-    ),
+    field_changes={
+        "approved_name": {"old": "Old Name", "new": "New Name"},
+        "editor": {"old": "previous_curator", "new": "curator"},
+    },
 )
 ```
 
@@ -65,12 +65,12 @@ with get_readwrite_session(user="curator") as session:
 #     operation="CREATE",
 #     entity_type="Gene",
 #     entity_id=0,  # 0 for INSERTs — the ID is not assigned at flush time
-#     field_changes=json.dumps({
+#     field_changes={
 #         "approved_symbol": {"old": None, "new": "TEST1"},
 #         "approved_name": {"old": None, "new": "Test Gene 1"},
 #         "status": {"old": None, "new": "Approved"},
 #         ...
-#     }),
+#     },
 # )
 ```
 
@@ -92,10 +92,10 @@ with get_readwrite_session(user="curator") as session:
 #     operation="UPDATE",
 #     entity_type="Gene",
 #     entity_id=12345,
-#     field_changes=json.dumps({
+#     field_changes={
 #         "approved_name": {"old": "Original Name", "new": "Updated Name"},
 #         "editor": {"old": "previous_editor", "new": "curator"},
-#     }),
+#     },
 # )
 ```
 
@@ -112,20 +112,19 @@ with get_readwrite_session(user="curator") as session:
 #     operation="DELETE",
 #     entity_type="Gene",
 #     entity_id=12345,
-#     field_changes=json.dumps({}),
+#     field_changes={},
 # )
 ```
 
 ## Querying Audit Logs
 
-`field_changes` is stored as a JSON string, so parse it with `json.loads()` when
-reading it back.
+`field_changes` is a Python `dict` on loaded rows (the `JSONEncodedDict`
+`TypeDecorator` deserializes the stored JSON text), so access it directly —
+no `json.loads` needed.
 
 ### Get Recent Changes
 
 ```python
-import json
-
 from sqlalchemy import select
 
 from genew4_orm import get_readonly_session
@@ -151,8 +150,6 @@ with get_readonly_session() as session:
 ### Get Changes for Specific Entity
 
 ```python
-import json
-
 from sqlalchemy import select
 
 from genew4_orm import get_readonly_session
@@ -171,7 +168,7 @@ with get_readonly_session() as session:
 
     for audit in audits:
         print(f"{audit.operation} on {audit.timestamp}")
-        changes = json.loads(audit.field_changes) if audit.field_changes else {}
+        changes = audit.field_changes or {}
         for field, change in changes.items():
             print(f"  {field}: {change.get('old')} -> {change.get('new')}")
 ```
@@ -221,7 +218,7 @@ with get_readonly_session() as session:
 | `operation` | `str` | CREATE, UPDATE, or DELETE |
 | `entity_type` | `str` | Model class name (e.g., "Gene", "GeneGroup") |
 | `entity_id` | `int` | ID of the affected record (`0` for INSERTs) |
-| `field_changes` | `str` | JSON string of field name -> `{old, new}` values |
+| `field_changes` | `dict` | Dict of field name -> `{old, new}` values (JSON-serialized for storage) |
 
 ## Session Requirements
 
@@ -269,8 +266,6 @@ the recorded changes by `should_log_field()`.
 ## Example: Complete Audit Workflow
 
 ```python
-import json
-
 from sqlalchemy import select
 
 from genew4_orm import get_readonly_session, get_readwrite_session
@@ -296,7 +291,7 @@ with get_readonly_session() as session:
     print(f"Audit trail for Gene {12345}:")
     for audit in audits:
         print(f"  {audit.timestamp}: {audit.user} {audit.operation}")
-        changes = json.loads(audit.field_changes) if audit.field_changes else {}
+        changes = audit.field_changes or {}
         for field, change in changes.items():
             print(f"    {field}: {change.get('old')} -> {change.get('new')}")
 ```
@@ -320,7 +315,6 @@ For high-volume write operations:
 3. **Add indexes** - Add database indexes on frequently queried audit fields
 
 ```python
-import json
 from datetime import datetime, timedelta
 
 from sqlalchemy import select

@@ -264,12 +264,11 @@ class TestGeneRelationships:
 
 ### Audit Log Tests
 
-Test audit logging functionality. Remember that `field_changes` is persisted as
-a JSON **string**, so parse it with `json.loads()` when asserting on it:
+Test audit logging functionality. `field_changes` is a Python `dict` on loaded
+rows (the column uses a `JSONEncodedDict` `TypeDecorator`), so assert on it
+directly — no `json.loads`:
 
 ```python
-import json
-
 from sqlalchemy import select
 
 from genew4_orm.models import AuditLog, Gene
@@ -316,7 +315,7 @@ class TestAuditLogging:
         )
         audit = sqlite_session.scalars(statement).first()
         assert audit is not None
-        changes = json.loads(audit.field_changes)
+        changes = audit.field_changes
         assert "approved_name" in changes
 ```
 
