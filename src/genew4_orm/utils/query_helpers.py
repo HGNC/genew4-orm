@@ -99,8 +99,8 @@ def get_gene_group_with_all_relations() -> Any:
         ...     for group in groups:
         ...         print(f"Group {group.name} has {len(group.gene_group_has_genes)} genes")
     """
-    # Note: Return as list for compatibility with .options()
-    # Each selectinload targets a relationship property
+    # Returns a list of selectinload options; callers must splat it into
+    # .options(), e.g. select(GeneGroup).options(*get_gene_group_with_all_relations()).
     return [
         selectinload(GeneGroup.gene_group_has_genes),
         selectinload(GeneGroup.aliases),

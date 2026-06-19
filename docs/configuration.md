@@ -1,10 +1,12 @@
 # Configuration
 
-genew4-orm uses Pydantic Settings for configuration management. All settings can be loaded from environment variables or passed directly.
+genew4-orm uses [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) for configuration management, layered on top of the shared [db-common](https://github.com/HGNC/db-common) `DatabaseSettings`. All settings can be loaded from environment variables or passed directly.
 
 ## Environment Variables
 
-Create a `.env` file in your project root:
+Create a `.env` file in your project root. All variables are prefixed with
+`DATABASESETTINGS_`; the `DATABASESETTINGS_PG_*` names are accepted as legacy
+aliases:
 
 ```bash
 # PostgreSQL Configuration
@@ -19,9 +21,14 @@ DATABASESETTINGS_POOL_SIZE=5
 DATABASESETTINGS_MAX_OVERFLOW=10
 DATABASESETTINGS_POOL_TIMEOUT=30
 DATABASESETTINGS_POOL_RECYCLE=3600
+DATABASESETTINGS_POOL_PRE_PING=true
 ```
 
-## DatabaseSettings Class
+## Genew4DatabaseSettings Class
+
+The canonical class is `Genew4DatabaseSettings` (a subclass of
+`db_common.DatabaseSettings`). It is re-exported as `DatabaseSettings` for
+backwards compatibility:
 
 ```python
 from genew4_orm.config import DatabaseSettings
@@ -29,50 +36,78 @@ from genew4_orm.config import DatabaseSettings
 # Load from environment variables
 settings = DatabaseSettings()
 
-# Or pass values directly
+# Or pass values directly (canonical field names)
 settings = DatabaseSettings(
-    pg_host="localhost",
-    pg_port=5432,
-    pg_name="genew4",
-    pg_user="username",
-    pg_password="password",
+    host="localhost",
+    port=5432,
+    database="genew4",
+    username="username",
+    password="password",
 )
 ```
 
+The legacy `pg_host` / `pg_port` / `pg_name` / `pg_user` / `pg_password`
+keyword arguments still work as aliases of the canonical fields.
+
 ## Configuration Options
 
-### PostgreSQL Connection
+### Driver and PostgreSQL Connection
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `pg_host` | `str` | `"localhost"` | PostgreSQL server hostname |
-| `pg_port` | `int` | `5432` | PostgreSQL server port (1-65535) |
-| `pg_name` | `str` | `"genew4"` | Database name |
-| `pg_user` | `str` | *(required)* | Database username |
-| `pg_password` | `SecretStr` | *(required)* | Database password |
+| Field | Env var (legacy alias) | Type | Default | Description |
+|-------|------------------------|------|---------|-------------|
+| `driver` | `DATABASESETTINGS_DRIVER` | `str` | `"postgresql+psycopg"` | SQLAlchemy driver string |
+| `host` | `DATABASESETTINGS_HOST` (`..._PG_HOST`) | `str \| None` | `"localhost"` | PostgreSQL server hostname |
+| `port` | `DATABASESETTINGS_PORT` (`..._PG_PORT`) | `int \| None` | `5432` | PostgreSQL server port |
+| `database` | `DATABASESETTINGS_DATABASE` (`..._PG_NAME`) | `str \| None` | `"genew4"` | Database name |
+| `username` | `DATABASESETTINGS_USERNAME` (`..._PG_USER`) | `str \| None` | *(required)* | Database username |
+| `password` | `DATABASESETTINGS_PASSWORD` (`..._PG_PASSWORD`) | `str \| None` | *(required)* | Database password (plain `str`) |
+
+> Note: `password` is a plain `str` (it was `pydantic.SecretStr` before the
+> db-common migration, so `.get_secret_value()` is no longer available).
 
 ### Connection Pool
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `pool_size` | `int` | `5` | Number of persistent connections |
-| `max_overflow` | `int` | `10` | Maximum overflow connections |
-| `pool_timeout` | `int` | `30` | Connection timeout (seconds) |
-| `pool_recycle` | `int` | `3600` | Recycle connections after N seconds |
+| Field | Env var | Type | Default | Description |
+|-------|---------|------|---------|-------------|
+| `pool_size` | `DATABASESETTINGS_POOL_SIZE` | `int` | `5` | Number of persistent connections |
+| `max_overflow` | `DATABASESETTINGS_MAX_OVERFLOW` | `int` | `10` | Maximum overflow connections |
+| `pool_timeout` | `DATABASESETTINGS_POOL_TIMEOUT` | `int` | `30` | Connection timeout (seconds) — genew4 only |
+| `pool_recycle` | `DATABASESETTINGS_POOL_RECYCLE` | `int` | `3600` | Recycle connections after N seconds |
+| `pool_pre_ping` | `DATABASESETTINGS_POOL_PRE_PING` | `bool` | `true` | Test connections before checkout |
+
+`pool_timeout` is a genew4-specific field; db-common's own engine layer does not
+pass it, but `Genew4EngineFactory` reads it when creating the engine.
 
 ## Connection URL
 
-The `DatabaseSettings.get_connection_url()` method builds the PostgreSQL connection URL:
+`Genew4DatabaseSettings` inherits a `get_url()` method (from db-common) that
+returns a SQLAlchemy [`URL`](https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.engine.URL),
+and a genew4 convenience method `get_connection_url()` that renders a string:
 
 ```python
 from genew4_orm.config import DatabaseSettings
 
 settings = DatabaseSettings()
-url = settings.get_connection_url(with_password=True)
-# Returns: postgresql+psycopg://user:password@localhost:5432/genew4
 
-url_without_password = settings.get_connection_url(with_password=False)
-# Returns: postgresql+psycopg://user@localhost:5432/genew4
+# SQLAlchemy URL object (used internally by create_engine)
+url = settings.get_url()
+
+# String form, password omitted by default
+str_url = settings.get_connection_url()
+# Returns: postgresql+psycopg://username@localhost:5432/genew4
+
+# String form including the password
+str_url = settings.get_connection_url(with_password=True)
+# Returns: postgresql+psycopg://username:password@localhost:5432/genew4
+```
+
+`get_engine_kwargs()` returns the pool keyword arguments (including
+`pool_timeout`) suitable for `sqlalchemy.create_engine()`:
+
+```python
+settings.get_engine_kwargs()
+# {'pool_size': 5, 'max_overflow': 10, 'pool_timeout': 30,
+#  'pool_recycle': 3600, 'pool_pre_ping': True}
 ```
 
 ## Engine Initialization
@@ -91,13 +126,19 @@ settings = DatabaseSettings(...)
 engine = initialize_engine(settings)
 ```
 
+`initialize_engine()` is idempotent: calling it a second time returns the
+already-cached engine. Use `refresh_engine()` to rebuild the engine after
+configuration changes, and `get_settings()` / `get_engine()` to read back the
+cached singletons.
+
 ## Session Management
 
 After initialization, create sessions for database operations:
 
 ### Read-Write Session
 
-For operations that modify data:
+For operations that modify data. Pass `user=` so writes can be attributed in
+the audit log:
 
 ```python
 from genew4_orm.session import get_readwrite_session
@@ -106,20 +147,22 @@ with get_readwrite_session(user="username") as session:
     # Write operations allowed
     gene = session.get(Gene, 12345)
     gene.approved_name = "Updated"
-    session.commit()
+    # The session commits automatically on a clean exit (rolls back on error).
 ```
 
 ### Read-Only Session
 
-For queries only (prevents accidental modifications):
+For queries only. Any commit attempt raises
+`db_common.ReadOnlySessionError`:
 
 ```python
+from sqlalchemy import select
+
 from genew4_orm.session import get_readonly_session
 
 with get_readonly_session() as session:
     # Read operations only
-    from sqlmodel import select
-    results = session.exec(select(Gene)).all()
+    results = session.scalars(select(Gene)).all()
 ```
 
 ## Closing Connections

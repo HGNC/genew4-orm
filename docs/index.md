@@ -4,8 +4,8 @@ genew4-orm is a Python Object-Relational Mapping (ORM) library for the Gene Nome
 
 ## Features
 
-- **Type-Safe Models**: Built with [SQLModel](https://sqlmodel.tiangolo.com/) and Pydantic for full type checking
-- **PostgreSQL Support**: Optimized for PostgreSQL with psycopg driver
+- **Type-Safe Models**: Built on [SQLAlchemy 2.0](https://docs.sqlalchemy.org/en/20/) declarative models, sharing a common base class and engine/session infrastructure via the [db-common](https://github.com/HGNC/db-common) library
+- **PostgreSQL Support**: Optimized for PostgreSQL with the psycopg driver
 - **Audit Logging**: Automatic tracking of all write operations
 - **Read-Only Sessions**: Built-in protection against accidental modifications
 - **Query Helpers**: Eager loading utilities to prevent N+1 queries
@@ -25,15 +25,17 @@ pip install genew4-orm
 ## Quick Start
 
 ```python
-from genew4_orm.session import initialize_engine, get_readwrite_session
+from sqlalchemy import select
+
+from genew4_orm.session import get_readwrite_session, initialize_engine
 from genew4_orm.models import Gene
 
-# Initialize database connection
+# Initialize database connection (loads settings from the environment)
 initialize_engine()
 
 # Create a session
 with get_readwrite_session(user="your_user") as session:
-    # Query a gene
+    # Query a gene by primary key
     gene = session.get(Gene, 12345)
     print(gene.approved_symbol, gene.approved_name)
 ```

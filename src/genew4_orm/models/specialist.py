@@ -26,7 +26,7 @@ class Specialist(DeclarativeBase):
     url: Mapped[str | None] = mapped_column(String(255), comment="Specialist organization website URL")
 
     # Note: Many-to-many with GeneGroup is through FamHasSpecialist junction table
-    # Query via: session.query(Specialist).join(FamHasSpecialist).join(GeneGroup)
+    # Query via: session.scalars(select(Specialist).join(FamHasSpecialist).join(GeneGroup)).all()
 
     def __repr__(self) -> str:
         """Return string representation of Specialist."""

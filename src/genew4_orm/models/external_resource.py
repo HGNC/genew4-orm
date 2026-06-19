@@ -31,7 +31,7 @@ class ExternalResource(DeclarativeBase):
     )
 
     # Note: Many-to-many with GeneGroup is through FamHasExtResource junction table
-    # Query via: session.query(ExternalResource).join(FamHasExtResource).join(GeneGroup)
+    # Query via: session.scalars(select(ExternalResource).join(FamHasExtResource).join(GeneGroup)).all()
 
     def __repr__(self) -> str:
         """Return string representation of ExternalResource."""

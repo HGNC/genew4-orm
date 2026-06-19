@@ -37,7 +37,7 @@ class Correspondence(DeclarativeBase):
     email_sent: Mapped[str | None] = mapped_column("corr_sent_email", Text, comment="Sent email content")
 
     # Note: Many-to-many with GeneGroup is through FamHasCorr junction table
-    # Query via: session.query(Correspondence).join(FamHasCorr).join(GeneGroup)
+    # Query via: session.scalars(select(Correspondence).join(FamHasCorr).join(GeneGroup)).all()
 
     def __repr__(self) -> str:
         """Return string representation of Correspondence."""

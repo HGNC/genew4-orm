@@ -34,7 +34,7 @@ Before starting development, ensure you have:
 
 ```bash
 # Clone the repository
-git clone https://github.com/genew4/genew4-orm.git
+git clone https://github.com/HGNC/genew4-orm.git
 cd genew4-orm
 
 # Install development dependencies
@@ -111,7 +111,7 @@ git push origin feature/my-feature
 
 ### 5. Create Pull Request
 
-1. Go to: https://github.com/genew4/genew4-orm
+1. Go to: https://github.com/HGNC/genew4-orm
 2. Click "Compare & pull request"
 3. Create PR from your feature branch to `main`
 
@@ -201,7 +201,7 @@ Docs Workflow Steps:
 
 **Users can now:**
 - Download the new release from GitHub Releases
-- Use the updated documentation at https://genew4-orm.hgnc.github.io
+- Use the updated documentation at https://hgnc.github.io/genew4-orm
 - Install the latest version: `pip install genew4-orm==X.Y.Z`
 
 ## Pre-commit Hooks (Optional)

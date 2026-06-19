@@ -1,34 +1,42 @@
 # Querying
 
-This guide covers querying techniques with genew4-orm, including eager loading, pagination, and performance optimization.
+This guide covers querying techniques with genew4-orm, including eager loading, pagination, and performance optimization. Queries use the [SQLAlchemy 2.0](https://docs.sqlalchemy.org/en/20/) `select()` API.
 
 ## Basic Queries
 
 ### Select All Records
 
 ```python
-from sqlmodel import Session, select
+from sqlalchemy import select
+
+from genew4_orm import get_readonly_session
 from genew4_orm.models import Gene
 
-with Session(engine) as session:
+with get_readonly_session() as session:
     statement = select(Gene)
-    results = session.exec(statement).all()
+    results = session.scalars(statement).all()
 ```
 
 ### Filter Records
 
 ```python
-from sqlmodel import select
+from sqlalchemy import select
 
-with Session(engine) as session:
+from genew4_orm import get_readonly_session
+from genew4_orm.models import Gene
+
+with get_readonly_session() as session:
     statement = select(Gene).where(Gene.status == "Approved")
-    results = session.exec(statement).all()
+    results = session.scalars(statement).all()
 ```
 
 ### Get Single Record by ID
 
 ```python
-with Session(engine) as session:
+from genew4_orm import get_readonly_session
+from genew4_orm.models import Gene
+
+with get_readonly_session() as session:
     gene = session.get(Gene, 12345)
 ```
 
@@ -38,95 +46,123 @@ genew4-orm provides helper functions in `genew4_orm.utils.query_helpers` for eag
 
 ### Get Gene with Groups
 
+`get_gene_with_groups()` returns a single (chained) loader option, so pass it
+directly to `.options()`:
+
 ```python
-from sqlmodel import Session, select
+from sqlalchemy import select
+
+from genew4_orm import get_readonly_session
 from genew4_orm.utils.query_helpers import get_gene_with_groups
 
-with Session(engine) as session:
+with get_readonly_session() as session:
     statement = select(Gene).options(get_gene_with_groups())
-    gene = session.exec(statement).first()
+    genes = session.scalars(statement).all()
 
     # Groups are pre-loaded (no additional queries)
-    for assoc in gene.gene_has_gene_groups:
-        print(assoc.gene_group.name)
+    for gene in genes:
+        for assoc in gene.gene_has_gene_groups:
+            print(assoc.gene_group.name)
 ```
 
 ### Get GeneGroup with Hierarchy
 
+`get_gene_group_with_hierarchy()` returns a **list** of loader options, so splat
+it into `.options()` with `*`:
+
 ```python
+from sqlalchemy import select
+
+from genew4_orm import get_readonly_session
+from genew4_orm.models import GeneGroup
 from genew4_orm.utils.query_helpers import get_gene_group_with_hierarchy
 
-with Session(engine) as session:
-    statement = select(GeneGroup).options(
-        get_gene_group_with_hierarchy()
-    )
-    group = session.exec(statement).first()
+with get_readonly_session() as session:
+    statement = select(GeneGroup).options(*get_gene_group_with_hierarchy())
+    groups = session.scalars(statement).all()
 ```
+
+`get_gene_group_with_all_relations()` likewise returns a list — splat it the same
+way: `.options(*get_gene_group_with_all_relations())`.
 
 ### Get Comments for a Gene
 
 ```python
-from sqlmodel import select
-from genew4_orm.models import Gene, GeneHasComment, Comment
+from sqlalchemy import select
 
-with Session(engine) as session:
+from genew4_orm import get_readonly_session
+from genew4_orm.models import Comment, Gene, GeneHasComment
+
+with get_readonly_session() as session:
     statement = (
         select(Comment)
         .join(GeneHasComment)
         .join(Gene)
         .where(Gene.approved_symbol == "BRCA1")
     )
-    comments = session.exec(statement).all()
+    comments = session.scalars(statement).all()
 
     for comment in comments:
         print(f"Comment: {comment.comment} (status: {comment.status})")
 ```
 
-### Bulk Queries with Eager Loading
+### Bulk Fetch Genes with Eager Loading
 
 ```python
-from genew4_orm.utils.query_helpers import bulk_query_genes_with_groups
+from genew4_orm import get_readonly_session
+from genew4_orm.utils.query_helpers import get_genes_by_ids
 
-with Session(engine) as session:
-    statement = bulk_query_genes_with_groups()
-    genes = session.exec(statement).all()
+with get_readonly_session() as session:
+    genes = get_genes_by_ids(session, [12345, 67890], eager_load=True)
 ```
+
+Use `get_gene_groups_by_ids(session, [...], eager_load=True)` for the equivalent
+gene-group helper.
 
 ## Advanced Queries
 
 ### ILike (Case-Insensitive Search)
 
 ```python
-from sqlmodel import select
+from sqlalchemy import select
 
-with Session(engine) as session:
-    statement = select(Gene).where(
-        Gene.approved_symbol.ilike("%brca%")
-    )
-    results = session.exec(statement).all()
+from genew4_orm import get_readonly_session
+from genew4_orm.models import Gene
+
+with get_readonly_session() as session:
+    statement = select(Gene).where(Gene.approved_symbol.ilike("%brca%"))
+    results = session.scalars(statement).all()
 ```
 
 ### Multiple Conditions
 
 ```python
-from sqlmodel import and_, or_
+from sqlalchemy import and_, or_, select
 
-with Session(engine) as session:
+from genew4_orm import get_readonly_session
+from genew4_orm.models import Gene
+
+with get_readonly_session() as session:
     statement = select(Gene).where(
         and_(
             Gene.status == "Approved",
             Gene.locus_type == "gene with protein product",
         )
     )
-    results = session.exec(statement).all()
+    results = session.scalars(statement).all()
 ```
 
 ### Ordering
 
 ```python
-with Session(engine) as session:
+from sqlalchemy import select
+
+from genew4_orm import get_readonly_session
+from genew4_orm.models import Gene
+
+with get_readonly_session() as session:
     statement = select(Gene).order_by(Gene.approved_symbol)
-    results = session.exec(statement).all()
+    results = session.scalars(statement).all()
 ```
 
 ## Pagination
@@ -134,9 +170,13 @@ with Session(engine) as session:
 ### Paginated Query Helper
 
 ```python
+from sqlalchemy import select
+
+from genew4_orm import get_readonly_session
+from genew4_orm.models import Gene
 from genew4_orm.utils.query_helpers import paginated_query
 
-with Session(engine) as session:
+with get_readonly_session() as session:
     # Get page 2, 20 per page
     results, total_pages, total_count = paginated_query(
         session=session,
@@ -145,18 +185,20 @@ with Session(engine) as session:
         per_page=20,
     )
 
-    print(f"Page {page} of {total_pages}, Total: {total_count}")
+    print(f"Page 2 of {total_pages}, Total: {total_count}")
 ```
 
 ### Manual Pagination
 
 ```python
-from sqlmodel import select, col
+from sqlalchemy import func, select
 
-with Session(engine) as session:
+from genew4_orm import get_readonly_session
+from genew4_orm.models import Gene
+
+with get_readonly_session() as session:
     # Get total count
-    count_statement = select(func.count(col(Gene.id)))
-    total_count = session.exec(count_statement).one()
+    total_count = session.scalar(select(func.count(Gene.hgnc_id)))
 
     # Paginate
     page = 1
@@ -164,22 +206,26 @@ with Session(engine) as session:
     offset = (page - 1) * per_page
 
     statement = select(Gene).offset(offset).limit(per_page)
-    results = session.exec(statement).all()
+    results = session.scalars(statement).all()
 ```
 
 ## Streaming Large Result Sets
 
 ### Stream Records
 
+`stream_genes()` yields lists (chunks) of records so you can process large
+datasets without loading everything into memory:
+
 ```python
-from genew4_orm.utils.query_helpers import stream_query
+from genew4_orm import get_readonly_session
+from genew4_orm.models import GeneGroup
+from genew4_orm.utils.query_helpers import stream_genes
 
-with Session(engine) as session:
-    statement = select(Gene)
-
-    for gene in stream_query(session, statement, chunk_size=100):
-        # Process gene in chunks
-        print(gene.approved_symbol)
+with get_readonly_session() as session:
+    # Note: despite the name, stream_genes() currently yields GeneGroup chunks.
+    for chunk in stream_genes(session, chunk_size=1000):
+        for group in chunk:
+            print(group.name)
 ```
 
 ## Performance Optimization
@@ -189,33 +235,40 @@ with Session(engine) as session:
 Always use eager loading for relationships to avoid N+1 query problems:
 
 ```python
-from sqlmodel import select
+from sqlalchemy import select
 
-# BAD: N+1 queries
-genes = session.exec(select(Gene)).all()
-for gene in genes:
-    for assoc in gene.gene_has_gene_groups:  # Additional query per gene!
-        print(assoc.gene_group.name)
-
-# GOOD: Single query with eager loading
+from genew4_orm import get_readonly_session
+from genew4_orm.models import Gene
 from genew4_orm.utils.query_helpers import get_gene_with_groups
 
-statement = select(Gene).options(get_gene_with_groups())
-genes = session.exec(statement).all()
-for gene in genes:
-    for assoc in gene.gene_has_gene_groups:  # No additional query!
-        print(assoc.gene_group.name)
+# BAD: N+1 queries
+with get_readonly_session() as session:
+    genes = session.scalars(select(Gene)).all()
+    for gene in genes:
+        for assoc in gene.gene_has_gene_groups:  # Additional query per gene!
+            print(assoc.gene_group.name)
+
+# GOOD: Single query with eager loading
+with get_readonly_session() as session:
+    statement = select(Gene).options(get_gene_with_groups())
+    genes = session.scalars(statement).all()
+    for gene in genes:
+        for assoc in gene.gene_has_gene_groups:  # No additional query!
+            print(assoc.gene_group.name)
 ```
 
 ### Select Specific Columns
 
 ```python
-from sqlmodel import Session, select
+from sqlalchemy import select
 
-with Session(engine) as session:
-    # Only select needed columns
+from genew4_orm import get_readonly_session
+from genew4_orm.models import Gene
+
+with get_readonly_session() as session:
+    # Only select needed columns (returns Row tuples)
     statement = select(Gene.approved_symbol, Gene.approved_name)
-    results = session.exec(statement).all()
+    results = session.execute(statement).all()
 ```
 
 ### Index Usage
@@ -224,13 +277,9 @@ Ensure appropriate database indexes exist on frequently queried columns:
 
 ```python
 # These queries benefit from indexes on approved_symbol and status
-statement = select(Gene).where(
-    Gene.approved_symbol == "BRCA1"
-)
+statement = select(Gene).where(Gene.approved_symbol == "BRCA1")
 
-statement = select(Gene).where(
-    Gene.status == "Approved"
-)
+statement = select(Gene).where(Gene.status == "Approved")
 ```
 
 ## Raw SQL Queries
@@ -240,7 +289,9 @@ statement = select(Gene).where(
 ```python
 from sqlalchemy import text
 
-with Session(engine) as session:
+from genew4_orm import get_readonly_session
+
+with get_readonly_session() as session:
     result = session.execute(text("SELECT * FROM hgnc LIMIT 10"))
     rows = result.fetchall()
 ```
@@ -251,7 +302,7 @@ with Session(engine) as session:
 symbol = "BRCA1"
 result = session.execute(
     text("SELECT * FROM hgnc WHERE hgnc_app_sym = :symbol"),
-    {"symbol": symbol}
+    {"symbol": symbol},
 )
 ```
 
@@ -262,4 +313,4 @@ result = session.execute(
 3. **Use specific column selection** instead of `SELECT *`
 4. **Add database indexes** on frequently filtered columns
 5. **Consider read replicas** for read-heavy workloads
-6. **Use connection pooling** (enabled by default with pool_size=5)
+6. **Use connection pooling** (enabled by default with `pool_size=5`)

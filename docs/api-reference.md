@@ -1,6 +1,9 @@
 # API Documentation
 
-This page provides auto-generated API documentation extracted from the source code.
+This page provides auto-generated API documentation extracted from the source
+code via [mkdocstrings](https://mkdocstrings.github.io/). The code examples in
+this library use the [SQLAlchemy 2.0](https://docs.sqlalchemy.org/en/20/)
+`select()` API.
 
 ## Configuration
 
@@ -8,7 +11,8 @@ This page provides auto-generated API documentation extracted from the source co
 from genew4_orm.config import DatabaseSettings
 ```
 
-### DatabaseSettings
+`DatabaseSettings` is the backwards-compatible alias for
+`Genew4DatabaseSettings`, which subclasses `db_common.DatabaseSettings`.
 
 ::: genew4_orm.config.DatabaseSettings
     options:
@@ -17,20 +21,39 @@ from genew4_orm.config import DatabaseSettings
 
 ## Session Management
 
-### Session Functions
-
 ```python
 from genew4_orm.session import (
-    initialize_engine,
-    get_readwrite_session,
-    get_readonly_session,
+    SessionError,
+    ReadOnlySessionError,
     close_all_sessions,
+    get_engine,
+    get_readonly_session,
+    get_readwrite_session,
+    get_settings,
+    initialize_engine,
+    refresh_engine,
 )
 ```
+
+### Engine and settings
 
 ::: genew4_orm.session.initialize_engine
     options:
       show_if_no_docstring: true
+
+::: genew4_orm.session.get_engine
+    options:
+      show_if_no_docstring: true
+
+::: genew4_orm.session.get_settings
+    options:
+      show_if_no_docstring: true
+
+::: genew4_orm.session.refresh_engine
+    options:
+      show_if_no_docstring: true
+
+### Sessions
 
 ::: genew4_orm.session.get_readwrite_session
     options:
@@ -40,7 +63,17 @@ from genew4_orm.session import (
     options:
       show_if_no_docstring: true
 
+### Cleanup and exceptions
+
 ::: genew4_orm.session.close_all_sessions
+    options:
+      show_if_no_docstring: true
+
+::: genew4_orm.session.SessionError
+    options:
+      show_if_no_docstring: true
+
+::: genew4_orm.session.ReadOnlySessionError
     options:
       show_if_no_docstring: true
 
@@ -48,14 +81,20 @@ from genew4_orm.session import (
 
 ```python
 from genew4_orm.utils.query_helpers import (
-    get_gene_with_groups,
-    get_gene_group_with_hierarchy,
+    build_gene_group_query,
     build_gene_query,
+    get_gene_group_with_all_relations,
+    get_gene_group_with_hierarchy,
+    get_gene_groups_by_ids,
+    get_gene_with_groups,
+    get_genes_by_ids,
+    get_user_with_reminders,
     paginated_query,
+    stream_genes,
 )
 ```
 
-### Eager Loading
+### Eager loading
 
 ::: genew4_orm.utils.query_helpers.get_gene_with_groups
     options:
@@ -65,7 +104,15 @@ from genew4_orm.utils.query_helpers import (
     options:
       show_if_no_docstring: true
 
-### Query Builders
+::: genew4_orm.utils.query_helpers.get_gene_group_with_all_relations
+    options:
+      show_if_no_docstring: true
+
+::: genew4_orm.utils.query_helpers.get_user_with_reminders
+    options:
+      show_if_no_docstring: true
+
+### Query builders
 
 ::: genew4_orm.utils.query_helpers.build_gene_query
     options:
@@ -75,9 +122,21 @@ from genew4_orm.utils.query_helpers import (
     options:
       show_if_no_docstring: true
 
-### Pagination
+### Pagination, bulk fetch, and streaming
 
 ::: genew4_orm.utils.query_helpers.paginated_query
+    options:
+      show_if_no_docstring: true
+
+::: genew4_orm.utils.query_helpers.get_genes_by_ids
+    options:
+      show_if_no_docstring: true
+
+::: genew4_orm.utils.query_helpers.get_gene_groups_by_ids
+    options:
+      show_if_no_docstring: true
+
+::: genew4_orm.utils.query_helpers.stream_genes
     options:
       show_if_no_docstring: true
 
@@ -102,11 +161,15 @@ from genew4_orm.audit import (
 
 ```python
 from genew4_orm.enums import (
-    GeneStatus,
-    GeneLocusType,
+    CytobandSourceType,
     GeneGroupStatus,
     GeneGroupType,
+    GeneLocusType,
+    GeneStatus,
+    Grch38MarkType,
+    Grch38SourceType,
     PublishStatus,
+    enum_field,
 )
 ```
 

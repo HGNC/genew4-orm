@@ -62,7 +62,7 @@ class GeneGroup(DeclarativeBase):
     )
 
     # Many-to-many with Specialist via FamHasSpecialist junction table
-    # Query via: session.query(GeneGroup).join(FamHasSpecialist).join(Specialist)
+    # Query via: session.scalars(select(GeneGroup).join(FamHasSpecialist).join(Specialist)).all()
 
     # One-to-many with GeneGroupAlias
     aliases: Mapped[list["GeneGroupAlias"]] = relationship(
@@ -71,10 +71,10 @@ class GeneGroup(DeclarativeBase):
     )
 
     # Many-to-many with ExternalResource via FamHasExtResource junction table
-    # Query via: session.query(GeneGroup).join(FamHasExtResource).join(ExternalResource)
+    # Query via: session.scalars(select(GeneGroup).join(FamHasExtResource).join(ExternalResource)).all()
 
     # Many-to-many with Correspondence via FamHasCorr junction table
-    # Query via: session.query(GeneGroup).join(FamHasCorr).join(Correspondence)
+    # Query via: session.scalars(select(GeneGroup).join(FamHasCorr).join(Correspondence)).all()
 
     # TODO: Self-referential many-to-many for hierarchy - requires junction table
     # # Self-referential many-to-many for hierarchy (parents)

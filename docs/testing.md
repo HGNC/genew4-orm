@@ -14,18 +14,34 @@ genew4-orm uses **pytest** as the test framework with the following extensions:
 
 ```
 tests/
-├── unit/
-│   ├── test_config.py              # Configuration tests
-│   ├── test_models.py              # Model field validation tests
-│   ├── test_comment_model.py       # Comment model tests
-│   ├── test_gene_has_comment_model.py  # GeneHasComment junction tests
-│   ├── test_enums.py               # Enum tests (including PublishStatus)
-│   └── test_relationships.py       # Relationship integrity tests
-├── integration/
-│   ├── test_session.py             # Session management tests
-│   ├── test_crud.py                # CRUD operation tests
-│   └── test_audit_log.py           # Audit logging tests
-└── conftest.py                     # Pytest configuration and fixtures
+├── unit/                         # Fast, isolated unit tests (in-memory SQLite)
+│   ├── conftest fixtures use sqlite_session
+│   ├── test_config.py            # Configuration / DatabaseSettings
+│   ├── test_enums.py             # Enum definitions
+│   ├── test_audit_log_model.py   # AuditLog model + (de)serialization helpers
+│   ├── test_audit.py             # Audit event listener behaviour
+│   ├── test_*_model.py           # Per-model field/relationship tests
+│   ├── test_junction_models.py   # Junction-table models
+│   ├── test_phase2_models.py     # Phase 2 cross-reference / sequence models
+│   └── test_query_helpers.py     # Query helper functions
+├── integration/                  # Cross-model workflows (SQLite, + PostgreSQL)
+│   ├── test_audit_logging.py
+│   ├── test_readonly_session.py
+│   ├── test_user.py, test_editor.py, test_specialist.py, ...
+│   └── postgresql/               # PostgreSQL-specific integration tests
+│       ├── test_gene_crud.py
+│       ├── test_schema_validation.py
+│       └── test_postgresql_types.py
+├── session/                      # Session lifecycle / engine / settings tests
+│   ├── test_session_module.py
+│   └── test_session_lifecycle.py
+├── e2e/                          # End-to-end workflows against a real DB
+│   ├── test_gene_lifecycle.py
+│   ├── test_audit_trail_workflows.py
+│   └── test_data_integrity.py
+├── utils/                        # Tests for utility modules
+│   └── test_query_helpers.py
+└── conftest.py                   # Shared pytest fixtures (engines / sessions)
 ```
 
 ## Running Tests
@@ -43,13 +59,13 @@ pytest
 ### Run Specific Test File
 
 ```bash
-pytest tests/unit/test_models.py
+pytest tests/unit/test_user_model.py
 ```
 
 ### Run Specific Test
 
 ```bash
-pytest tests/unit/test_models.py::test_gene_model_fields
+pytest tests/unit/test_user_model.py::test_user_model
 ```
 
 ### Run Tests in Parallel
@@ -85,16 +101,22 @@ pytest -vv -s
 
 ## Test Fixtures
 
+Shared fixtures live in `tests/conftest.py` (and `tests/e2e/conftest.py`).
+
 ### SQLite Session Fixture
 
-For unit tests, use the in-memory SQLite session:
+For unit tests, use the in-memory `sqlite_session` fixture. It already seeds
+`session.info` (`user`, `read_only`) so audit logging behaves the same as in
+production:
 
 ```python
-import pytest
+from sqlalchemy import select
 from genew4_orm.models import Gene
 
-def test_gene_creation(sqlite_session: SQLAlchemySession) -> None:
+
+def test_gene_creation(sqlite_session) -> None:
     gene = Gene(
+        hgnc_id=1100,
         approved_symbol="TEST1",
         approved_name="Test Gene",
         status="Approved",
@@ -102,28 +124,20 @@ def test_gene_creation(sqlite_session: SQLAlchemySession) -> None:
     sqlite_session.add(gene)
     sqlite_session.commit()
 
-    retrieved = sqlite_session.query(Gene).filter_by(approved_symbol="TEST1").first()
+    retrieved = sqlite_session.scalars(
+        select(Gene).where(Gene.approved_symbol == "TEST1")
+    ).first()
     assert retrieved is not None
     assert retrieved.approved_name == "Test Gene"
 ```
 
-### Read-Write Session Fixture
+### PostgreSQL Session Fixture
 
-For integration tests with PostgreSQL:
-
-```python
-@pytest.fixture(scope="function")
-def rw_session():
-    """Create a read-write session for testing."""
-    from genew4_orm.session import initialize_engine, get_readwrite_session
-
-    initialize_engine()
-
-    with get_readwrite_session(user="test_user") as session:
-        yield session
-
-    # Cleanup happens automatically via context manager
-```
+For integration tests against PostgreSQL, `conftest.py` provides a
+`postgres_session` fixture (function-scoped) and an `e2e_session` fixture for
+end-to-end tests. A PostgreSQL service must be available — see the
+[Development Workflow](development-workflow.md) for starting one with
+`docker-compose`.
 
 ## Writing Tests
 
@@ -132,14 +146,14 @@ def rw_session():
 Test individual models and configurations:
 
 ```python
-import pytest
-from pydantic import ValidationError
 from genew4_orm.models import Gene
 
+
 class TestGeneModel:
-    def test_gene_model_fields(self, sqlite_session: SQLAlchemySession) -> None:
+    def test_gene_model_fields(self, sqlite_session) -> None:
         """Test Gene model fields are correctly defined."""
         gene = Gene(
+            hgnc_id=1100,
             approved_symbol="BRCA1",
             approved_name="Breast Cancer 1",
             status="Approved",
@@ -148,14 +162,21 @@ class TestGeneModel:
         sqlite_session.add(gene)
         sqlite_session.commit()
 
-        assert gene.id is not None
+        assert gene.hgnc_id == 1100
         assert gene.approved_symbol == "BRCA1"
 
-    def test_gene_status_validation(self) -> None:
-        """Test Gene status enum validation."""
-        with pytest.raises(ValidationError):
-            Gene(approved_symbol="TEST", status="InvalidStatus")
+    def test_gene_status_default(self) -> None:
+        """status defaults to 'Pending' when not provided."""
+        gene = Gene(hgnc_id=1101, approved_symbol="TEST")
+        # The column-level default is applied on flush; at construction the
+        # value is unset, so persist it to check the default.
+        assert gene.status is None or gene.status == "Pending"
 ```
+
+> Models are plain SQLAlchemy 2.0 declarative classes (not Pydantic models), so
+> constructing one with an arbitrary string does **not** raise a validation
+> error. Validate domain values explicitly in your tests, e.g.
+> `assert value in {s.value for s in GeneStatus}`.
 
 ### Integration Tests
 
@@ -163,50 +184,43 @@ Test complete workflows:
 
 ```python
 class TestGeneCRUD:
-    def test_create_gene(self, rw_session) -> None:
+    def test_create_gene(self, sqlite_session) -> None:
         """Test creating a gene record."""
         gene = Gene(
+            hgnc_id=1100,
             approved_symbol="NEWGENE",
             approved_name="New Gene",
             status="Approved",
         )
-        rw_session.add(gene)
-        rw_session.commit()
+        sqlite_session.add(gene)
+        sqlite_session.commit()
 
-        retrieved = rw_session.get(Gene, gene.id)
+        retrieved = sqlite_session.get(Gene, gene.hgnc_id)
         assert retrieved.approved_symbol == "NEWGENE"
 
-    def test_update_gene(self, rw_session) -> None:
+    def test_update_gene(self, sqlite_session) -> None:
         """Test updating a gene record."""
-        gene = Gene(
-            approved_symbol="TEST",
-            approved_name="Original",
-            status="Approved",
-        )
-        rw_session.add(gene)
-        rw_session.commit()
+        gene = Gene(hgnc_id=1100, approved_symbol="TEST", approved_name="Original", status="Approved")
+        sqlite_session.add(gene)
+        sqlite_session.commit()
 
         gene.approved_name = "Updated"
-        rw_session.commit()
+        sqlite_session.commit()
 
-        rw_session.refresh(gene)
+        sqlite_session.refresh(gene)
         assert gene.approved_name == "Updated"
 
-    def test_delete_gene(self, rw_session) -> None:
+    def test_delete_gene(self, sqlite_session) -> None:
         """Test deleting a gene record."""
-        gene = Gene(
-            approved_symbol="TEST",
-            approved_name="Test",
-            status="Approved",
-        )
-        rw_session.add(gene)
-        rw_session.commit()
+        gene = Gene(hgnc_id=1100, approved_symbol="TEST", approved_name="Test", status="Approved")
+        sqlite_session.add(gene)
+        sqlite_session.commit()
 
-        gene_id = gene.id
-        rw_session.delete(gene)
-        rw_session.commit()
+        gene_id = gene.hgnc_id
+        sqlite_session.delete(gene)
+        sqlite_session.commit()
 
-        retrieved = rw_session.get(Gene, gene_id)
+        retrieved = sqlite_session.get(Gene, gene_id)
         assert retrieved is None
 ```
 
@@ -215,88 +229,95 @@ class TestGeneCRUD:
 Test model relationships:
 
 ```python
-class TestGeneRelationships:
-    def test_gene_has_groups(self, sqlite_session: SQLAlchemySession) -> None:
-        """Test Gene to GeneGroup relationship through junction table."""
-        from genew4_orm.models import GeneGroup, GeneHasGeneGroup
+from sqlalchemy import select
 
-        gene = Gene(approved_symbol="TEST", approved_name="Test", status="Approved")
-        group = GeneGroup(name="Test Group", abbreviation="TG", status="internal", type="set")
+from genew4_orm.models import GeneGroup, GeneHasGeneGroup
+
+
+class TestGeneRelationships:
+    def test_gene_has_groups(self, sqlite_session) -> None:
+        """Test Gene to GeneGroup relationship through the junction table."""
+        gene = Gene(hgnc_id=1100, approved_symbol="TEST", approved_name="Test", status="Approved")
+        group = GeneGroup(name="Test Group", abbreviation="TG")
 
         sqlite_session.add_all([gene, group])
         sqlite_session.commit()
 
         # Create junction record
         association = GeneHasGeneGroup(
-            gene_id=gene.id,
+            gene_id=gene.hgnc_id,
             gene_group_id=group.id,
-            sort_order=1,
+            custom_sort="A",
         )
         sqlite_session.add(association)
         sqlite_session.commit()
 
         # Verify relationship
-        retrieved = sqlite_session.query(GeneHasGeneGroup).filter_by(
-            gene_id=gene.id, gene_group_id=group.id
+        retrieved = sqlite_session.scalars(
+            select(GeneHasGeneGroup).where(
+                GeneHasGeneGroup.gene_id == gene.hgnc_id,
+                GeneHasGeneGroup.gene_group_id == group.id,
+            )
         ).first()
         assert retrieved is not None
 ```
 
 ### Audit Log Tests
 
-Test audit logging functionality:
+Test audit logging functionality. Remember that `field_changes` is persisted as
+a JSON **string**, so parse it with `json.loads()` when asserting on it:
 
 ```python
-class TestAuditLogging:
-    def test_create_logs_audit_entry(self, rw_session) -> None:
-        """Test that CREATE operations are logged."""
-        from genew4_orm.models import AuditLog
+import json
 
+from sqlalchemy import select
+
+from genew4_orm.models import AuditLog, Gene
+
+
+class TestAuditLogging:
+    def test_create_logs_audit_entry(self, sqlite_session) -> None:
+        """Test that CREATE operations are logged."""
         gene = Gene(
+            hgnc_id=1100,
             approved_symbol="AUDITTEST",
             approved_name="Audit Test",
             status="Approved",
         )
-        rw_session.add(gene)
-        rw_session.commit()
+        sqlite_session.add(gene)
+        sqlite_session.commit()
 
-        # Check audit log was created
-        from sqlmodel import select
-
-        statement = select(AuditLog).where(
-            AuditLog.entity_type == "Gene",
-            AuditLog.entity_id == gene.id,
-            AuditLog.operation == "CREATE"
+        statement = (
+            select(AuditLog)
+            .where(
+                AuditLog.entity_type == "Gene",
+                AuditLog.operation == "CREATE",
+            )
         )
-        audit = rw_session.exec(statement).first()
+        audit = sqlite_session.scalars(statement).first()
         assert audit is not None
-        assert audit.user == "test_user"
+        assert audit.user == "test_user"  # set by the sqlite_session fixture
 
-    def test_update_logs_audit_entry(self, rw_session) -> None:
-        """Test that UPDATE operations are logged."""
-        from genew4_orm.models import AuditLog
-
-        gene = Gene(
-            approved_symbol="UPDATETEST",
-            approved_name="Original",
-            status="Approved",
-        )
-        rw_session.add(gene)
-        rw_session.commit()
+    def test_update_logs_field_change(self, sqlite_session) -> None:
+        """Test that UPDATE operations record the changed field."""
+        gene = Gene(hgnc_id=1100, approved_symbol="UPDATETEST", approved_name="Original", status="Approved")
+        sqlite_session.add(gene)
+        sqlite_session.commit()
 
         gene.approved_name = "Updated"
-        rw_session.commit()
+        sqlite_session.commit()
 
-        # Check audit log was created
-        from sqlmodel import select
-
-        statement = select(AuditLog).where(
-            AuditLog.entity_type == "Gene",
-            AuditLog.operation == "UPDATE"
+        statement = (
+            select(AuditLog)
+            .where(
+                AuditLog.entity_type == "Gene",
+                AuditLog.operation == "UPDATE",
+            )
         )
-        audit = rw_session.exec(statement).first()
+        audit = sqlite_session.scalars(statement).first()
         assert audit is not None
-        assert "approved_name" in audit.field_changes
+        changes = json.loads(audit.field_changes)
+        assert "approved_name" in changes
 ```
 
 ## Test Organization
@@ -312,16 +333,14 @@ class TestGeneModel:
     def test_fields(self):
         pass
 
-    def test_validation(self):
+    def test_defaults(self):
         pass
+
 
 class TestGeneGroupModel:
     """Tests for GeneGroup model."""
 
     def test_fields(self):
-        pass
-
-    def test_validation(self):
         pass
 ```
 
@@ -331,17 +350,17 @@ Test names should describe what is being tested:
 
 ```python
 # Good
-def test_gene_status_must_be_valid_enum_value(self):
+def test_gene_status_must_be_a_known_status_value():
     pass
 
-def test_gene_deletion_cascades_to_associations(self):
+def test_gene_deletion_cascades_to_associations():
     pass
 
 # Bad
-def test_gene(self):
+def test_gene():
     pass
 
-def test_it_works(self):
+def test_it_works():
     pass
 ```
 
@@ -367,6 +386,7 @@ Tests are run automatically on CI/CD pipelines. The configuration ensures:
 ### Pre-commit Requirements
 
 Code cannot be pushed to the remote repository unless:
+
 - All tests pass (`pytest`)
 - Linting passes (`ruff check`)
 - Type checking passes (`mypy`)
@@ -379,9 +399,9 @@ Code cannot be pushed to the remote repository unless:
 $ pytest -v
 
 tests/unit/test_config.py::test_database_settings_from_env PASSED
-tests/unit/test_models.py::test_gene_model_fields PASSED
-tests/unit/test_models.py::test_gene_group_model_fields PASSED
-tests/unit/test_relationships.py::test_gene_has_groups PASSED
+tests/unit/test_user_model.py::test_user_model PASSED
+tests/unit/test_gene_group_model.py::test_gene_group_model PASSED
+tests/unit/test_junction_models.py::test_gene_has_gene_group PASSED
 
 ======================== 116 passed in 2.34s ========================
 ```
@@ -391,13 +411,13 @@ tests/unit/test_relationships.py::test_gene_has_groups PASSED
 ```bash
 $ pytest -v
 
-tests/unit/test_models.py::test_gene_model_fields FAILED
+tests/unit/test_user_model.py::test_user_model FAILED
 
 ======================== FAILURES ========================
-____________________ test_gene_model_fields ____________________
-    def test_gene_model_fields(self):
->       assert gene.status == "Approved"
-E       AssertionError: assert 'Pending' == 'Approved'
+____________________ test_user_model ____________________
+    def test_user_model():
+>       assert user.email == "expected@example.com"
+E       AssertionError: assert 'other@example.com' == 'expected@example.com'
 
 ======================== 1 failed, 115 passed in 2.12s ========================
 ```
@@ -406,15 +426,19 @@ E       AssertionError: assert 'Pending' == 'Approved'
 
 ### Import Errors
 
-If you get import errors, ensure the package is installed:
+If you get import errors, ensure the package is installed (editable) and on the
+path:
 
 ```bash
 uv pip install -e .
 ```
 
+The test suite adds `src` to `sys.path` via `pyproject.toml`
+(`tool.pytest.pythonpath = ["src"]`).
+
 ### Database Connection Errors
 
-For integration tests, ensure PostgreSQL is running and configured:
+For PostgreSQL integration tests, ensure PostgreSQL is running and configured:
 
 ```bash
 # Check database connection
@@ -423,9 +447,11 @@ psql -h localhost -U your_user -d genew4
 
 ### SQLite Limitations
 
-Some tests may fail with SQLite due to limitations:
-- CASCADE deletes work differently
-- Type validation may vary
-- Foreign key constraints may not be enforced
+Some tests may behave differently with SQLite compared to PostgreSQL:
 
-These are expected and documented in the test suite.
+- Enum constraints and native types are not enforced the same way
+- Foreign-key / cascade behaviour can differ
+- PostgreSQL-specific columns (e.g. sequences) have no SQLite equivalent
+
+The dedicated `tests/integration/postgresql/` suite covers the cases that require
+a real PostgreSQL instance.

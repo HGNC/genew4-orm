@@ -1,25 +1,25 @@
 # CRUD Operations
 
-This guide covers Create, Read, Update, and Delete operations with genew4-orm, including session management and audit logging.
+This guide covers Create, Read, Update, and Delete operations with genew4-orm, including session management and audit logging. Queries use the SQLAlchemy 2.0 `select()` API.
 
 ## Session Management
 
 ### Initialize the Engine
 
 ```python
-from genew4_orm.session import initialize_engine
 from genew4_orm.config import DatabaseSettings
+from genew4_orm.session import initialize_engine
 
 # Option 1: Load from environment variables
 initialize_engine()
 
 # Option 2: Pass settings directly
 settings = DatabaseSettings(
-    pg_host="localhost",
-    pg_port=5432,
-    pg_name="genew4",
-    pg_user="your_user",
-    pg_password="your_password",
+    host="localhost",
+    port=5432,
+    database="genew4",
+    username="your_user",
+    password="your_password",
 )
 initialize_engine(settings)
 ```
@@ -29,30 +29,33 @@ initialize_engine(settings)
 For operations that modify data:
 
 ```python
-from genew4_orm.session import get_readwrite_session
 from genew4_orm.models import Gene
+from genew4_orm.session import get_readwrite_session
 
 with get_readwrite_session(user="your_username") as session:
     gene = session.get(Gene, 12345)
     gene.approved_name = "Updated Name"
-    session.commit()
+    # The session commits automatically on a clean exit (rolls back on error).
 ```
 
-The `user` parameter is required for audit logging. All write operations are automatically tracked with the username and timestamp.
+The `user` keyword is captured for audit logging. All write operations are
+automatically tracked with the username and timestamp.
 
 ### Read-Only Sessions
 
 For queries only (prevents accidental modifications):
 
 ```python
+from sqlalchemy import select
+
+from genew4_orm.models import Gene
 from genew4_orm.session import get_readonly_session
 
 with get_readonly_session() as session:
-    from sqlmodel import select
-    results = session.exec(select(Gene)).all()
+    results = session.scalars(select(Gene)).all()
 ```
 
-Read-only sessions reject `add()`, `delete()`, and `commit()` operations.
+Read-only sessions raise `db_common.ReadOnlySessionError` on any commit attempt.
 
 ### Close All Sessions
 
@@ -69,23 +72,20 @@ close_all_sessions()
 ### Create Single Record
 
 ```python
-from genew4_orm.session import get_readwrite_session
 from genew4_orm.models import GeneGroup
+from genew4_orm.session import get_readwrite_session
 
 with get_readwrite_session(user="curator") as session:
     group = GeneGroup(
         name="Test Gene Family",
         abbreviation="TGF",
-        status="internal",
-        type="family",
         description="A test gene family",
     )
     session.add(group)
-    session.commit()
+    session.flush()  # Persist + populate generated ID within the transaction
 
-    # Refresh to get generated ID
-    session.refresh(group)
     print(f"Created group with ID: {group.id}")
+    # The session commits automatically on a clean exit.
 ```
 
 ### Create Multiple Records
@@ -93,11 +93,10 @@ with get_readwrite_session(user="curator") as session:
 ```python
 with get_readwrite_session(user="curator") as session:
     groups = [
-        GeneGroup(name="Group 1", abbreviation="G1", status="internal", type="set"),
-        GeneGroup(name="Group 2", abbreviation="G2", status="internal", type="set"),
+        GeneGroup(name="Group 1", abbreviation="G1"),
+        GeneGroup(name="Group 2", abbreviation="G2"),
     ]
     session.add_all(groups)
-    session.commit()
 ```
 
 ### Create with Relationships
@@ -108,39 +107,35 @@ from genew4_orm.models import Gene, GeneGroup, GeneHasGeneGroup
 with get_readwrite_session(user="curator") as session:
     # Create gene
     gene = Gene(
+        hgnc_id=1100,
         approved_symbol="TEST1",
         approved_name="Test Gene 1",
         status="Approved",
         locus_type="gene with protein product",
     )
     session.add(gene)
-    session.flush()  # Get gene ID without committing
+    session.flush()  # Ensure the gene is visible for the FK
 
     # Create group
-    group = GeneGroup(
-        name="Test Group",
-        abbreviation="TG",
-        status="internal",
-        type="set",
-    )
+    group = GeneGroup(name="Test Group", abbreviation="TG")
     session.add(group)
     session.flush()
 
     # Create association
     association = GeneHasGeneGroup(
-        gene_id=gene.id,
+        gene_id=gene.hgnc_id,
         gene_group_id=group.id,
-        sort_order=1,
+        custom_sort="A",
     )
     session.add(association)
-    session.commit()
 ```
 
 ### Create Comment Linked to Gene
 
 ```python
-from genew4_orm.models import Comment, GeneHasComment
 from genew4_orm.enums import PublishStatus
+from genew4_orm.models import Comment, GeneHasComment
+from genew4_orm.session import get_readwrite_session
 
 with get_readwrite_session(user="curator") as session:
     # Create a comment
@@ -159,7 +154,6 @@ with get_readwrite_session(user="curator") as session:
         editor_id=1,
     )
     session.add(gene_comment)
-    session.commit()
 ```
 
 ## Read Operations
@@ -176,11 +170,13 @@ with get_readwrite_session(user="curator") as session:
 ### Select with Filters
 
 ```python
-from sqlmodel import select
+from sqlalchemy import select
+
+from genew4_orm.session import get_readonly_session
 
 with get_readonly_session() as session:
     statement = select(Gene).where(Gene.status == "Approved")
-    results = session.exec(statement).all()
+    results = session.scalars(statement).all()
 
     for gene in results:
         print(gene.approved_symbol)
@@ -191,13 +187,13 @@ with get_readonly_session() as session:
 ```python
 with get_readonly_session() as session:
     statement = select(Gene).where(Gene.approved_symbol == "BRCA1")
-    gene = session.exec(statement).first()
+    gene = session.scalars(statement).first()
 ```
 
 ### Select with Multiple Conditions
 
 ```python
-from sqlmodel import and_, or_
+from sqlalchemy import and_, select
 
 with get_readonly_session() as session:
     statement = select(Gene).where(
@@ -206,17 +202,16 @@ with get_readonly_session() as session:
             Gene.locus_type == "gene with protein product",
         )
     )
-    results = session.exec(statement).all()
+    results = session.scalars(statement).all()
 ```
 
 ### Count Records
 
 ```python
-from sqlmodel import func
+from sqlalchemy import func, select
 
 with get_readonly_session() as session:
-    statement = select(func.count(Gene.id))
-    count = session.exec(statement).one()
+    count = session.scalar(select(func.count(Gene.hgnc_id)))
     print(f"Total genes: {count}")
 ```
 
@@ -230,22 +225,19 @@ with get_readwrite_session(user="curator") as session:
     if gene:
         gene.approved_name = "New Approved Name"
         gene.editor = "curator"
-        session.commit()
 ```
 
 ### Update Multiple Records
 
 ```python
-from sqlmodel import select
+from sqlalchemy import select
 
 with get_readwrite_session(user="curator") as session:
     statement = select(Gene).where(Gene.status == "Pending")
-    results = session.exec(statement).all()
+    results = session.scalars(statement).all()
 
     for gene in results:
         gene.status = "Approved"
-
-    session.commit()
 ```
 
 ### Bulk Update with execute
@@ -256,7 +248,6 @@ from sqlalchemy import update
 with get_readwrite_session(user="curator") as session:
     stmt = update(Gene).where(Gene.status == "Pending").values(status="Approved")
     session.execute(stmt)
-    session.commit()
 ```
 
 ## Delete Operations
@@ -268,22 +259,19 @@ with get_readwrite_session(user="curator") as session:
     gene = session.get(Gene, 12345)
     if gene:
         session.delete(gene)
-        session.commit()
 ```
 
 ### Delete Multiple Records
 
 ```python
-from sqlmodel import select
+from sqlalchemy import select
 
 with get_readwrite_session(user="curator") as session:
-    statement = select(Gene).where(Gene.status == "Withdrawn")
-    results = session.exec(statement).all()
+    statement = select(Gene).where(Gene.status == "Entry Withdrawn")
+    results = session.scalars(statement).all()
 
     for gene in results:
         session.delete(gene)
-
-    session.commit()
 ```
 
 ### Delete with Relationships
@@ -302,18 +290,21 @@ with get_readwrite_session(user="curator") as session:
     group = session.get(GeneGroup, 1)
     if group:
         session.delete(group)
-        session.commit()
 ```
 
 ## Transaction Management
 
 ### Commit Changes
 
+Read-write sessions created with `get_readwrite_session()` **commit automatically**
+when the `with` block exits cleanly and **roll back automatically** on any
+exception. You can also commit explicitly mid-session:
+
 ```python
 with get_readwrite_session(user="curator") as session:
     gene = session.get(Gene, 12345)
     gene.approved_name = "Updated"
-    session.commit()  # Persist changes
+    session.commit()  # Persist changes immediately
 ```
 
 ### Rollback Changes
@@ -324,11 +315,11 @@ with get_readwrite_session(user="curator") as session:
     gene.approved_name = "This will be rolled back"
     session.rollback()  # Undo changes
 
-    # Or use context manager for automatic rollback on exception
+    # Or rely on the context manager to roll back on exception:
     try:
         gene.approved_name = "Updated"
-        session.commit()
-    except Exception as e:
+        raise RuntimeError("something went wrong")
+    except Exception:
         session.rollback()
         raise
 ```
@@ -341,19 +332,17 @@ with get_readwrite_session(user="curator") as session:
 
     try:
         # Operations that can be rolled back independently
-        gene = Gene(approved_symbol="TEST", approved_name="Test")
+        gene = Gene(hgnc_id=1101, approved_symbol="TEST", approved_name="Test")
         session.add(gene)
         session.commit()  # Commits nested transaction
     except Exception:
         session.rollback()  # Rolls back nested transaction only
-
-    session.commit()  # Commits outer transaction
 ```
 
 ## Best Practices
 
-1. **Always use context managers** (`with` statements) for automatic cleanup
-2. **Specify user parameter** in read-write sessions for audit logging
+1. **Always use context managers** (`with` statements) for automatic commit/rollback and cleanup
+2. **Pass the `user=` keyword** to read-write sessions for audit logging
 3. **Use read-only sessions** for queries to prevent accidental modifications
 4. **Commit frequently** to avoid long-running transactions
 5. **Handle exceptions** and rollback on errors
@@ -379,13 +368,14 @@ from sqlalchemy.exc import IntegrityError
 
 try:
     with get_readwrite_session(user="curator") as session:
-        group = GeneGroup(name="Duplicate Name", abbreviation="DUP", status="internal", type="set")
+        group = GeneGroup(name="Duplicate Name", abbreviation="DUP")
         session.add(group)
-        session.commit()
 except IntegrityError as e:
     print(f"Constraint violation: {e}")
-    session.rollback()
 ```
+
+> The read-write session context manager already rolls back on exception, so you
+> normally do not need to call `session.rollback()` yourself in the `except` block.
 
 ### Handle Connection Errors
 
@@ -399,3 +389,4 @@ try:
 except OperationalError as e:
     print(f"Connection error: {e}")
     # Implement retry logic or alert administrators
+```
