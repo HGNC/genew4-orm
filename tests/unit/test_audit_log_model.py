@@ -1,6 +1,10 @@
 """Unit tests for AuditLog model."""
 
 from datetime import datetime
+from typing import Any
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session as SQLAlchemySession
 
 from genew4_orm.models.audit_log import (
     AuditLog,
@@ -240,52 +244,47 @@ class TestAuditLogFieldChangesRoundTrip:
     the in-memory tests above do not exercise that path.
     """
 
-    def _round_trip(self):
-        from db_common import DeclarativeBase
-        from sqlalchemy import create_engine, select
-        from sqlalchemy.orm import sessionmaker
-
-        from genew4_orm import models  # noqa: F401  (register metadata)
-
-        engine = create_engine("sqlite:///:memory:")
-        DeclarativeBase.metadata.create_all(engine)
-        session = sessionmaker(bind=engine)()
-        changes = {
-            "approved_symbol": {"old": None, "new": "ROUNDTRIP_TEST"},
-            "status": {"old": "Pending", "new": "Approved"},
-        }
+    @staticmethod
+    def _commit_and_reload(session: SQLAlchemySession, field_changes: dict[str, Any]) -> AuditLog:
+        """Insert an AuditLog row, commit, and reload it from the database."""
         session.add(
             AuditLog(
                 user="test_user",
                 operation="CREATE",
                 entity_type="Gene",
                 entity_id=1,
-                field_changes=changes,
+                field_changes=field_changes,
             )
         )
         session.commit()
-        loaded = session.execute(select(AuditLog).where(AuditLog.entity_type == "Gene")).scalar_one()
-        session.close()
-        engine.dispose()
-        return loaded
+        return session.execute(select(AuditLog).where(AuditLog.entity_type == "Gene")).scalar_one()
 
-    def test_field_changes_is_dict_after_load(self) -> None:
+    def test_field_changes_is_dict_after_load(self, sqlite_session: SQLAlchemySession) -> None:
         """field_changes must deserialize to a dict on DB load (not a JSON str)."""
-        loaded = self._round_trip()
+        loaded = self._commit_and_reload(sqlite_session, {"approved_symbol": {"old": None, "new": "ROUNDTRIP_TEST"}})
         assert isinstance(loaded.field_changes, dict)
 
-    def test_field_changes_dict_access(self) -> None:
+    def test_field_changes_dict_access(self, sqlite_session: SQLAlchemySession) -> None:
         """field_changes can be keyed directly on a DB-loaded row."""
-        loaded = self._round_trip()
+        loaded = self._commit_and_reload(sqlite_session, {"approved_symbol": {"old": None, "new": "ROUNDTRIP_TEST"}})
         assert loaded.field_changes["approved_symbol"]["new"] == "ROUNDTRIP_TEST"
 
-    def test_get_field_diff_works_after_load(self) -> None:
+    def test_get_field_diff_works_after_load(self, sqlite_session: SQLAlchemySession) -> None:
         """get_field_diff must not raise on a DB-loaded row."""
-        loaded = self._round_trip()
+        loaded = self._commit_and_reload(
+            sqlite_session,
+            {"status": {"old": "Pending", "new": "Approved"}},
+        )
         assert loaded.get_field_diff("status") == {"old": "Pending", "new": "Approved"}
         assert loaded.get_field_diff("missing") is None
 
-    def test_get_changed_fields_works_after_load(self) -> None:
+    def test_get_changed_fields_works_after_load(self, sqlite_session: SQLAlchemySession) -> None:
         """get_changed_fields must not raise on a DB-loaded row."""
-        loaded = self._round_trip()
+        loaded = self._commit_and_reload(
+            sqlite_session,
+            {
+                "approved_symbol": {"old": None, "new": "ROUNDTRIP_TEST"},
+                "status": {"old": "Pending", "new": "Approved"},
+            },
+        )
         assert set(loaded.get_changed_fields()) == {"approved_symbol", "status"}
