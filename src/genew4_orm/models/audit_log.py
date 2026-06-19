@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Any
 
 from db_common import DeclarativeBase
-from sqlalchemy import DateTime, Integer, String, Text
+from sqlalchemy import DateTime, Integer, String, Text, TypeDecorator
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -25,6 +25,33 @@ def _deserialize_field_changes(value: str | None) -> dict[str, Any]:
     if value is None:
         return {}
     return json.loads(value)  # type: ignore[no-any-return]
+
+
+class JSONEncodedDict(TypeDecorator[dict[str, Any]]):
+    """Store a Python ``dict`` in a ``TEXT`` column, serialized as JSON.
+
+    Implements the JSON-in-TEXT ``TypeDecorator`` pattern from the SQLAlchemy
+    docs: ``process_bind_param`` serializes a dict to a JSON string on write and
+    ``process_result_value`` deserializes it back to a dict on read. This makes
+    ``AuditLog.field_changes`` honor its ``Mapped[dict[str, Any]]`` annotation
+    across a database round-trip (previously the column was plain ``Text``, so a
+    dict could not be persisted and a loaded row came back as a JSON string,
+    breaking ``get_field_diff`` / ``get_changed_fields``).
+
+    The column DDL remains ``TEXT`` (``impl = Text``), so this is a Python-side
+    (de)serialization change with no schema migration.
+    """
+
+    impl = Text
+    cache_ok = True
+
+    def process_bind_param(self, value: dict[str, Any] | None, dialect: Any) -> str | None:
+        """Serialize dict -> JSON string for the database."""
+        return _serialize_field_changes(value)
+
+    def process_result_value(self, value: str | None, dialect: Any) -> dict[str, Any]:
+        """Deserialize JSON string -> dict from the database."""
+        return _deserialize_field_changes(value)
 
 
 class AuditLog(DeclarativeBase):
@@ -63,7 +90,7 @@ class AuditLog(DeclarativeBase):
     entity_id: Mapped[int] = mapped_column(Integer, nullable=False, comment="ID of the affected entity")
     field_changes: Mapped[dict[str, Any]] = mapped_column(
         "field_changes",
-        Text,
+        JSONEncodedDict,
         nullable=False,
         default={},
         comment="JSON dict with old/new values for changed fields (stored as Text)",

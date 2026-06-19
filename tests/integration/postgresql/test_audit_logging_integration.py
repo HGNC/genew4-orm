@@ -8,8 +8,6 @@ Note: For INSERT operations, the entity_id will be 0 since the ID
 isn't assigned yet during before_flush. Query audit logs by other fields.
 """
 
-import json
-
 import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session as SQLAlchemySession
@@ -48,7 +46,7 @@ class TestAuditLoggingIntegration:
         # Find our specific entry
         audit_entry = None
         for entry in audit_entries:
-            changes = json.loads(entry.field_changes)
+            changes = entry.field_changes
             if changes.get("approved_symbol", {}).get("new") == "AUDIT_TEST1":
                 audit_entry = entry
                 break
@@ -88,7 +86,7 @@ class TestAuditLoggingIntegration:
 
         # Check the most recent one has our changes
         audit_entry = audit_entries[0]
-        field_changes = json.loads(audit_entry.field_changes)
+        field_changes = audit_entry.field_changes
 
         assert "approved_name" in field_changes or "status" in field_changes
 
@@ -160,7 +158,7 @@ class TestAuditLoggingIntegration:
         # Find our entry
         audit_entry = None
         for entry in audit_entries:
-            changes = json.loads(entry.field_changes)
+            changes = entry.field_changes
             if changes.get("name", {}).get("new") == "Audit Test Group":
                 audit_entry = entry
                 break
@@ -288,13 +286,13 @@ class TestAuditLoggingIntegration:
         # Find our entry
         audit_entry = None
         for entry in audit_entries:
-            changes = json.loads(entry.field_changes)
+            changes = entry.field_changes
             if changes.get("approved_symbol", {}).get("new") == "FIELD_TEST":
                 audit_entry = entry
                 break
 
         assert audit_entry is not None, "Field changes should be captured"
-        field_changes = json.loads(audit_entry.field_changes)
+        field_changes = audit_entry.field_changes
 
         # Check that expected fields are in the changes
         assert "approved_symbol" in field_changes

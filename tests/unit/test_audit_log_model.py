@@ -229,3 +229,63 @@ class TestAuditLogModel:
                 entity_id=1,
             )
             assert audit.operation == op
+
+
+class TestAuditLogFieldChangesRoundTrip:
+    """field_changes round-trips through the database as a dict.
+
+    `field_changes` is declared `Mapped[dict]` and the accessors
+    `get_field_diff` / `get_changed_fields` assume a dict. This only holds if a
+    row loaded from the DB deserializes its stored JSON text back into a dict;
+    the in-memory tests above do not exercise that path.
+    """
+
+    def _round_trip(self):
+        from db_common import DeclarativeBase
+        from sqlalchemy import create_engine, select
+        from sqlalchemy.orm import sessionmaker
+
+        from genew4_orm import models  # noqa: F401  (register metadata)
+
+        engine = create_engine("sqlite:///:memory:")
+        DeclarativeBase.metadata.create_all(engine)
+        session = sessionmaker(bind=engine)()
+        changes = {
+            "approved_symbol": {"old": None, "new": "ROUNDTRIP_TEST"},
+            "status": {"old": "Pending", "new": "Approved"},
+        }
+        session.add(
+            AuditLog(
+                user="test_user",
+                operation="CREATE",
+                entity_type="Gene",
+                entity_id=1,
+                field_changes=changes,
+            )
+        )
+        session.commit()
+        loaded = session.execute(select(AuditLog).where(AuditLog.entity_type == "Gene")).scalar_one()
+        session.close()
+        engine.dispose()
+        return loaded
+
+    def test_field_changes_is_dict_after_load(self) -> None:
+        """field_changes must deserialize to a dict on DB load (not a JSON str)."""
+        loaded = self._round_trip()
+        assert isinstance(loaded.field_changes, dict)
+
+    def test_field_changes_dict_access(self) -> None:
+        """field_changes can be keyed directly on a DB-loaded row."""
+        loaded = self._round_trip()
+        assert loaded.field_changes["approved_symbol"]["new"] == "ROUNDTRIP_TEST"
+
+    def test_get_field_diff_works_after_load(self) -> None:
+        """get_field_diff must not raise on a DB-loaded row."""
+        loaded = self._round_trip()
+        assert loaded.get_field_diff("status") == {"old": "Pending", "new": "Approved"}
+        assert loaded.get_field_diff("missing") is None
+
+    def test_get_changed_fields_works_after_load(self) -> None:
+        """get_changed_fields must not raise on a DB-loaded row."""
+        loaded = self._round_trip()
+        assert set(loaded.get_changed_fields()) == {"approved_symbol", "status"}

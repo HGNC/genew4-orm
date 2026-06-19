@@ -9,7 +9,6 @@ Tests complete gene curation workflow:
 Each test verifies entire workflow with audit trail validation.
 """
 
-import json
 from datetime import date
 
 import pytest
@@ -74,7 +73,7 @@ class TestGeneLifecycleWorkflow:
         for entry in all_audit_entries:
             if entry.operation == "CREATE":
                 # Check if this CREATE is for our gene by looking at field_changes
-                changes = json.loads(entry.field_changes)
+                changes = entry.field_changes
                 if "approved_symbol" in changes:
                     symbol = changes["approved_symbol"]["new"]
                     if symbol and "E2E_GENE" in str(symbol):

@@ -4,8 +4,6 @@ These tests verify that read-only sessions properly prevent
 write operations and raise appropriate errors.
 """
 
-import json
-
 import pytest
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session as SQLAlchemySession
@@ -179,10 +177,9 @@ class TestReadOnlySessionBehavior:
         # Tie the audit entry back to *this* gene, not just any Gene CREATE by this
         # user. entity_id is 0 for INSERTs (see comment above), so the discriminator
         # is the field_changes payload: approved_symbol is in ALWAYS_LOG_FIELDS, so it
-        # is always recorded for a Gene. field_changes reads back as a JSON string
-        # (no deserializer on the model), so json.loads it here.
-        changes = json.loads(audit_entry.field_changes)
-        assert changes["approved_symbol"]["new"] == "RW_AUDIT_TEST"
+        # is always recorded for a Gene. AuditLog.field_changes is a dict on load
+        # (JSONEncodedDict deserializes the stored JSON text).
+        assert audit_entry.field_changes["approved_symbol"]["new"] == "RW_AUDIT_TEST"
 
 
 @pytest.mark.usefixtures("postgres_session")

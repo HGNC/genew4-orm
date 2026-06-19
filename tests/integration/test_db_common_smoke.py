@@ -9,7 +9,6 @@ Verifies the migration's end state against a real in-memory SQLite database
 """
 
 import ast
-import json
 from pathlib import Path
 
 import pytest
@@ -100,7 +99,7 @@ def test_readwrite_session_round_trips_gene_and_audit(sqlite_engine) -> None:
     migration deliberately does not change). Querying by our exact payload
     stays green whether or not that listener is active.
     """
-    audit_payload = json.dumps({"symbol": {"old": None, "new": "SMOKE"}})
+    audit_payload = {"symbol": {"old": None, "new": "SMOKE"}}
     with get_readwrite_session(user="alice") as session:
         session.add(
             Gene(
@@ -114,8 +113,9 @@ def test_readwrite_session_round_trips_gene_and_audit(sqlite_engine) -> None:
                 editor="curator",
             )
         )
-        # audit.py always persists field_changes as a JSON string (a bare dict
-        # is not bindable to the Text column); mirror that real usage here.
+        # field_changes is a real dict on the model: AuditLog.field_changes uses a
+        # JSONEncodedDict TypeDecorator that serializes to JSON text on write, so we
+        # pass the dict directly (mirroring audit_write_operations' usage).
         session.add(
             AuditLog(
                 user="alice",

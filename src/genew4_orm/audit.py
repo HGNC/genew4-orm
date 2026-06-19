@@ -206,7 +206,7 @@ def audit_write_operations(
                 operation="CREATE",
                 entity_type=entity_type,
                 entity_id=entity_id,  # Will be 0 for new entities
-                field_changes=json.dumps(field_changes),
+                field_changes=field_changes,  # serialized to JSON by AuditLog.field_changes (JSONEncodedDict)
             )
             session.add(audit_entry)
             audited_instances.add(id(instance))
@@ -225,7 +225,7 @@ def audit_write_operations(
                 operation="UPDATE",
                 entity_type=entity_type,
                 entity_id=entity_id,
-                field_changes=json.dumps(field_changes),
+                field_changes=field_changes,  # serialized to JSON by AuditLog.field_changes (JSONEncodedDict)
             )
             session.add(audit_entry)
             audited_instances.add(id(instance))
@@ -244,7 +244,7 @@ def audit_write_operations(
                 operation="DELETE",
                 entity_type=entity_type,
                 entity_id=entity_id,
-                field_changes=json.dumps(field_changes),
+                field_changes=field_changes,  # serialized to JSON by AuditLog.field_changes (JSONEncodedDict)
             )
             session.add(audit_entry)
             audited_instances.add(id(instance))

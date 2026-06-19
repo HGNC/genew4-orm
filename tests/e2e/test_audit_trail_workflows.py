@@ -7,8 +7,6 @@ Tests complete audit trails for complex multi-entity operations:
 - Sequential operation ordering
 """
 
-import json
-
 import pytest
 from sqlalchemy import select
 
@@ -108,7 +106,7 @@ class TestMultiEntityAuditTrails:
         gene_audit = None
         group_audit = None
         for entry in audit_entries:
-            changes = json.loads(entry.field_changes)
+            changes = entry.field_changes
             if entry.entity_type == "Gene" and "approved_symbol" in changes:
                 gene_audit = entry
             elif entry.entity_type == "GeneGroup" and "name" in changes:
@@ -157,7 +155,7 @@ class TestMultiEntityAuditTrails:
         assert audit_entry is not None, "Audit entry not found"
 
         # Verify field-level detail
-        changes = json.loads(audit_entry.field_changes)
+        changes = audit_entry.field_changes
 
         # Should capture all three changes
         assert "approved_symbol" in changes
