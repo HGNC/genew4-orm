@@ -159,19 +159,17 @@ class TestReadOnlySessionBehavior:
         # The audit listener should be triggered during flush/commit
         postgres_session.commit()
 
-        # Verify audit log was created - query more broadly first
+        # Query by the fields the audit module documents as reliable for a CREATE.
+        # The `before_flush` listener writes `entity_id=0` for INSERTs because the
+        # autoincrement PK isn't assigned until the INSERT runs (after `before_flush`),
+        # so we cannot key on `entity_id == gene.hgnc_id`. This test creates exactly one
+        # gene, so entity_type + operation + user uniquely identify the entry.
         stmt = select(AuditLog).where(
             AuditLog.entity_type == "Gene",
             AuditLog.operation == "CREATE",
+            AuditLog.user == "audit_test_user",
         )
-        audit_entries = postgres_session.execute(stmt).scalars().all()
-
-        # Find our specific entry
-        audit_entry = None
-        for entry in audit_entries:
-            if entry.entity_id == gene.hgnc_id:
-                audit_entry = entry
-                break
+        audit_entry = postgres_session.execute(stmt).scalar_one_or_none()
 
         assert audit_entry is not None
         assert audit_entry.user == "audit_test_user"
