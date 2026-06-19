@@ -1,6 +1,196 @@
 # CHANGELOG
 
 
+## v0.5.0 (2026-06-19)
+
+### Bug Fixes
+
+- **audit-log**: Make field_changes a real dict via JSONEncodedDict TypeDecorator
+  ([`726059a`](https://github.com/HGNC/genew4-orm/commit/726059ac694fd536ba024dbef8d2257937b2a464))
+
+AuditLog.field_changes was declared Mapped[dict] but stored as a plain Text column: a dict could not
+  be persisted (SQLite rejected it), and a DB-loaded row came back as a JSON string, so
+  get_field_diff()/get_changed_fields() raised AttributeError. Existing accessor tests only used
+  in-memory objects, so it went undetected.
+
+Add a JSONEncodedDict TypeDecorator (impl=Text, so DDL is unchanged -> no migration) that serializes
+  dict->JSON on write and deserializes on read; delegate to the previously-dead
+  _serialize/_deserialize helpers. Drop the now-redundant json.dumps in audit.py (3 sites) so the
+  TypeDecorator is the single serialization owner. Update callers/tests that json.loads'd the string
+  (1 readonly + 5 pg-integration + 2 e2e + 1 gene_lifecycle + 1 smoke where audit_payload is now a
+  dict). Add round-trip unit tests that RED-failed before (dict not bindable) and pass now.
+
+Verified: ruff/black/mypy clean; 368 passed (+4), no new failures vs baseline; e2e/PG-gated files
+  collect cleanly (unrunnable without PG).
+
+- **readonly-session**: Query audit log by reliable fields, not entity_id (Task T2)
+  ([`9b39101`](https://github.com/HGNC/genew4-orm/commit/9b39101f5dbc6a945b9673b09e259dcf674e8383))
+
+The audit before_flush listener writes entity_id=0 for INSERTs because the autoincrement PK isn't
+  assigned until the INSERT runs (after before_flush) — documented in audit.py and pinned by
+  tests/unit/test_audit.py. So test_readwrite_session_creates_audit_logs's match loop
+  (entry.entity_id == gene.hgnc_id) never matched and always fell through to the skip removed in
+  d968e93. Query instead by the fields the audit module documents as reliable for a CREATE
+  (entity_type + operation + user); this test creates exactly one gene so that uniquely identifies
+  the entry.
+
+Proven via a SQLite probe (listener is global): old query WOULD FAIL, new query finds the entry.
+  Corrected the spec's "Why" to name both root causes of the original skip (registration [T1] +
+  entity_id=0 [T2 query]). No change to conftest.py or audit.py; no new regressions vs baseline.
+
+### Build System
+
+- **deps**: Wire db-common as a git dependency pinned to v0.1.0 (Task T1)
+  ([`a9eb856`](https://github.com/HGNC/genew4-orm/commit/a9eb856f1e1b587df0cd6adcbfb1ce6e69b72f20))
+
+Add db-common>=0.1.0 to dependencies and a [tool.uv.sources] git source pinned to the immutable tag
+  v0.1.0 on HGNC/db-common, mirroring ensembl-orm. Resolves from the git source at commit 67b6cae.
+
+Adds a regression guard (tests/unit/test_db_common_dependency.py) that is the executable form of the
+  T1 verify line: the module-level imports prove db-common resolves and its public symbols import;
+  the test pins those symbols to db_common.__all__ so a silent privatization fails here.
+
+### Chores
+
+- Ignore .pi/ directory
+  ([`6be6fa7`](https://github.com/HGNC/genew4-orm/commit/6be6fa777a4116b00b8efcfcc4fefcfcf9f0b60c))
+
+CLAUDE.md was the final line with no trailing newline, so appending .pi/ concatenated both into a
+  single non-matching pattern (CLAUDE.md.pi/). Split into two lines so each is ignored.
+
+### Documentation
+
+- Sync markdown + docstrings to SQLAlchemy/db-common migration
+  ([`2054e3f`](https://github.com/HGNC/genew4-orm/commit/2054e3f2b1b5fe0b517b209af99c6a3d4084edf7))
+
+Update README and all docs/* pages to the post-migration API: SQLAlchemy 2.0 select()/scalars()
+  patterns, correct config fields (Genew4DatabaseSettings, DATABASESETTINGS_PG_* env vars, plain-str
+  password), fixed model fields and enum values, and the real query-helper names.
+
+Fix broken .options() examples in query_helpers.py docstrings — the list-returning helpers must be
+  splatted. Modernize legacy session.query() comments in models to select().
+
+- **audit**: Document field_changes as a dict, not a JSON string
+  ([`82ff676`](https://github.com/HGNC/genew4-orm/commit/82ff676a6d2875bcce449fa930e622934edcdb4e))
+
+Since 726059a (JSONEncodedDict TypeDecorator), AuditLog.field_changes is a real dict on load/write.
+  Update audit-logging.md and testing.md so the contract, the constructor/query examples, and the
+  fields table stop showing json.loads/json.dumps and pass/read dicts directly. mkdocs build
+  --strict passes.
+
+ci: fix schema-init (sqlmodel removed) and docs.yml (db-common git dep)
+
+test.yml/ci.yml: the "Initialize database schema" step imported sqlmodel and called
+  SQLModel.metadata.create_all, but sqlmodel was dropped in the db-common migration ->
+  ModuleNotFoundError before any PG test ran. Use db_common.DeclarativeBase.metadata.create_all (the
+  pattern in conftest.py). DDL unchanged (audit_log.field_changes stays TEXT -> no migration).
+
+docs.yml: pip install -e . cannot resolve db-common (git-only via [tool.uv.sources]; not on PyPI,
+  verified 404). Add a `docs` dependency-group (mkdocs-material, mkdocstrings[python]) and switch to
+  uv sync --group docs + uv run mkdocs build, so the git pin resolves. mkdocs build --strict passes.
+
+- **query-helpers**: Convert session.exec → session.scalars in docstrings (Task T5)
+  ([`640b96c`](https://github.com/HGNC/genew4-orm/commit/640b96c1c4ed7294645fa38610b2a9155e660f5f))
+
+Finish the SQLModel→SQLAlchemy docstring conversion in query_helpers.py: the import lines were
+  already flipped to `from sqlalchemy import select` in T5, but the 6 example calls still used
+  SQLModel's session.exec(...). Switch them to session.scalars(...) (the SQLAlchemy 2.0 equivalent
+  that the module's own runtime already uses) so the examples are internally consistent with the
+  now-SQLAlchemy-only runtime.
+
+### Features
+
+- **audit**: Auto-register before_flush listener on package import (Task T1)
+  ([`99ef3f0`](https://github.com/HGNC/genew4-orm/commit/99ef3f073188387eaf85c0d0d72626facf55e488))
+
+### Refactoring
+
+- **config**: Replace DatabaseSettings with Genew4DatabaseSettings(db_common.DatabaseSettings) (Task
+  T3)
+  ([`931426f`](https://github.com/HGNC/genew4-orm/commit/931426f1a3b96beac02423d4f83b633e380cab62))
+
+Subclass db_common.DatabaseSettings, inheriting its URL builder (get_url) and pool fields while
+  keeping the DATABASESETTINGS_ prefix, PostgreSQL defaults, and legacy DATABASESETTINGS_PG_*
+  env-var names via AliasChoices. Expose pg_host/pg_port/pg_name/pg_user/pg_password as read/write
+  property aliases (also accepted as constructor kwargs via a before model validator). Preserve
+  get_connection_url and get_engine_kwargs as compat shims delegating to db-common; add a
+  genew4-only pool_timeout field. Drop SecretStr (password is now plain str), drop
+  get_async_engine_kwargs (db-common is sync-only), and mask password in repr via Field(repr=False).
+
+- **migration**: Drop sqlmodel and finish db-common migration (Task T5)
+  ([`7d50290`](https://github.com/HGNC/genew4-orm/commit/7d50290cc31ee724796a718cd6109e9a90b7709d))
+
+Switch alembic + conftest metadata to db_common.DeclarativeBase.metadata, remove the sqlmodel
+  dependency (deps/keywords/isort/mypy-override), and clear the db-common-under-strict mypy
+  regression (disallow_subclassing_any= false + db_common import override, 27 dead type: ignore
+  removed, and the [no-any-return]/[type-arg] introduced by T3/T4 delegating to untyped db-common).
+  Add an end-to-end SQLite smoke test through the migrated session path asserting alembic targets
+  DeclarativeBase.metadata. Clean up the remaining sqlmodel docstring references. mypy src/ and the
+  sqlmodel grep gate are both green; unit suite + smoke test pass.
+
+- **models**: Convert 28 models + enum_field to SQLAlchemy on db_common.DeclarativeBase (Task T2)
+  ([`e5cf257`](https://github.com/HGNC/genew4-orm/commit/e5cf2575aadc1865aeeeb31ee5388468188d7d9b))
+
+Rewrite all 28 SQLModel-based models as plain SQLAlchemy 2.0 classes on db_common.DeclarativeBase
+  (Mapped/mapped_column/relationship), and rewrite enum_field to return a mapped_column(SAEnum(...))
+  spec. Five models whose instantiation defaults are pinned by unchanged tests (User, Reminder,
+  AuditLog, Comment, GeneHasComment) gain a hand-written __init__ restoring SQLModel-parity
+  construction defaults; User also tolerates unknown kwargs to match SQLModel.
+
+Mapper verified byte-for-byte identical to the prior SQLModel baseline (tablename, columns, types,
+  nullable, PK, unique, FKs, relationships, cascades). All 332 unit tests green; ruff clean.
+
+Note: mypy src/ regresses 0->83 (db_common lacks py.typed under strict=true); this is the
+  documented, T5-deferred gap recorded in the spec Decisions.
+
+- **session**: Migrate session infra + exceptions to db-common delegation (Task T4)
+  ([`04ef142`](https://github.com/HGNC/genew4-orm/commit/04ef1424aa1d7c63de58165a304d8efd544ca34b))
+
+### Testing
+
+- **audit**: Surface which registration condition failed in listener test
+  ([`133dc8b`](https://github.com/HGNC/genew4-orm/commit/133dc8b5870d21a812a9c8e5a99151eaa0e35a76))
+
+- **audit-log**: Reuse sqlite_session fixture and tighten field_changes type
+  ([`5e23f8f`](https://github.com/HGNC/genew4-orm/commit/5e23f8fde58cdafea994cf51903ddd3e764bd1c5))
+
+Refactor TestAuditLogFieldChangesRoundTrip to use the project's function-scoped sqlite_session
+  fixture instead of building its own engine/schema/session per test, and annotate
+  _commit_and_reload's field_changes param as dict[str, Any] (matching AuditLog's Mapped[dict] and
+  the sibling _serialize/_deserialize helpers) rather than bare dict.
+
+Annotation-only on the runtime path; 21 model-unit tests still pass, no regressions vs baseline (368
+  passed).
+
+- **readonly-session**: Assert audit logs directly instead of skipping (Task T2)
+  ([`d968e93`](https://github.com/HGNC/genew4-orm/commit/d968e9393d6a722f8b4a3dc99a62a8a16dee9898))
+
+Now that T1 (99ef3f0) auto-registers the before_flush listener on package import, drop the defensive
+  pytest.skip("Audit event listener not properly attached...") escape hatch from
+  test_readwrite_session_creates_audit_logs and assert audit_entry is not None + audit_entry.user ==
+  "audit_test_user" directly.
+
+Also fix tests/conftest.py::postgres_engine to call _try_postgres_connection() before constructing
+  DatabaseSettings(): previously DatabaseSettings() ran unconditionally and raised a pydantic
+  ValidationError on missing PG creds, so every postgres_session integration test errored instead of
+  skipping. Pre-existing (45fae83, regresses 4a57405); required so T2's "module-level skipped when
+  PG unavailable" Verify holds. No change to the PG-available path.
+
+- **readonly-session**: Assert field_changes ties audit entry to the gene (Task T2)
+  ([`4f3e0b7`](https://github.com/HGNC/genew4-orm/commit/4f3e0b7d5dce64a2840ac732a7029cdaf76bae98))
+
+Strengthen test_readwrite_session_creates_audit_logs: beyond confirming a Gene CREATE audit log
+  exists for audit_test_user, also assert
+  json.loads(audit_entry.field_changes)["approved_symbol"]["new"] == "RW_AUDIT_TEST". entity_id is 0
+  for INSERTs, so field_changes is the only reliable discriminator tying the entry to the specific
+  gene. approved_symbol is in ALWAYS_LOG_FIELDS so it is always recorded.
+
+field_changes reads back as a JSON string (the model declares Mapped[dict] but wires no
+  deserializer; get_field_diff() is broken for DB-loaded rows — flagged in spec, out of scope), so
+  parse with json.loads in the test. Proven on SQLite: positive matches, a different symbol does
+  not. No new regressions vs baseline.
+
+
 ## v0.4.0 (2026-05-28)
 
 ### Features
@@ -27,6 +217,11 @@ Update models/__init__.py to import and re-export all 10 new Phase 2 model class
 
 Add test_phase2_model_exports.py with 12 tests verifying all new models are importable via
   genew4_orm.models and present in __all__.
+
+### Refactoring
+
+- Clean up SQLModel imports and improve code readability in models and tests
+  ([`3e8bba2`](https://github.com/HGNC/genew4-orm/commit/3e8bba2caa60871ffe6334d0660389f79cd62ac7))
 
 
 ## v0.3.0 (2026-05-20)
