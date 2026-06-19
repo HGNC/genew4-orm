@@ -52,11 +52,14 @@ def postgres_engine() -> sqlalchemy.engine.Engine:
     Yields:
         SQLAlchemy Engine connected to PostgreSQL database.
     """
-    # Try to connect to PostgreSQL using DatabaseSettings
-    settings = DatabaseSettings()
+    # Gate on availability BEFORE constructing DatabaseSettings(): when PG creds
+    # are missing, DatabaseSettings() raises a ValidationError, so we must skip
+    # first (mirroring the graceful-handling intent of the env-var guard in
+    # _try_postgres_connection()) rather than erroring at fixture setup.
     if not _try_postgres_connection():
         pytest.skip("PostgreSQL database not available", allow_module_level=True)
 
+    settings = DatabaseSettings()
     engine = create_engine(
         settings.get_connection_url(with_password=True),
         pool_pre_ping=True,

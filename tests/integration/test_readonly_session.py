@@ -173,12 +173,7 @@ class TestReadOnlySessionBehavior:
                 audit_entry = entry
                 break
 
-        # If no audit log was created, skip this test for now
-        # The audit event listener may not be properly attached
-        if audit_entry is None:
-            pytest.skip("Audit event listener not properly attached to test session")
-            return
-
+        assert audit_entry is not None
         assert audit_entry.user == "audit_test_user"
 
 
