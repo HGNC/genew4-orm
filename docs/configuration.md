@@ -78,6 +78,20 @@ keyword arguments still work as aliases of the canonical fields.
 `pool_timeout` is a genew4-specific field; db-common's own engine layer does not
 pass it, but `Genew4EngineFactory` reads it when creating the engine.
 
+### Character Set / Collation
+
+| Field | Env var | Type | Default | Description |
+|-------|---------|------|---------|-------------|
+| `charset` | `DATABASESETTINGS_CHARSET` | `str` | `"utf8mb4"` | Connection charset (inherited from db-common v0.2.0+) |
+| `collation` | `DATABASESETTINGS_COLLATION` | `str \| None` | _(empty)_ | Optional connection collation (inherited from db-common v0.2.0+) |
+
+> The `charset`/`collation` fields are inherited from db-common (v0.2.0+), where
+> db-common enforces `charset` on every pooled MySQL connection at connect time
+> via `SET NAMES` (and `COLLATE <collation>` when `collation` is set). genew4-orm
+> uses the `postgresql+psycopg` driver, so these fields are **accepted but a
+> no-op** here — the connect-time charset listener only registers for MySQL
+> drivers.
+
 ## Connection URL
 
 `Genew4DatabaseSettings` inherits a `get_url()` method (from db-common) that

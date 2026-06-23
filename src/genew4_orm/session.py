@@ -19,7 +19,7 @@ onto ``SessionError`` (a ``db_common.DatabaseError`` subclass).
 
 from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, cast
+from typing import Any
 
 import db_common
 from sqlalchemy import Engine, create_engine
@@ -93,7 +93,7 @@ def initialize_engine(settings: DatabaseSettings | None = None) -> Engine:
     global _engine_factory, _session_factory, _global_settings
 
     if _engine_factory is not None:
-        return cast(Engine, _engine_factory.get_engine())
+        return _engine_factory.get_engine()
 
     if settings is None:
         settings = DatabaseSettings()
@@ -102,7 +102,7 @@ def initialize_engine(settings: DatabaseSettings | None = None) -> Engine:
     _engine_factory = Genew4EngineFactory(settings)
     _session_factory = db_common.SessionFactory(_engine_factory)
 
-    return cast(Engine, _engine_factory.get_engine())
+    return _engine_factory.get_engine()
 
 
 def get_engine() -> Engine:
@@ -116,7 +116,7 @@ def get_engine() -> Engine:
     """
     if _engine_factory is None:
         raise SessionError("Database engine not initialized. Call initialize_engine() first.")
-    return cast(Engine, _engine_factory.get_engine())
+    return _engine_factory.get_engine()
 
 
 def get_settings() -> DatabaseSettings:
