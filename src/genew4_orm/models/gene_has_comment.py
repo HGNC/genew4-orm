@@ -30,14 +30,16 @@ class GeneHasComment(DeclarativeBase):
         "comment_id",
         Integer,
         ForeignKey("comment.id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Foreign key to comment table",
     )
     hgnc_id: Mapped[int] = mapped_column(
         "hgnc_id",
         Integer,
         ForeignKey("hgnc.hgnc_id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Foreign key to hgnc (gene) table",
     )
     date_added: Mapped[date] = mapped_column(

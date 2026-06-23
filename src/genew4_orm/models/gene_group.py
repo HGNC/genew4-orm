@@ -29,7 +29,8 @@ class GeneGroup(DeclarativeBase):
     # Region: Group
     id: Mapped[int | None] = mapped_column(
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Primary key",
     )
     # Note: unique=True removed - database does not enforce this constraint
@@ -41,12 +42,8 @@ class GeneGroup(DeclarativeBase):
     # type field removed - was causing enum type issues
 
     pubmed_ids: Mapped[str | None] = mapped_column(Text, comment="PubMed IDs")
-    internal_comments: Mapped[str | None] = mapped_column(
-        "curator_comment", Text, comment="Internal curator comments"
-    )
-    public_comments: Mapped[str | None] = mapped_column(
-        "external_note", Text, comment="Public-facing comments"
-    )
+    internal_comments: Mapped[str | None] = mapped_column("curator_comment", Text, comment="Internal curator comments")
+    public_comments: Mapped[str | None] = mapped_column("external_note", Text, comment="Public-facing comments")
 
     # Region: Description
     label: Mapped[str | None] = mapped_column("desc_label", String(255), comment="Description label")

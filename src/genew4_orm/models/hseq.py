@@ -20,7 +20,8 @@ class Hseq(DeclarativeBase):
 
     hseq_id: Mapped[int | None] = mapped_column(
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Auto-incrementing primary key",
     )
     ext: Mapped[str | None] = mapped_column("hseq_ext", String(50), comment="External source identifier")

@@ -28,20 +28,23 @@ class HierarchyClosure(DeclarativeBase):
         "parent_fam_id",
         Integer,
         ForeignKey("family_new.id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Parent/ancestor gene group ID",
     )
     descendant_id: Mapped[int] = mapped_column(
         "child_fam_id",
         Integer,
         ForeignKey("family_new.id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Child/descendant gene group ID",
     )
     distance: Mapped[int] = mapped_column(
         "distance",
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Number of levels between ancestor and descendant",
     )
 

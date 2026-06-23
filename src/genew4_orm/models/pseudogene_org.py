@@ -19,7 +19,8 @@ class PseudogeneOrg(DeclarativeBase):
 
     porg_id: Mapped[int | None] = mapped_column(
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Pseudogene.org ID (primary key)",
     )
     chromosome: Mapped[str | None] = mapped_column("porg_chr", String(50), comment="Chromosome")
@@ -29,6 +30,4 @@ class PseudogeneOrg(DeclarativeBase):
     sequence: Mapped[str | None] = mapped_column("porg_seq", Text, comment="Nucleotide sequence")
     class_: Mapped[str | None] = mapped_column("porg_class", String(255), comment="Pseudogene classification")
     link: Mapped[str | None] = mapped_column("porg_link", String(255), comment="Link to parent gene or resource")
-    parent_gene: Mapped[str | None] = mapped_column(
-        "porg_parent_gene", String(255), comment="Parent gene identifier"
-    )
+    parent_gene: Mapped[str | None] = mapped_column("porg_parent_gene", String(255), comment="Parent gene identifier")

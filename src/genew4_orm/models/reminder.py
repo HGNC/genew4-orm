@@ -26,16 +26,15 @@ class Reminder(DeclarativeBase):
 
     id: Mapped[int | None] = mapped_column(
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Primary key",
     )
     subject: Mapped[str] = mapped_column(String(255), comment="Reminder subject/title")
     content: Mapped[str] = mapped_column(
         String, nullable=True, comment="Reminder content/body"
     )  # Using String with Text type
-    reminder_date: Mapped[date] = mapped_column(
-        "date", Date, nullable=True, comment="Due date for the reminder"
-    )
+    reminder_date: Mapped[date] = mapped_column("date", Date, nullable=True, comment="Due date for the reminder")
     sent: Mapped[bool] = mapped_column(Boolean, default=False, comment="Whether the reminder has been sent")
 
     # Foreign keys and relationships

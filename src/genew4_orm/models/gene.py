@@ -32,12 +32,11 @@ class Gene(DeclarativeBase):
     # Region: Core Public Data Fields
     hgnc_id: Mapped[int | None] = mapped_column(
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Primary key: HGNC ID",
     )
-    approved_symbol: Mapped[str | None] = mapped_column(
-        "hgnc_app_sym", String(255), comment="Approved gene symbol"
-    )
+    approved_symbol: Mapped[str | None] = mapped_column("hgnc_app_sym", String(255), comment="Approved gene symbol")
     approved_name: Mapped[str | None] = mapped_column("hgnc_app_name", Text, comment="Approved gene name")
     # Note: Database column is hgnc_locus_type (not locus_type), using VARCHAR with no enum
     locus_type: Mapped[str | None] = mapped_column(
@@ -62,21 +61,15 @@ class Gene(DeclarativeBase):
     edit_memo: Mapped[str | None] = mapped_column("hgnc_edit_memo", Text, comment="Edit memo")
     reserved_symbols: Mapped[str | None] = mapped_column("hgnc_res_sym", Text, comment="Reserved symbols")
     reserved_names: Mapped[str | None] = mapped_column("hgnc_res_name", Text, comment="Reserved names")
-    reserved_alias_symbols: Mapped[str | None] = mapped_column(
-        "hgnc_res_alias", Text, comment="Reserved alias symbols"
-    )
+    reserved_alias_symbols: Mapped[str | None] = mapped_column("hgnc_res_alias", Text, comment="Reserved alias symbols")
 
     # Region: External References
     public_ncbi_gene_id: Mapped[int | None] = mapped_column(
         "hgnc_pub_eg_id", Integer, comment="Public NCBI Gene ID (Entrez Gene)"
     )
     ncbi_gene_ids: Mapped[str | None] = mapped_column("hgnc_eg_ids", String(255), comment="NCBI Gene IDs")
-    public_refseq_ids: Mapped[str | None] = mapped_column(
-        "hgnc_pub_refseq_ids", Text, comment="Public RefSeq IDs"
-    )
-    public_ensembl_id: Mapped[str | None] = mapped_column(
-        "hgnc_pub_ensembl_id", Text, comment="Public Ensembl ID"
-    )
+    public_refseq_ids: Mapped[str | None] = mapped_column("hgnc_pub_refseq_ids", Text, comment="Public RefSeq IDs")
+    public_ensembl_id: Mapped[str | None] = mapped_column("hgnc_pub_ensembl_id", Text, comment="Public Ensembl ID")
     mgd_ids: Mapped[str | None] = mapped_column("hgnc_mgd_id", Text, comment="Mouse Genome Database IDs")
     public_pubmed_ids: Mapped[str | None] = mapped_column(
         "hgnc_pub_pubmed_ids", String(255), comment="Public PubMed IDs"
@@ -85,12 +78,8 @@ class Gene(DeclarativeBase):
     enzyme_commission_ids: Mapped[str | None] = mapped_column(
         "hgnc_enz_ids", String(255), comment="Enzyme Commission IDs"
     )
-    specialist_resources: Mapped[str | None] = mapped_column(
-        "hgnc_other_ids", Text, comment="Specialist resource IDs"
-    )
-    public_insd_c_ids: Mapped[str | None] = mapped_column(
-        "hgnc_pub_acc_ids", String(255), comment="Public INSDC IDs"
-    )
+    specialist_resources: Mapped[str | None] = mapped_column("hgnc_other_ids", Text, comment="Specialist resource IDs")
+    public_insd_c_ids: Mapped[str | None] = mapped_column("hgnc_pub_acc_ids", String(255), comment="Public INSDC IDs")
     insdc_ids: Mapped[str | None] = mapped_column(
         "hgnc_acc_ids", Text, comment="International Nucleotide Sequence Database Collaboration IDs"
     )
@@ -104,9 +93,7 @@ class Gene(DeclarativeBase):
     date_symbol_changed: Mapped[date | None] = mapped_column(
         "hgnc_date_sym_change", Date, comment="Date symbol changed"
     )
-    date_name_changed: Mapped[date | None] = mapped_column(
-        "hgnc_date_name_change", Date, comment="Date name changed"
-    )
+    date_name_changed: Mapped[date | None] = mapped_column("hgnc_date_name_change", Date, comment="Date name changed")
     date_stable_symbol_changed: Mapped[date | None] = mapped_column(
         "hgnc_date_stable_symbol_change", Date, comment="Date stable symbol changed"
     )
@@ -125,9 +112,7 @@ class Gene(DeclarativeBase):
     hseq_ids: Mapped[str | None] = mapped_column(
         "hgnc_hseq_ids", Text, comment="Comma-separated HSeq IDs associated with this gene"
     )
-    public_hseq_id: Mapped[str | None] = mapped_column(
-        "hgnc_pub_hseq_id", Text, comment="Public HSeq ID for this gene"
-    )
+    public_hseq_id: Mapped[str | None] = mapped_column("hgnc_pub_hseq_id", Text, comment="Public HSeq ID for this gene")
     pseudogene_id: Mapped[int | None] = mapped_column(
         "hgnc_pseudogene_id", Integer, comment="Pseudogene.org ID linked to this gene"
     )

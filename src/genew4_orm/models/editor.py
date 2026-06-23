@@ -19,7 +19,8 @@ class Editor(DeclarativeBase):
     id: Mapped[int | None] = mapped_column(
         "ed_id",
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Primary key",
     )
     full_name: Mapped[str | None] = mapped_column(

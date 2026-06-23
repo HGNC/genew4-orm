@@ -90,13 +90,15 @@ def postgres_session(postgres_engine) -> Generator[Session, None, None]:
 
     # Cleanup: truncate all tables after test
     with postgres_engine.begin() as conn:
-        result = conn.execute(text("""
+        result = conn.execute(
+            text("""
             SELECT tablename
             FROM pg_tables
             WHERE schemaname = 'public'
             AND tablename NOT LIKE 'pg_%'
             AND tablename NOT LIKE 'sql_%'
-        """))
+        """)
+        )
         tables = [row[0] for row in result.fetchall()]
         for table in tables:
             conn.execute(text(f'TRUNCATE TABLE public."{table}" CASCADE'))

@@ -20,11 +20,13 @@ class HgncId2CcdsId(DeclarativeBase):
 
     hgnc_id2ccds_id_hgnc_id: Mapped[int | None] = mapped_column(
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="HGNC ID (composite primary key)",
     )
     hgnc_id2ccds_id_ccds_id: Mapped[str | None] = mapped_column(
         String(50),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="CCDS identifier (composite primary key)",
     )

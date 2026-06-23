@@ -29,7 +29,8 @@ class Comment(DeclarativeBase):
 
     id: Mapped[int | None] = mapped_column(
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Primary key (auto-increment via comment_sequence)",
     )
     comment: Mapped[str] = mapped_column(Text, nullable=False, comment="Comment text content")

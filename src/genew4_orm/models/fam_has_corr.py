@@ -22,14 +22,16 @@ class FamHasCorr(DeclarativeBase):
         "corr_id",
         Integer,
         ForeignKey("corr.corr_id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Foreign key to corr table",
     )
     gene_group_id: Mapped[int] = mapped_column(
         "fam_id",
         Integer,
         ForeignKey("family_new.id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Foreign key to family_new table",
     )
 

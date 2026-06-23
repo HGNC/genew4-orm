@@ -21,7 +21,8 @@ class Ccds(DeclarativeBase):
     ccds_id: Mapped[str | None] = mapped_column(
         "ccds_id",
         String(50),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="CCDS identifier (primary key)",
     )
     chromosome: Mapped[str | None] = mapped_column(

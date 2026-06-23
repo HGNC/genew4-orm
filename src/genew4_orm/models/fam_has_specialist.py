@@ -22,14 +22,16 @@ class FamHasSpecialist(DeclarativeBase):
         "specialist_id",
         Integer,
         ForeignKey("specialist.id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Foreign key to specialist table",
     )
     gene_group_id: Mapped[int] = mapped_column(
         "fam_id",
         Integer,
         ForeignKey("family_new.id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Foreign key to family_new table",
     )
 

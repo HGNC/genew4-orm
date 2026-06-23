@@ -18,14 +18,13 @@ class ExternalResource(DeclarativeBase):
 
     id: Mapped[int] = mapped_column(
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Primary key",
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, comment="External resource name")
     url: Mapped[str] = mapped_column(String(255), nullable=False, comment="External resource URL")
-    description: Mapped[str | None] = mapped_column(
-        String(255), comment="External resource description"
-    )
+    description: Mapped[str | None] = mapped_column(String(255), comment="External resource description")
     approved: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, comment="Whether resource is approved"
     )

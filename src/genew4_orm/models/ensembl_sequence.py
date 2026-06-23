@@ -20,12 +20,11 @@ class EnsemblSequence(DeclarativeBase):
 
     eseq_ensembl_gene_id: Mapped[str | None] = mapped_column(
         String(255),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Ensembl gene identifier (ENSG..., primary key)",
     )
-    source: Mapped[str | None] = mapped_column(
-        "eseq_source", String(255), comment="Data source label"
-    )
+    source: Mapped[str | None] = mapped_column("eseq_source", String(255), comment="Data source label")
     defline: Mapped[str | None] = mapped_column("eseq_defline", Text, comment="FASTA defline")
     ensembl_transcript_id: Mapped[str | None] = mapped_column(
         "eseq_ensembl_transcript_id", String(255), comment="Ensembl transcript identifier (ENST...)"

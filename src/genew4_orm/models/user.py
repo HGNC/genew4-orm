@@ -22,7 +22,8 @@ class User(DeclarativeBase):
     __tablename__ = "user"
 
     id: Mapped[int | None] = mapped_column(
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Primary key",
     )
     display_name: Mapped[str] = mapped_column(
@@ -32,12 +33,8 @@ class User(DeclarativeBase):
     )
     first_name: Mapped[str | None] = mapped_column(String(50), comment="User first name")
     last_name: Mapped[str | None] = mapped_column(String(50), comment="User last name")
-    email: Mapped[str | None] = mapped_column(
-        String(255), unique=True, comment="User email address (unique)"
-    )
-    password: Mapped[str | None] = mapped_column(
-        String(255), comment="Hashed password (excluded from serialization)"
-    )
+    email: Mapped[str | None] = mapped_column(String(255), unique=True, comment="User email address (unique)")
+    password: Mapped[str | None] = mapped_column(String(255), comment="Hashed password (excluded from serialization)")
     current: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,

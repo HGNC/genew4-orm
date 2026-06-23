@@ -19,7 +19,8 @@ class OtterSequence(DeclarativeBase):
 
     oseq_gene_id: Mapped[str | None] = mapped_column(
         String(255),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="VEGA gene identifier (primary key, join key)",
     )
     defline: Mapped[str | None] = mapped_column("oseq_defline", Text, comment="FASTA defline")

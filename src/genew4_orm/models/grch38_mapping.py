@@ -38,9 +38,7 @@ class Grch38Mapping(DeclarativeBase):
     )
 
     # Additional optional fields (not part of primary key)
-    source_id: Mapped[str | None] = mapped_column(
-        "cm_source_id", String, comment="Source identifier"
-    )
+    source_id: Mapped[str | None] = mapped_column("cm_source_id", String, comment="Source identifier")
     ncbi_gene_id: Mapped[int | None] = mapped_column("cm_eg_id", Integer, comment="NCBI Gene ID")
     hgnc_id: Mapped[int | None] = mapped_column("cm_hgnc_id", Integer, comment="HGNC Gene ID")
     notes: Mapped[str | None] = mapped_column("cm_notes", String, comment="Additional notes")

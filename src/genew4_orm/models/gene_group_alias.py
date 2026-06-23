@@ -23,7 +23,8 @@ class GeneGroupAlias(DeclarativeBase):
 
     id: Mapped[int | None] = mapped_column(
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Primary key",
     )
     alias: Mapped[str] = mapped_column(String(255), nullable=False, comment="Alternative name for the gene group")

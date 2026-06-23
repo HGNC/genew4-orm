@@ -25,14 +25,16 @@ class FamHasExtResource(DeclarativeBase):
         "ext_id",
         Integer,
         ForeignKey("external_resource.id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Foreign key to external_resource table",
     )
     gene_group_id: Mapped[int] = mapped_column(
         "family_id",
         Integer,
         ForeignKey("family_new.id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Foreign key to family_new table",
     )
 

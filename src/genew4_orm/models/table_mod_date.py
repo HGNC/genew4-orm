@@ -22,7 +22,8 @@ class TableModDate(DeclarativeBase):
 
     table_name: Mapped[str | None] = mapped_column(
         String(100),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Target table name (primary key)",
     )
     version: Mapped[str | None] = mapped_column("version", String(255), comment="Last-loaded source version string")

@@ -30,14 +30,16 @@ class GeneHasGeneGroup(DeclarativeBase):
         "hgnc_id",
         Integer,
         ForeignKey("hgnc.hgnc_id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Foreign key to hgnc table (part of composite primary key)",
     )
     gene_group_id: Mapped[int | None] = mapped_column(
         "family_id",
         Integer,
         ForeignKey("family_new.id", ondelete="CASCADE"),
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Foreign key to family_new table (part of composite primary key)",
     )
 

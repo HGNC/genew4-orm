@@ -22,7 +22,8 @@ class Correspondence(DeclarativeBase):
     # Region: Core fields
     id: Mapped[int | None] = mapped_column(
         "corr_id",
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Primary key",
     )
     first_name: Mapped[str | None] = mapped_column("corr_first_name", Text, comment="Contact first name")

@@ -74,7 +74,8 @@ class AuditLog(DeclarativeBase):
 
     id: Mapped[int | None] = mapped_column(
         Integer,
-        primary_key=True, nullable=False,
+        primary_key=True,
+        nullable=False,
         comment="Primary key",
     )
     timestamp: Mapped[datetime] = mapped_column(
@@ -84,9 +85,7 @@ class AuditLog(DeclarativeBase):
     operation: Mapped[str] = mapped_column(
         String(10), nullable=False, comment="Operation type: CREATE, UPDATE, or DELETE"
     )
-    entity_type: Mapped[str] = mapped_column(
-        String(100), nullable=False, comment="Type of entity affected"
-    )
+    entity_type: Mapped[str] = mapped_column(String(100), nullable=False, comment="Type of entity affected")
     entity_id: Mapped[int] = mapped_column(Integer, nullable=False, comment="ID of the affected entity")
     field_changes: Mapped[dict[str, Any]] = mapped_column(
         "field_changes",

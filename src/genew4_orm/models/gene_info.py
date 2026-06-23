@@ -31,12 +31,8 @@ class GeneInfo(DeclarativeBase):
     map_location: Mapped[str | None] = mapped_column("gi_map_location", String)
     description: Mapped[str | None] = mapped_column("gi_description", Text)
     type_of_gene: Mapped[str | None] = mapped_column("gi_type_of_gene", String)
-    symbol_from_nomenclature_authority: Mapped[str | None] = mapped_column(
-        "gi_sym_from_nome_auth", String
-    )
-    full_name_from_nomenclature_authority: Mapped[str | None] = mapped_column(
-        "gi_full_name_from_nome_auth", String
-    )
+    symbol_from_nomenclature_authority: Mapped[str | None] = mapped_column("gi_sym_from_nome_auth", String)
+    full_name_from_nomenclature_authority: Mapped[str | None] = mapped_column("gi_full_name_from_nome_auth", String)
     nomenclature_status: Mapped[str | None] = mapped_column("gi_nome_status", String)
     other_designations: Mapped[str | None] = mapped_column("gi_other_designations", String)
     modification_date: Mapped[str | None] = mapped_column("gi_modification_date", String)
