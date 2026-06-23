@@ -498,6 +498,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#character-set-collation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Character Set / Collation
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1052,6 +1063,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#character-set-collation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Character Set / Collation
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1301,6 +1323,42 @@ db-common migration, so <code>.get_secret_value()</code> is no longer available)
 </table>
 <p><code>pool_timeout</code> is a genew4-specific field; db-common's own engine layer does not
 pass it, but <code>Genew4EngineFactory</code> reads it when creating the engine.</p>
+<h3 id="character-set-collation">Character Set / Collation<a class="headerlink" href="#character-set-collation" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Env var</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>charset</code></td>
+<td><code>DATABASESETTINGS_CHARSET</code></td>
+<td><code>str</code></td>
+<td><code>"utf8mb4"</code></td>
+<td>Connection charset (inherited from db-common v0.2.0+)</td>
+</tr>
+<tr>
+<td><code>collation</code></td>
+<td><code>DATABASESETTINGS_COLLATION</code></td>
+<td><code>str \| None</code></td>
+<td><em>(empty)</em></td>
+<td>Optional connection collation (inherited from db-common v0.2.0+)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>The <code>charset</code>/<code>collation</code> fields are inherited from db-common (v0.2.0+), where
+db-common enforces <code>charset</code> on every pooled MySQL connection at connect time
+via <code>SET NAMES</code> (and <code>COLLATE &lt;collation&gt;</code> when <code>collation</code> is set). genew4-orm
+uses the <code>postgresql+psycopg</code> driver, so these fields are <strong>accepted but a
+no-op</strong> here — the connect-time charset listener only registers for MySQL
+drivers.</p>
+</blockquote>
 <h2 id="connection-url">Connection URL<a class="headerlink" href="#connection-url" title="Permanent link">&para;</a></h2>
 <p><code>Genew4DatabaseSettings</code> inherits a <code>get_url()</code> method (from db-common) that
 returns a SQLAlchemy <a href="https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.engine.URL"><code>URL</code></a>,
