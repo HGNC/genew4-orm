@@ -1,6 +1,28 @@
 # CHANGELOG
 
 
+## v0.5.2 (2026-06-24)
+
+### Bug Fixes
+
+- **models**: Persist enum values, not member names, in enum_field
+  ([`4e15e09`](https://github.com/HGNC/genew4-orm/commit/4e15e0914600d803a52998a34d487264ea27c462))
+
+enum_field built SQLEnum(native_enum=False), which by default persists the enum member NAME
+  ('INTERNAL', 'PENDING') rather than its value ('internal', 'pending'). This contradicted
+  docs/models.md and the real family_new / comment columns — which are lowercase and owned by the
+  TypeScript ORM — and would raise CheckViolation against production's lowercase CHECK constraints
+  if ever exercised there.
+
+Add values_callable so both the stored bytes and the generated CHECK constraint use the StrEnum
+  values. Affects GeneGroup.status, GeneGroup.type, and Comment.status.
+
+Align the 14 raw-SQL test inserts against family_new (which bypass the ORM and so must supply the
+  now-required status) to 'internal'. Add a unit test asserting col.type.enums equals the enum
+  values, and two PostgreSQL integration tests that read the raw status/type columns and assert the
+  persisted case.
+
+
 ## v0.5.1 (2026-06-24)
 
 ### Bug Fixes
