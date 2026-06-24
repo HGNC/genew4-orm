@@ -1595,6 +1595,16 @@ enums respectively.</p>
 <td>Editor responsible</td>
 </tr>
 <tr>
+<td><code>status</code></td>
+<td><code>str</code></td>
+<td>Visibility enum (<code>internal</code>/<code>exported</code>/<code>delete</code>); NOT NULL, defaults to <code>internal</code> (<code>GeneGroupStatus</code>)</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>str \| None</code></td>
+<td>Group type enum (<code>set</code>); nullable, defaults to <code>set</code> (<code>GeneGroupType</code>)</td>
+</tr>
+<tr>
 <td><code>pubmed_ids</code></td>
 <td><code>str \| None</code></td>
 <td>PubMed IDs</td>
@@ -1632,10 +1642,12 @@ enums respectively.</p>
 </tbody>
 </table>
 <blockquote>
-<p>Note: the legacy <code>status</code> and <code>type</code> enum columns are <strong>not</strong> mapped on this
-model (they were removed because the database does not use enum types here).
-The <code>GeneGroupStatus</code> / <code>GeneGroupType</code> enums still exist but are not bound
-to columns.</p>
+<p>The <code>status</code> and <code>type</code> columns are backed by PostgreSQL enum types,
+mirroring the TypeScript ORM. They are mapped with the <code>enum_field()</code> helper
+(<code>native_enum=False</code>), the same pattern as <code>Comment.status</code>, so the values are
+sent as text and accepted by the real enum columns. Both default at
+construction: <code>status</code> to <code>GeneGroupStatus.INTERNAL</code>, <code>type</code> to
+<code>GeneGroupType.SET</code>.</p>
 </blockquote>
 <p><strong>Relationships:</strong>
 - <code>gene_group_has_genes</code> - One-to-many with GeneHasGeneGroup
