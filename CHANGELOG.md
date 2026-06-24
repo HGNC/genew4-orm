@@ -1,6 +1,24 @@
 # CHANGELOG
 
 
+## v0.5.1 (2026-06-24)
+
+### Bug Fixes
+
+- **models**: Bind GeneGroup.status/type enum columns via enum_field (Task ...)
+  ([`0aa41b0`](https://github.com/HGNC/genew4-orm/commit/0aa41b0cb63c6e3cd7b91ebb9cc867f7affbdd1b))
+
+### Chores
+
+- **deps**: Bump db-common pin to v0.2.0 and fix surfaced redundant casts (Task T6)
+  ([`5caaf68`](https://github.com/HGNC/genew4-orm/commit/5caaf68b6b8a76848668510afbb4b935b59b4257))
+
+### Code Style
+
+- **format**: Apply ruff format to align with CI formatters gate
+  ([`34f9d68`](https://github.com/HGNC/genew4-orm/commit/34f9d688309a6fe94c0546611a76abc88ce79074))
+
+
 ## v0.5.0 (2026-06-19)
 
 ### Bug Fixes
