@@ -72,6 +72,8 @@ group = GeneGroup(
 | `name` | `str` | Group name (required) |
 | `abbreviation` | `str \| None` | Group abbreviation |
 | `editor` | `str \| None` | Editor responsible |
+| `status` | `str` | Visibility enum (`internal`/`exported`/`delete`); NOT NULL, defaults to `internal` (`GeneGroupStatus`) |
+| `type` | `str \| None` | Group type enum (`set`); nullable, defaults to `set` (`GeneGroupType`) |
 | `pubmed_ids` | `str \| None` | PubMed IDs |
 | `internal_comments` | `str \| None` | Internal curator comments (`curator_comment` column) |
 | `public_comments` | `str \| None` | Public-facing comments (`external_note` column) |
@@ -80,10 +82,12 @@ group = GeneGroup(
 | `typical_gene` | `str \| None` | Typical gene for this group |
 | `description` | `str \| None` | Full description (`desc_comment`) |
 
-> Note: the legacy `status` and `type` enum columns are **not** mapped on this
-> model (they were removed because the database does not use enum types here).
-> The `GeneGroupStatus` / `GeneGroupType` enums still exist but are not bound
-> to columns.
+> The `status` and `type` columns are backed by PostgreSQL enum types,
+> mirroring the TypeScript ORM. They are mapped with the `enum_field()` helper
+> (`native_enum=False`), the same pattern as `Comment.status`, so the values are
+> sent as text and accepted by the real enum columns. Both default at
+> construction: `status` to `GeneGroupStatus.INTERNAL`, `type` to
+> `GeneGroupType.SET`.
 
 **Relationships:**
 - `gene_group_has_genes` - One-to-many with GeneHasGeneGroup

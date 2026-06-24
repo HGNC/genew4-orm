@@ -19,7 +19,7 @@ class GeneHasGeneGroup(DeclarativeBase):
     """GeneHasGeneGroup junction entity representing the gene_has_family table.
 
     This is the junction table for the many-to-many relationship between
-    Gene and GeneGroup. It includes a custom sort_order field.
+    Gene and GeneGroup. It includes a custom_sort field.
     """
 
     __tablename__ = "gene_has_family"

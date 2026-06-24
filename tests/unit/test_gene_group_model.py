@@ -1,5 +1,6 @@
 """Unit tests for GeneGroup model."""
 
+from genew4_orm.enums import GeneGroupStatus, GeneGroupType
 from genew4_orm.models import GeneGroup
 
 
@@ -130,3 +131,52 @@ class TestGeneGroup:
         assert "GeneGroup" in repr_str
         assert "id=None" in repr_str
         assert "name='Test Group'" in repr_str
+
+
+class TestGeneGroupStatusType:
+    """Test the status (visibility) and type enum columns on GeneGroup.
+
+    These mirror the family_new.status / family_new.type columns defined in the
+    TypeScript ORM (hgnc-tools-api GeneGroup entity): status is a NOT NULL enum
+    defaulting to 'internal', and type is a nullable enum defaulting to 'set'.
+    """
+
+    def test_status_defaults_to_internal_at_construction(self) -> None:
+        """status should default to INTERNAL when not provided (SQLModel-parity)."""
+        gene_group = GeneGroup(name="Test Group")
+
+        assert gene_group.status == GeneGroupStatus.INTERNAL
+        assert gene_group.status == "internal"
+
+    def test_type_defaults_to_set_at_construction(self) -> None:
+        """type should default to SET when not provided."""
+        gene_group = GeneGroup(name="Test Group")
+
+        assert gene_group.type == GeneGroupType.SET
+        assert gene_group.type == "set"
+
+    def test_status_accepts_string_value(self) -> None:
+        """status should accept a plain string value matching the enum."""
+        gene_group = GeneGroup(name="Test Group", status="exported")
+
+        assert gene_group.status == "exported"
+        assert gene_group.status == GeneGroupStatus.EXPORTED
+
+    def test_status_accepts_enum_member(self) -> None:
+        """status should accept a GeneGroupStatus enum member."""
+        gene_group = GeneGroup(name="Test Group", status=GeneGroupStatus.DELETE)
+
+        assert gene_group.status == GeneGroupStatus.DELETE
+
+    def test_type_accepts_string_value(self) -> None:
+        """type should accept a plain string value matching the enum."""
+        gene_group = GeneGroup(name="Test Group", type="set")
+
+        assert gene_group.type == "set"
+        assert gene_group.type == GeneGroupType.SET
+
+    def test_status_is_not_none_for_minimal_instantiation(self) -> None:
+        """Minimal GeneGroup must have a non-None status (NOT NULL column)."""
+        gene_group = GeneGroup(name="Test Group")
+
+        assert gene_group.status is not None

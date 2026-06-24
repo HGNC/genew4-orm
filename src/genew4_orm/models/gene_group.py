@@ -10,6 +10,8 @@ from db_common import DeclarativeBase
 from sqlalchemy import Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from genew4_orm.enums import GeneGroupStatus, GeneGroupType, enum_field
+
 if TYPE_CHECKING:
     from genew4_orm.models.gene_group_alias import GeneGroupAlias
     from genew4_orm.models.gene_has_gene_group import GeneHasGeneGroup
@@ -37,9 +39,24 @@ class GeneGroup(DeclarativeBase):
     name: Mapped[str] = mapped_column(String(150), nullable=False, comment="Gene group name")
     abbreviation: Mapped[str | None] = mapped_column(String(50), comment="Gene group abbreviation")
     editor: Mapped[str | None] = mapped_column(String(50), comment="Editor responsible")
-    # status field removed - was causing enum type issues
 
-    # type field removed - was causing enum type issues
+    # status / type are real family_new columns backed by PostgreSQL enum types,
+    # mirroring the TypeScript ORM (hgnc-tools-api GeneGroup entity).
+    # native_enum=False sends the value as text (no auto-created PG enum type),
+    # which the real enum column accepts; create_constraint adds a CHECK on
+    # create_all()-built (e.g. SQLite) test schemas. Same pattern as Comment.status.
+    status: Mapped[str] = enum_field(
+        GeneGroupStatus,
+        default=GeneGroupStatus.INTERNAL,
+        nullable=False,
+        column_name="status",
+    )
+    type: Mapped[str | None] = enum_field(
+        GeneGroupType,
+        default=GeneGroupType.SET,
+        nullable=True,
+        column_name="type",
+    )
 
     pubmed_ids: Mapped[str | None] = mapped_column(Text, comment="PubMed IDs")
     internal_comments: Mapped[str | None] = mapped_column("curator_comment", Text, comment="Internal curator comments")
@@ -101,6 +118,19 @@ class GeneGroup(DeclarativeBase):
         primaryjoin="GeneGroup.id == HierarchyClosure.descendant_id",
         foreign_keys="[HierarchyClosure.descendant_id]",
     )
+
+    def __init__(self, **kwargs: object) -> None:
+        """Initialize a GeneGroup, applying SQLModel-parity instantiation defaults.
+
+        Plain SQLAlchemy 2.0 only applies ``mapped_column(default=...)`` at flush,
+        not construction. ``status`` (NOT NULL) and ``type`` get their defaults at
+        instantiation (as the TypeScript ORM did), unless explicitly provided.
+        """
+        if "status" not in kwargs:
+            self.status = GeneGroupStatus.INTERNAL
+        if "type" not in kwargs:
+            self.type = GeneGroupType.SET
+        super().__init__(**kwargs)
 
     def __repr__(self) -> str:
         """Return string representation of GeneGroup."""

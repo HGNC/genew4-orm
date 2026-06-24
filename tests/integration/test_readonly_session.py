@@ -293,10 +293,11 @@ class TestSessionOperations:
         postgres_session.flush()
 
         # Create relationship
+        # The junction sort column is `custom_sort` (String), not `sort_order`.
         association = GeneHasGeneGroup(
             gene_id=gene.hgnc_id,
             gene_group_id=gene_group.id,
-            sort_order=1,
+            custom_sort="1",
         )
         postgres_session.add(association)
         postgres_session.commit()

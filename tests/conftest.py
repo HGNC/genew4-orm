@@ -202,10 +202,11 @@ def sample_gene_with_group(sample_gene, sample_gene_group) -> tuple[Gene, GeneGr
     Returns:
         Tuple of (Gene, GeneGroup, GeneHasGeneGroup).
     """
+    # The junction sort column is `custom_sort` (String), not `sort_order`.
     gene_group_has_gene = GeneHasGeneGroup(
         gene_id=sample_gene.id,
         gene_group_id=sample_gene_group.id,
-        sort_order=1,
+        custom_sort="1",
     )
     return sample_gene, sample_gene_group, gene_group_has_gene
 
