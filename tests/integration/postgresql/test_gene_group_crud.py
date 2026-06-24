@@ -5,7 +5,7 @@ for GeneGroup model using actual PostgreSQL genew4 database.
 """
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from genew4_orm.models import GeneGroup
 
@@ -184,3 +184,37 @@ class TestGeneGroupCRUD:
         assert gene_group1.id is not None
         assert gene_group2.id is not None
         assert gene_group1.name == gene_group2.name
+
+    def test_status_persisted_as_lowercase_enum_value(self, postgres_session) -> None:
+        """Persisted status must be the enum *value* ('internal'), not the NAME.
+
+        docs/models.md documents GeneGroup.status with its lowercase values
+        ('internal'/'exported'/'delete'), mirroring the real family_new column
+        and the TypeScript ORM. Reading the raw column (bypassing ORM coercion)
+        confirms what is actually stored in the database.
+        """
+        gene_group = GeneGroup(name="Persisted Status Case Probe")
+        postgres_session.add(gene_group)
+        postgres_session.commit()
+
+        stored = postgres_session.execute(
+            text("SELECT status FROM family_new WHERE id = :id"),
+            {"id": gene_group.id},
+        ).scalar()
+
+        assert stored == "internal"
+        assert stored != "INTERNAL"
+
+    def test_type_persisted_as_lowercase_enum_value(self, postgres_session) -> None:
+        """Persisted type must be the enum *value* ('set'), not the NAME."""
+        gene_group = GeneGroup(name="Persisted Type Case Probe")
+        postgres_session.add(gene_group)
+        postgres_session.commit()
+
+        stored = postgres_session.execute(
+            text("SELECT type FROM family_new WHERE id = :id"),
+            {"id": gene_group.id},
+        ).scalar()
+
+        assert stored == "set"
+        assert stored != "SET"

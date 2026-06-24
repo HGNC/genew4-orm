@@ -135,7 +135,7 @@ class TestPaginatedQueryWithSession:
         ts = int(time.time() * 1000)
         for i in range(25):
             postgres_session.execute(
-                text("INSERT INTO family_new (name) VALUES (:name)"),
+                text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
                 {"name": f"page_test_{ts}_{i}"},
             )
         postgres_session.commit()
@@ -167,7 +167,7 @@ class TestPaginatedQueryWithSession:
         ts = int(time.time() * 1000)
         for i in range(25):
             postgres_session.execute(
-                text("INSERT INTO family_new (name) VALUES (:name)"),
+                text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
                 {"name": f"page2_test_{ts}_{i}"},
             )
         postgres_session.commit()
@@ -188,7 +188,7 @@ class TestPaginatedQueryWithSession:
         ts = int(time.time() * 1000)
         for i in range(25):
             postgres_session.execute(
-                text("INSERT INTO family_new (name) VALUES (:name)"),
+                text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
                 {"name": f"page3_test_{ts}_{i}"},
             )
         postgres_session.commit()
@@ -215,7 +215,7 @@ class TestGetGeneGroupsWithAllRelationsWithSession:
 
         # Create test data
         postgres_session.execute(
-            text("INSERT INTO family_new (name) VALUES (:name)"),
+            text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
             {"name": f"test_all_rel_{ts}"},
         )
         postgres_session.commit()
@@ -270,7 +270,7 @@ class TestStreamGenesWithSession:
         # Create test data
         for i in range(25):
             postgres_session.execute(
-                text("INSERT INTO family_new (name) VALUES (:name)"),
+                text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
                 {"name": f"stream_test_{ts}_{i}"},
             )
         postgres_session.commit()
@@ -298,7 +298,7 @@ class TestStreamGenesWithSession:
         # Create test data
         for i in range(20):
             postgres_session.execute(
-                text("INSERT INTO family_new (name) VALUES (:name)"),
+                text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
                 {"name": f"chunk_test_{ts}_{i}"},
             )
         postgres_session.commit()

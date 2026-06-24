@@ -126,7 +126,7 @@ class TestReadOnlySession:
         # Create a test record first
         with get_readwrite_session() as session:
             session.execute(
-                text("INSERT INTO family_new (name) VALUES (:name)"),
+                text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
                 {"name": f"readonly_test_{ts}"},
             )
 
@@ -149,7 +149,7 @@ class TestSessionIntegration:
         # First session creates a record
         with get_readwrite_session(user="user1") as session1:
             session1.execute(
-                text("INSERT INTO family_new (name) VALUES (:name)"),
+                text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
                 {"name": f"multi_session_test_{ts}"},
             )
 
@@ -168,7 +168,7 @@ class TestSessionIntegration:
         # Create in one session
         with get_readwrite_session(user="user1") as session1:
             session1.execute(
-                text("INSERT INTO family_new (name) VALUES (:name)"),
+                text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
                 {"name": f"isolation_test_{ts}"},
             )
 

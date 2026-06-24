@@ -16,7 +16,7 @@ class TestSessionLifecycle:
 
         # Create a test gene group
         postgres_session.execute(
-            text("INSERT INTO family_new (name) VALUES (:name)"),
+            text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
             {"name": f"test_insert_{ts}"},
         )
         postgres_session.commit()
@@ -34,7 +34,7 @@ class TestSessionLifecycle:
 
         # Create a test gene group
         postgres_session.execute(
-            text("INSERT INTO family_new (name) VALUES (:name)"),
+            text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
             {"name": f"update_test_{ts}"},
         )
         postgres_session.commit()
@@ -66,7 +66,7 @@ class TestSessionLifecycle:
 
         # Create a test gene group
         postgres_session.execute(
-            text("INSERT INTO family_new (name) VALUES (:name)"),
+            text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
             {"name": f"delete_test_{ts}"},
         )
         postgres_session.commit()
@@ -104,7 +104,7 @@ class TestSessionLifecycle:
 
         # Create a record
         postgres_session.execute(
-            text("INSERT INTO family_new (name) VALUES (:name)"),
+            text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
             {"name": f"rollback_test_{ts}"},
         )
 
@@ -126,7 +126,7 @@ class TestSessionLifecycle:
         # Create multiple records
         for i in range(5):
             postgres_session.execute(
-                text("INSERT INTO family_new (name) VALUES (:name)"),
+                text("INSERT INTO family_new (name, status) VALUES (:name, 'internal')"),
                 {"name": f"multi_op_{ts}_{i}"},
             )
 

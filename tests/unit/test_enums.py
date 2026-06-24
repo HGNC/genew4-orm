@@ -108,6 +108,23 @@ class TestEnumField:
         assert col.type.create_constraint is True
         assert col.type.native_enum is False
 
+    def test_enum_field_persists_enum_values_not_names(self) -> None:
+        """enum_field must persist the StrEnum *values* (lowercase), not member NAMES.
+
+        docs/models.md documents these columns by their lowercase values
+        (e.g. GeneGroup.status 'internal', Comment.status 'pending'). SQLAlchemy's
+        Enum defaults to persisting member *names* ('INTERNAL', 'PENDING'), so
+        enum_field must opt into values via ``values_callable``. ``col.type.enums``
+        is the exact list SQLAlchemy persists and emits in the CHECK constraint.
+        """
+        model = _build_enum_model(default=PublishStatus.PENDING, nullable=False)
+        col = inspect(model).columns["status"]
+
+        # col.type.enums is the exact list SQLAlchemy persists and emits in the
+        # CHECK constraint — it must be the enum *values*, never the member NAMES.
+        assert col.type.enums == [member.value for member in PublishStatus]
+        assert "PENDING" not in col.type.enums
+
 
 class TestGeneLocusType:
     """Test cases for GeneLocusType enum."""

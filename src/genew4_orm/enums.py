@@ -52,7 +52,17 @@ def enum_field(
     if column_name is not None:
         kwargs["name"] = column_name
     return mapped_column(
-        SQLEnum(enum_class, create_constraint=True, native_enum=False),
+        # values_callable persists the StrEnum *value* (e.g. 'internal',
+        # 'pending') rather than the member NAME ('INTERNAL', 'PENDING'), which
+        # is SQLAlchemy's default. This keeps the stored bytes, the generated
+        # CHECK constraint, and docs/models.md in agreement — and matches the
+        # real family_new / comment columns mirrored from the TypeScript ORM.
+        SQLEnum(
+            enum_class,
+            create_constraint=True,
+            native_enum=False,
+            values_callable=lambda klass: [member.value for member in klass],
+        ),
         **kwargs,
     )
 
